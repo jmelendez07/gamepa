@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -9,9 +10,15 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $admin = User::factory()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@gamepa.com',
         ]);
+        $admin->assignRole('administrador');
+
+        $students = User::factory(20)->create();
+        foreach ($students as $student) {
+            $student->assignRole('estudiante');
+        }
     }
 }
