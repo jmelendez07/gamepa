@@ -18,7 +18,7 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from '@/components/ui/drawer';
-import { AlertTriangle, Mail, Trash2, X } from 'lucide-react';
+import { AlertTriangle, ClipboardCopy, Mail, Trash2, X } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface User {
@@ -98,19 +98,28 @@ export function DeleteUserDialog({ user, open, onOpenChange, onConfirm, isCurren
                     Para confirmar, escribe el correo electrónico del usuario:
                 </div>
                 <div className="space-y-2">
-                    <Input
-                        type="email"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        placeholder={user.email}
-                        className={`w-full ${
-                            emailInput && !isEmailValid 
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                                : ''
-                        }`}
-                        disabled={isDeleting}
-                        autoComplete="off"
-                    />
+                    <div className="grid grid-cols-[1fr_auto] items-center gap-2">
+                        <Input
+                            type="email"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            placeholder={user.email}
+                            className={`w-full ${
+                                emailInput && !isEmailValid 
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                                    : ''
+                            }`}
+                            disabled={isDeleting}
+                            autoComplete="off"
+                        />
+                        <button 
+                            type="button"
+                            onClick={() => setEmailInput(user.email)}
+                            className="text-gray-600 hover:text-gray-900 cursor-pointer border p-2 rounded-md"
+                        >
+                            <ClipboardCopy className="size-4.5" />
+                        </button>
+                    </div>
                     {emailInput && !isEmailValid && (
                         <p className="text-xs text-red-600 dark:text-red-400">
                             El correo electrónico no coincide

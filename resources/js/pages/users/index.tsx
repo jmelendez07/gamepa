@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Usuarios',
-        href: '/usuarios',
+        href: '/users',
     },
 ];
 
@@ -25,6 +25,13 @@ interface User {
         name: string;
     }>;
     created_at: string;
+    last_session?: {
+        browser: string;
+        operating_system: string;
+        last_activity: string;
+        is_active: boolean;
+        formatted_activity: string;
+    } | null;
 }
 
 interface Props {
@@ -55,7 +62,7 @@ export default function UsersIndex({ users: initialUsers, auth }: Props) {
         
         const nextPage = initialUsers.current_page + 1;
         
-        router.visit(`/usuarios?page=${nextPage}`, {
+        router.visit(`/users?page=${nextPage}`, {
             preserveState: true,
             preserveScroll: true,
             only: ['users'],
@@ -95,7 +102,7 @@ export default function UsersIndex({ users: initialUsers, auth }: Props) {
         const currentPageFromUrl = parseInt(urlParams.get('page') || '1');
         
         if (currentPageFromUrl > 1) {
-            router.visit('/usuarios', { replace: true });
+            router.visit('/users', { replace: true });
             return;
         }
         
@@ -115,12 +122,6 @@ export default function UsersIndex({ users: initialUsers, auth }: Props) {
                             Gestiona los usuarios del sistema
                         </p>
                     </div>
-                    <Link href={route('users.create')}>
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Nuevo Usuario
-                        </Button>
-                    </Link>
                 </div>
 
                 <div className="relative overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
@@ -141,7 +142,7 @@ export default function UsersIndex({ users: initialUsers, auth }: Props) {
                                         Fecha de Registro
                                     </th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                        Acciones
+                                        Última Sesión
                                     </th>
                                 </tr>
                             </thead>
@@ -212,26 +213,35 @@ export default function UsersIndex({ users: initialUsers, auth }: Props) {
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                     {new Date(user.created_at).toLocaleDateString('es-ES')}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <div className="flex justify-end space-x-2">
-                                                        <Link
-                                                            href={route('users.edit', user.id)}
-                                                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-                                                        >
-                                                            Editar
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => {
-                                                                if (confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-                                                                    // Aquí puedes implementar la lógica de eliminación
-                                                                    // router.delete(route('users.destroy', user.id))
-                                                                }
-                                                            }}
-                                                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                        >
-                                                            Eliminar
-                                                        </button>
-                                                    </div>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                                    {user.last_session ? (
+                                                        <div className="flex flex-col items-end">
+                                                            <div className="flex items-center space-x-2">
+                                                                <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
+                                                                    user.last_session.is_active 
+                                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                                                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                                                }`}>
+                                                                    <div className={`w-1.5 h-1.5 rounded-full mr-1 ${
+                                                                        user.last_session.is_active ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                                                                    }`}></div>
+                                                                    {user.last_session.is_active ? 'Activa' : 'Inactiva'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                {user.last_session.browser} • {user.last_session.operating_system}
+                                                            </div>
+                                                            <div className="text-xs text-gray-400 dark:text-gray-500">
+                                                                {user.last_session.formatted_activity}
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center">
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                                                                Sin sesiones
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </td>
                                             </tr>
                                         );

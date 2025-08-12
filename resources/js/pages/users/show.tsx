@@ -4,6 +4,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Mail, Calendar, ShieldCheck, Monitor, Smartphone, Globe, Clock, Share2, Copy, Check, MoreVertical, Trash2, UserX, Edit } from 'lucide-react';
 import { useState } from 'react';
 import { DeleteUserDialog } from '@/components/delete-user-dialog';
+import { EditUserDialog } from '@/components/edit-user-dialog';
 
 interface User {
     id: string;
@@ -35,6 +36,7 @@ export default function UserShow({ user, sessions, isCurrentUser }: Props) {
     const [copied, setCopied] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -163,7 +165,7 @@ export default function UserShow({ user, sessions, isCurrentUser }: Props) {
                 onSuccess: () => {
                     resolve(true);
                     if (!isCurrentUser) {
-                        router.visit('/usuarios');
+                        router.visit('/users');
                     }
                 },
                 onError: (errors) => {
@@ -176,7 +178,7 @@ export default function UserShow({ user, sessions, isCurrentUser }: Props) {
 
     const handleEditUser = () => {
         setDropdownOpen(false);
-        router.visit(route('users.edit', user.id));
+        setEditDialogOpen(true);
     };
 
     return (
@@ -460,6 +462,14 @@ export default function UserShow({ user, sessions, isCurrentUser }: Props) {
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleConfirmDelete}
+                isCurrentUser={isCurrentUser}
+            />
+            
+            {/* Dialog de edición de usuario */}
+            <EditUserDialog
+                user={user}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
                 isCurrentUser={isCurrentUser}
             />
         </AppLayout>

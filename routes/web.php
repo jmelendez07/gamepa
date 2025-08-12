@@ -16,7 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::middleware(['role:administrador'])->group(function () {
-        Route::resource('usuarios', UserController::class)->names('users');
+        Route::resource('users', UserController::class)->names('users');
     });
 });
 
