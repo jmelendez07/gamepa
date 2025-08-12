@@ -79,7 +79,7 @@ export const Hero = ({ texture, onMove }: IHeroProps) => {
                     texture={sprite.texture} 
                     x={position.current.x} 
                     y={position.current.y}
-                    scale={0.5}
+                    scale={0.6}
                     anchor={{ x: 0.5, y: 0.8 }}
                      />)}
             </pixiContainer>
