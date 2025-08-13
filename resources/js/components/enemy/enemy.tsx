@@ -31,8 +31,6 @@ export default function Enemy({ texture, position }: IEnemyProps) {
     <>
       <pixiContainer position={enemyPosition.current}>
         {sprite && (<pixiSprite texture={sprite.texture} 
-                        x={enemyPosition.current.x} 
-                        y={enemyPosition.current.y}
                         scale={0.6}
                         anchor={0.5} />)}
       </pixiContainer>

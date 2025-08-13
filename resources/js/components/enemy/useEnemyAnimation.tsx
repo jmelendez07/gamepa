@@ -47,7 +47,7 @@ export default function useEnemyAnimation({ texture, frameWidth, frameHeight, to
       case 'walk':
         return 1;
       case 'combatIdle':
-        return 2;
+        return 43;
       case 'attack':
         return 3;
       default:

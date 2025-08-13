@@ -1,9 +1,10 @@
 import { Camera } from '@/components/camera/camera';
+import { Combat } from '@/components/combat/combat';
 import { TILE_SIZE } from '@/components/constants/game-world';
 import Enemy from '@/components/enemy/enemy';
 import { Hero } from '@/components/Hero/hero';
 import { StageGame } from '@/components/stages/stageGame';
-import { extend } from '@pixi/react';
+import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
 
@@ -21,6 +22,12 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
     const [heroTexture, setHeroTexture] = useState<Texture | null>(null);
     const [enemyTexture, setEnemyTexture] = useState<Texture | null>(null);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [enemyPosition, setEnemyPosition] = useState<{ x: number; y: number }>({
+        x: Math.floor(200 / TILE_SIZE),
+        y: Math.floor(200 / TILE_SIZE),
+    });
+
+    const [inCombat, setInCombat] = useState(false);
 
     const updateHeroPosition = useCallback((x: number, y: number) => {
         setHeroPosition({ x: Math.floor(x / TILE_SIZE), y: Math.floor(y / TILE_SIZE) });
@@ -80,29 +87,49 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
         };
     }, []);
 
+    const checkCollisionWithArea = useCallback(
+        (heroPos: { x: number; y: number }, enemyPos: { x: number; y: number }, threshold: number) => {
+            const dx = Math.abs(heroPos.x - enemyPos.x);
+            const dy = Math.abs(heroPos.y - enemyPos.y);
+            return dx <= threshold && dy <= threshold;
+        },
+        []
+    );
+
+    useTick((ticker) => {
+        const delta = ticker.deltaTime;
+
+        // Ahora ambas posiciones están en el mismo sistema (tiles)
+        if (checkCollisionWithArea(heroPosition, enemyPosition, 1)) {
+            setInCombat(true);
+        } else {
+            setInCombat(false);
+        }
+    });
+
     return (
         <pixiContainer>
             {bgTexture && <pixiSprite texture={bgTexture} width={canvasSize.width} height={canvasSize.height} />}
             {children}
             <Camera canvasSize={canvasSize} heroPosition={heroPosition}>
                 <StageGame />
-                {/* Debug: Mostrar un sprite de prueba si no hay textura */}
-                {!heroTexture && (
-                    <pixiSprite
-                        texture={Texture.WHITE}
-                        x={320}
-                        y={480}
-                        width={32}
-                        height={32}
-                        tint={0xff0000} // Rojo para debug
+                {enemyTexture && (
+                    <Enemy
+                        texture={enemyTexture}
+                        position={{
+                            x: enemyPosition.x * TILE_SIZE,
+                            y: enemyPosition.y * TILE_SIZE
+                        }}
                     />
                 )}
-
-                {enemyTexture && <Enemy texture={enemyTexture} position={{ x: 100, y: 100 }} />}
-
-                {/* Renderizar el héroe */}
                 {heroTexture && <Hero texture={heroTexture} onMove={updateHeroPosition} />}
             </Camera>
+            {inCombat && heroTexture && enemyTexture && (
+                <Combat 
+                    hero={heroTexture} 
+                    enemy={enemyTexture} 
+                />
+            )}
         </pixiContainer>
     );
 };
