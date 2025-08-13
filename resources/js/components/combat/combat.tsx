@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ANIMATION_SPEED, GAME_WIDTH } from '../constants/game-world';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import useEnemyAnimation from '../enemy/useEnemyAnimation';
+import { Card } from './card/card';
 
 extend({Sprite, Container});
 
@@ -95,6 +96,8 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
           height={128} 
         />
       )}
+
+      <Card />
     </pixiContainer>
   )
 }
