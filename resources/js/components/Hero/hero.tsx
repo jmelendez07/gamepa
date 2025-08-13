@@ -67,7 +67,7 @@ export const Hero = ({ texture, onMove }: IHeroProps) => {
             }
         }
 
-        updateSprite(currentDirection.current!, isMoving.current);
+        updateSprite(currentDirection.current!, isMoving.current, false);
 
         //handle completion of movement
     })
