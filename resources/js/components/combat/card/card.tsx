@@ -1,9 +1,9 @@
 import { extend } from '@pixi/react';
 import type { FederatedPointerEvent } from 'pixi.js';
-import { Assets, Container, Sprite, Texture } from 'pixi.js';
-import { useEffect, useRef, useState } from 'react';
+import { Assets, Container, Sprite, Texture, Graphics } from 'pixi.js';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-extend({ Container, Sprite });
+extend({ Container, Sprite, Graphics });
 
 export const Card = () => {
     const card1Asset = '/assets/cards/card-1.png';
@@ -13,65 +13,58 @@ export const Card = () => {
     const [isHeldDown, setIsHeldDown] = useState(false);
     const [cardPosition, setCardPosition] = useState({ x: 500, y: 600 });
     const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [isClicked, setIsClicked] = useState(false);
 
     const originalPosition = { x: 500, y: 600 };
 
-    const resetCard = () => {
+    const resetCard = useCallback(() => {
         setIsPressed(false);
         setIsHeldDown(false);
-        setCardPosition(originalPosition);
+        setCardPosition({ x: 500, y: 600 });
 
         if (pressTimerRef.current) {
             clearTimeout(pressTimerRef.current);
             pressTimerRef.current = null;
         }
-    };
+    }, [cardPosition]);
 
-    const selectCard = () => {
-        console.log('Card selected', { cardPosition })
-        // verificar si el usuario mantuvo presionado
-        if (!isHeldDown) {
-            // lógica para seleccionar la carta
-            console.log('Card clicked, not held down');
-        }
-    };
+    const handlePointerDown = (event: FederatedPointerEvent) => {
+        console.log('Card pointer down');
+        setIsPressed(true);
 
-    const handlePointerDown = () => {
-        //verificar si el usuario hizo click o mantuvo presionado
-        document.addEventListener('pointerdown', (event) => {
-            const pressStartTime = event.timeStamp;
-            console.log('time', pressStartTime);
-        });
-
-        document.addEventListener('pointerup', (event) => {
-            const pressEndTime = event.timeStamp;
-            console.log('time', pressEndTime);
-        });
+        pressTimerRef.current = setTimeout(() => {
+            setIsHeldDown(true);
+            console.log('Card is now being held down');
+        }, 200);
     };
 
     const handlePointerUp = (event: FederatedPointerEvent) => {
-        event.stopPropagation();
-        setIsPressed(false);
-        setIsHeldDown(false);
-        setCardPosition(originalPosition);
-        console.log('Card played!', { cardPosition });
+        const finalPosition = cardPosition;
+        console.log('Card played!', { 
+            finalPosition, 
+            resetTo: originalPosition 
+        });
+        
+        resetCard();
+
+        if (finalPosition.x == originalPosition.x && finalPosition.y == originalPosition.y) {
+            setIsClicked(!isClicked);
+        }
     };
 
     const handlePointerUpOutside = () => {
-        console.log('Card released outside', { cardPosition });
+        const finalPosition = cardPosition;
+        console.log('Card released outside', { finalPosition });
         resetCard();
     };
 
     const handlePointerMove = (event: FederatedPointerEvent) => {
-        // Solo seguir el mouse si la carta está en estado "held down"
         if (isHeldDown) {
             const globalPos = event.global;
             setCardPosition({
                 x: globalPos.x - 100,
                 y: globalPos.y - 150,
             });
-        } else {
-            setCardPosition(originalPosition);
         }
     };
 
@@ -84,19 +77,36 @@ export const Card = () => {
     return (
         <pixiContainer interactive={true}>
             {card1Texture && (
-                <pixiSprite
-                    interactive={true}
-                    texture={card1Texture}
-                    width={200}
-                    height={300}
-                    x={cardPosition.x}
-                    y={cardPosition.y}
-                    onPointerDown={handlePointerDown}
-                    // onPointerUp={handlePointerUp}
-                    // onPointerUpOutside={handlePointerUpOutside}
-                    // onPointerMove={handlePointerMove}
-                    alpha={isHeldDown ? 0.7 : 1.0}
-                />
+                <>
+                    <pixiSprite
+                        interactive={true}
+                        texture={card1Texture}
+                        width={200}
+                        height={300}
+                        x={cardPosition.x}
+                        y={cardPosition.y}
+                        onPointerDown={handlePointerDown}
+                        onPointerUp={handlePointerUp}
+                        onPointerUpOutside={handlePointerUpOutside}
+                        onPointerMove={handlePointerMove}
+                        alpha={isHeldDown ? 0.7 : 1.0}
+                    />
+                    {isClicked && (
+                        <pixiGraphics
+                            interactive={true}
+                            onPointerDown={handlePointerDown}
+                            onPointerUp={handlePointerUp}
+                            onPointerUpOutside={handlePointerUpOutside}
+                            onPointerMove={handlePointerMove}
+                            draw={(g) => {
+                                g.clear();
+                                g.rect(cardPosition.x - 3, cardPosition.y - 3, 206, 306);
+                                // g.fill({ color: 0x00ff00, alpha: 0.3 }); para rellenar todo el rectangulo
+                                g.stroke({ color: 0x00ff00, width: 3 }); 
+                            }}
+                        />
+                    )}
+                </>
             )}
         </pixiContainer>
     );
