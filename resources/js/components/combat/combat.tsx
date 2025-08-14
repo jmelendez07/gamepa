@@ -1,12 +1,12 @@
 import { extend, useTick } from '@pixi/react';
-import { Assets, Container, Sprite, Texture } from 'pixi.js';
-import React, { useState, useEffect, useRef } from 'react'
+import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import React, { useState, useEffect } from 'react'
 import { ANIMATION_SPEED, GAME_WIDTH } from '../constants/game-world';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import useEnemyAnimation from '../enemy/useEnemyAnimation';
 import { Card } from './card/card';
 
-extend({Sprite, Container});
+extend({Sprite, Container, Graphics});
 
 interface ICharacterProps{
     hero: Texture;
@@ -18,7 +18,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
   const spriteBgCombat = '/assets/bg-battle.jpg'
 
   const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
-  const initializedRef = useRef(false);
+  const [isCardHeldDown, setIsCardHeldDown] = useState(false);
 
   const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
     texture: hero,
@@ -42,6 +42,10 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
 
     updateHeroSprite('DOWN', true, true);
     updateEnemySprite('combatIdle', 'left');
+
+    // if (isCardHeldDown) {
+    //   console.log('Card is being held down');
+    // }
   });
 
   useEffect(() => {
@@ -63,41 +67,29 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
   }, []);
 
   return (
-    <pixiContainer>
-      {/* Combat background */}
-      {combatTexture && 
-        <pixiSprite 
-          texture={combatTexture} 
-          width={window.innerWidth} 
-          height={window.innerHeight} 
-          x={0} 
-          y={0} 
-        />
-      }
-      
-      {/* Hero sprite - lado izquierdo */}
-      {heroSprite && (
-        <pixiSprite 
-          texture={heroSprite.texture} 
-          x={window.innerWidth * 0.15} 
-          y={window.innerHeight * 0.3} 
-          width={128} 
-          height={128} 
-        />
-      )}
-      
-      {/* Enemy sprite - lado derecho */}
-      {enemySprite && (
-        <pixiSprite 
-          texture={enemySprite.texture} 
-          x={window.innerWidth * 0.75} 
-          y={window.innerHeight * 0.3} 
-          width={128} 
-          height={128} 
-        />
-      )}
+      <pixiContainer>
+          {/* Combat background */}
+          {combatTexture && <pixiSprite texture={combatTexture} width={window.innerWidth} height={window.innerHeight} x={0} y={0} />}
 
-      <Card />
-    </pixiContainer>
-  )
+          {heroSprite && (
+              <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.3} width={128} height={128} />
+          )}
+
+          {enemySprite && (
+              <pixiSprite texture={enemySprite.texture} x={window.innerWidth * 0.75} y={window.innerHeight * 0.3} width={128} height={128} />
+          )}
+
+          {isCardHeldDown && (
+              <pixiGraphics
+                  draw={(g) => {
+                      g.clear();
+                      g.rect(window.innerWidth * 0.75, 273, 128, 128);
+                      g.stroke({ color: 0xff0000, width: 5 });
+                  }}
+              />
+          )}
+
+          <Card onHeldDownChange={setIsCardHeldDown} />
+      </pixiContainer>
+  );
 }

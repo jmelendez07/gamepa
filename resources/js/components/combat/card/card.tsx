@@ -5,7 +5,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 extend({ Container, Sprite, Graphics });
 
-export const Card = () => {
+interface ICardProps {
+    onHeldDownChange: (isHeldDown: boolean) => void;
+}
+
+export const Card = ({ onHeldDownChange }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
@@ -16,6 +20,10 @@ export const Card = () => {
     const [isClicked, setIsClicked] = useState(false);
 
     const originalPosition = { x: 500, y: 600 };
+
+    useEffect(() => {
+        onHeldDownChange?.(isHeldDown);
+    }, [isHeldDown, onHeldDownChange]);
 
     const resetCard = useCallback(() => {
         setIsPressed(false);
@@ -28,22 +36,16 @@ export const Card = () => {
         }
     }, [cardPosition]);
 
-    const handlePointerDown = (event: FederatedPointerEvent) => {
-        console.log('Card pointer down');
+    const handlePointerDown = () => {
         setIsPressed(true);
 
         pressTimerRef.current = setTimeout(() => {
             setIsHeldDown(true);
-            console.log('Card is now being held down');
         }, 200);
     };
 
-    const handlePointerUp = (event: FederatedPointerEvent) => {
+    const handlePointerUp = () => {
         const finalPosition = cardPosition;
-        console.log('Card played!', { 
-            finalPosition, 
-            resetTo: originalPosition 
-        });
         
         resetCard();
 
