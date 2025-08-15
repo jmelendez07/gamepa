@@ -7,9 +7,11 @@ extend({ Container, Sprite, Graphics });
 
 interface ICardProps {
     onHeldDownChange: (isHeldDown: boolean) => void;
+    onCardPositionChange: (cardPosition: { x: number; y: number }) => void;
+    isTargetAssigned?: boolean;
 }
 
-export const Card = ({ onHeldDownChange }: ICardProps) => {
+export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
@@ -23,7 +25,10 @@ export const Card = ({ onHeldDownChange }: ICardProps) => {
 
     useEffect(() => {
         onHeldDownChange?.(isHeldDown);
-    }, [isHeldDown, onHeldDownChange]);
+        if (!isHeldDown) {
+            onCardPositionChange?.(cardPosition);
+        }
+    }, [isHeldDown, onHeldDownChange, cardPosition, onCardPositionChange]);
 
     const resetCard = useCallback(() => {
         setIsPressed(false);
@@ -63,9 +68,14 @@ export const Card = ({ onHeldDownChange }: ICardProps) => {
     const handlePointerMove = (event: FederatedPointerEvent) => {
         if (isHeldDown) {
             const globalPos = event.global;
-            setCardPosition({
+            const newPosition = {
                 x: globalPos.x - 100,
                 y: globalPos.y - 150,
+            };
+            setCardPosition(newPosition);
+            onCardPositionChange({
+                x: globalPos.x,
+                y: globalPos.y
             });
         }
     };
@@ -89,16 +99,16 @@ export const Card = ({ onHeldDownChange }: ICardProps) => {
                         y={cardPosition.y}
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        onPointerUpOutside={handlePointerUpOutside}
+                        // onPointerUpOutside={handlePointerUpOutside}
                         onPointerMove={handlePointerMove}
-                        alpha={isHeldDown ? 0.7 : 1.0}
+                        alpha={isHeldDown ? isTargetAssigned ? 0.1 : 0.7 : 1.0}
                     />
                     {isClicked && (
                         <pixiGraphics
                             interactive={true}
                             onPointerDown={handlePointerDown}
                             onPointerUp={handlePointerUp}
-                            onPointerUpOutside={handlePointerUpOutside}
+                            // onPointerUpOutside={handlePointerUpOutside}
                             onPointerMove={handlePointerMove}
                             draw={(g) => {
                                 g.clear();
