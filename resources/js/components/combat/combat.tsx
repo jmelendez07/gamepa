@@ -5,6 +5,7 @@ import { ANIMATION_SPEED } from '../constants/game-world';
 import useEnemyAnimation from '../enemy/useEnemyAnimation';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import { Card } from './card/card';
+import { Exercise } from './exercise/exercise';
 
 extend({ Sprite, Container, Graphics });
 
@@ -21,6 +22,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
     const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
     const [enemyPosition, setEnemyPosition] = useState({ x: window.innerWidth * 0.75, y: window.innerHeight * 0.3 });
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
+    const [isAttacking, setIsAttacking] = useState(false);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: hero,
@@ -92,7 +94,6 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
 
     return (
         <pixiContainer>
-            {/* Combat background */}
             {combatTexture && <pixiSprite texture={combatTexture} width={window.innerWidth} height={window.innerHeight} x={0} y={0} />}
 
             {heroSprite && (
@@ -111,7 +112,13 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                 />
             )}
 
-            <Card onHeldDownChange={setIsCardHeldDown} onCardPositionChange={setCardPosition} isTargetAssigned={isTargetAssigned} />
+            <Card onHeldDownChange={setIsCardHeldDown} 
+                  onCardPositionChange={setCardPosition} 
+                  isTargetAssigned={isTargetAssigned}
+                  onAttack={setIsAttacking}
+                  />
+
+            {isAttacking && <Exercise enemy="nombre quemado" />}
         </pixiContainer>
     );
 };

@@ -9,9 +9,10 @@ interface ICardProps {
     onHeldDownChange: (isHeldDown: boolean) => void;
     onCardPositionChange: (cardPosition: { x: number; y: number }) => void;
     isTargetAssigned?: boolean;
+    onAttack?: (isAttacking: boolean) => void;
 }
 
-export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned }: ICardProps) => {
+export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
@@ -20,6 +21,7 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned 
     const [cardPosition, setCardPosition] = useState({ x: 500, y: 600 });
     const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
     const [isClicked, setIsClicked] = useState(false);
+    const [isAttacking, setIsAttacking] = useState(false);
 
     const originalPosition = { x: 500, y: 600 };
 
@@ -56,6 +58,12 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned 
 
         if (finalPosition.x == originalPosition.x && finalPosition.y == originalPosition.y) {
             setIsClicked(!isClicked);
+        }
+
+        if (isTargetAssigned) {
+            console.log('Card played on target!', { finalPosition });
+            setIsAttacking(true);
+            onAttack?.(true);
         }
     };
 
