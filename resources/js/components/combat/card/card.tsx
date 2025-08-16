@@ -5,7 +5,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 extend({ Container, Sprite, Graphics });
 
-export const Card = () => {
+interface ICardProps {
+    onHeldDownChange: (isHeldDown: boolean) => void;
+    onCardPositionChange: (cardPosition: { x: number; y: number }) => void;
+    isTargetAssigned?: boolean;
+    onAttack?: (isAttacking: boolean) => void;
+}
+
+export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
@@ -14,8 +21,16 @@ export const Card = () => {
     const [cardPosition, setCardPosition] = useState({ x: 500, y: 600 });
     const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
     const [isClicked, setIsClicked] = useState(false);
+    const [isAttacking, setIsAttacking] = useState(false);
 
     const originalPosition = { x: 500, y: 600 };
+
+    useEffect(() => {
+        onHeldDownChange?.(isHeldDown);
+        if (!isHeldDown) {
+            onCardPositionChange?.(cardPosition);
+        }
+    }, [isHeldDown, onHeldDownChange, cardPosition, onCardPositionChange]);
 
     const resetCard = useCallback(() => {
         setIsPressed(false);
@@ -28,27 +43,27 @@ export const Card = () => {
         }
     }, [cardPosition]);
 
-    const handlePointerDown = (event: FederatedPointerEvent) => {
-        console.log('Card pointer down');
+    const handlePointerDown = () => {
         setIsPressed(true);
 
         pressTimerRef.current = setTimeout(() => {
             setIsHeldDown(true);
-            console.log('Card is now being held down');
         }, 200);
     };
 
-    const handlePointerUp = (event: FederatedPointerEvent) => {
+    const handlePointerUp = () => {
         const finalPosition = cardPosition;
-        console.log('Card played!', { 
-            finalPosition, 
-            resetTo: originalPosition 
-        });
         
         resetCard();
 
         if (finalPosition.x == originalPosition.x && finalPosition.y == originalPosition.y) {
             setIsClicked(!isClicked);
+        }
+
+        if (isTargetAssigned) {
+            console.log('Card played on target!', { finalPosition });
+            setIsAttacking(true);
+            onAttack?.(true);
         }
     };
 
@@ -61,9 +76,14 @@ export const Card = () => {
     const handlePointerMove = (event: FederatedPointerEvent) => {
         if (isHeldDown) {
             const globalPos = event.global;
-            setCardPosition({
+            const newPosition = {
                 x: globalPos.x - 100,
                 y: globalPos.y - 150,
+            };
+            setCardPosition(newPosition);
+            onCardPositionChange({
+                x: globalPos.x,
+                y: globalPos.y
             });
         }
     };
@@ -87,16 +107,16 @@ export const Card = () => {
                         y={cardPosition.y}
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        onPointerUpOutside={handlePointerUpOutside}
+                        // onPointerUpOutside={handlePointerUpOutside}
                         onPointerMove={handlePointerMove}
-                        alpha={isHeldDown ? 0.7 : 1.0}
+                        alpha={isHeldDown ? isTargetAssigned ? 0.1 : 0.7 : 1.0}
                     />
                     {isClicked && (
                         <pixiGraphics
                             interactive={true}
                             onPointerDown={handlePointerDown}
                             onPointerUp={handlePointerUp}
-                            onPointerUpOutside={handlePointerUpOutside}
+                            // onPointerUpOutside={handlePointerUpOutside}
                             onPointerMove={handlePointerMove}
                             draw={(g) => {
                                 g.clear();

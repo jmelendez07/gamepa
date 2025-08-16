@@ -1,103 +1,124 @@
 import { extend, useTick } from '@pixi/react';
-import { Assets, Container, Sprite, Texture } from 'pixi.js';
-import React, { useState, useEffect, useRef } from 'react'
-import { ANIMATION_SPEED, GAME_WIDTH } from '../constants/game-world';
-import { useHeroAnimation } from '../Hero/useHeroAnimation';
+import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { useCallback, useEffect, useState } from 'react';
+import { ANIMATION_SPEED } from '../constants/game-world';
 import useEnemyAnimation from '../enemy/useEnemyAnimation';
+import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import { Card } from './card/card';
+import { Exercise } from './exercise/exercise';
 
-extend({Sprite, Container});
+extend({ Sprite, Container, Graphics });
 
-interface ICharacterProps{
+interface ICharacterProps {
     hero: Texture;
     enemy: Texture;
 }
 
 export const Combat = ({ hero, enemy }: ICharacterProps) => {
+    const spriteBgCombat = '/assets/bg-battle.jpg';
 
-  const spriteBgCombat = '/assets/bg-battle.jpg'
+    const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
+    const [isCardHeldDown, setIsCardHeldDown] = useState(false);
+    const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+    const [enemyPosition, setEnemyPosition] = useState({ x: window.innerWidth * 0.75, y: window.innerHeight * 0.3 });
+    const [isTargetAssigned, setIsTargetAssigned] = useState(false);
+    const [isAttacking, setIsAttacking] = useState(false);
 
-  const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
-  const initializedRef = useRef(false);
+    const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
+        texture: hero,
+        frameWidth: 64,
+        frameHeight: 64,
+        totalFrames: 2,
+        animationSpeed: ANIMATION_SPEED,
+    });
 
-  const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
-    texture: hero,
-    frameWidth: 64,
-    frameHeight: 64,
-    totalFrames: 2,
-    animationSpeed: ANIMATION_SPEED
-  });
+    const { sprite: enemySprite, updateSprite: updateEnemySprite } = useEnemyAnimation({
+        texture: enemy,
+        frameWidth: 64,
+        frameHeight: 64,
+        totalFrames: 2,
+        animationSpeed: ANIMATION_SPEED,
+    });
 
-  const { sprite: enemySprite, updateSprite: updateEnemySprite } = useEnemyAnimation({
-    texture: enemy,
-    frameWidth: 64,
-    frameHeight: 64,
-    totalFrames: 2,
-    animationSpeed: ANIMATION_SPEED
-  });
+    const assignCardTarget = useCallback(
+        (
+            {
+                cardPosition,
+                characterTarget,
+            }: {
+                cardPosition: { x: number; y: number };
+                characterTarget: { x: number; y: number };
+            },
+        ) => {
+            return (
+                cardPosition.x >= characterTarget.x &&
+                cardPosition.x <= characterTarget.x + 128 &&
+                cardPosition.y >= characterTarget.y &&
+                cardPosition.y <= characterTarget.y + 128
+            );
+        },
+        [],
+    );
 
-  // Usar useTick para inicializar solo una vez y manejar animaciones
-  useTick((ticker) => {
-    const deltaTime = ticker.deltaTime;
+    useTick((ticker) => {
+        const deltaTime = ticker.deltaTime;
 
-    updateHeroSprite('DOWN', true, true);
-    updateEnemySprite('combatIdle', 'left');
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    Assets.load<Texture>(spriteBgCombat)
-      .then((tex) => {
-        if (!cancelled) {
-          setCombatTexture(tex);
+        updateHeroSprite('DOWN', true, true);
+        updateEnemySprite('combatIdle', 'left');
+        if (isCardHeldDown) {
+            if (assignCardTarget({ cardPosition, characterTarget: enemyPosition })) {
+                setIsTargetAssigned(true);
+            } else {
+                setIsTargetAssigned(false);
+            }
         }
-      })
-      .catch((err) => {
-        console.error('Failed to load combat background texture:', err);
-      });
+    });
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    useEffect(() => {
+        let cancelled = false;
 
-  return (
-    <pixiContainer>
-      {/* Combat background */}
-      {combatTexture && 
-        <pixiSprite 
-          texture={combatTexture} 
-          width={window.innerWidth} 
-          height={window.innerHeight} 
-          x={0} 
-          y={0} 
-        />
-      }
-      
-      {/* Hero sprite - lado izquierdo */}
-      {heroSprite && (
-        <pixiSprite 
-          texture={heroSprite.texture} 
-          x={window.innerWidth * 0.15} 
-          y={window.innerHeight * 0.3} 
-          width={128} 
-          height={128} 
-        />
-      )}
-      
-      {/* Enemy sprite - lado derecho */}
-      {enemySprite && (
-        <pixiSprite 
-          texture={enemySprite.texture} 
-          x={window.innerWidth * 0.75} 
-          y={window.innerHeight * 0.3} 
-          width={128} 
-          height={128} 
-        />
-      )}
+        Assets.load<Texture>(spriteBgCombat)
+            .then((tex) => {
+                if (!cancelled) {
+                    setCombatTexture(tex);
+                }
+            })
+            .catch((err) => {
+                console.error('Failed to load combat background texture:', err);
+            });
 
-      <Card />
-    </pixiContainer>
-  )
-}
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    return (
+        <pixiContainer>
+            {combatTexture && <pixiSprite texture={combatTexture} width={window.innerWidth} height={window.innerHeight} x={0} y={0} />}
+
+            {heroSprite && (
+                <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.3} width={128} height={128} />
+            )}
+
+            {enemySprite && <pixiSprite texture={enemySprite.texture} x={enemyPosition.x} y={enemyPosition.y} width={128} height={128} />}
+
+            {isCardHeldDown && (
+                <pixiGraphics
+                    draw={(g) => {
+                        g.clear();
+                        g.rect(enemyPosition.x, enemyPosition.y, 128, 128);
+                        g.stroke({ color: isTargetAssigned ? 0x00ff00 : 0xff0000, width: 5 });
+                    }}
+                />
+            )}
+
+            <Card onHeldDownChange={setIsCardHeldDown} 
+                  onCardPositionChange={setCardPosition} 
+                  isTargetAssigned={isTargetAssigned}
+                  onAttack={setIsAttacking}
+                  />
+
+            {isAttacking && <Exercise enemy="nombre quemado" />}
+        </pixiContainer>
+    );
+};
