@@ -16,6 +16,8 @@ export const Exercise = ({ enemy }: IExerciseProps) => {
     const [answersTexture, setAnswersTexture] = useState<Texture | null>(null);
     const width = window.innerWidth * 0.5;
     const height = window.innerHeight * 0.80;
+    const containerX = window.innerWidth / 2 - width / 2;
+    const containerY = window.innerHeight / 2 - height / 2;
     const answersWidth = window.innerWidth * 0.45;
     const centerXRelativeToContainer = (width - answersWidth) / 2;
     const [answersOptions, setAnswersOptions] = useState<{ text: string; isCorrect: boolean }[]>([
@@ -99,6 +101,8 @@ export const Exercise = ({ enemy }: IExerciseProps) => {
                   y={yPosition}
                   width={answerWidth}
                   height={answerHeight}
+                  containerX={containerX}
+                  containerY={containerY}
                 />
               );
             })}
