@@ -1,36 +1,55 @@
-import { FederatedPointerEvent } from "pixi.js";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Container, FederatedPointerEvent } from 'pixi.js';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface IAnswerProps {
-  text: string;
-  isCorrect: boolean;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  containerX: number;
-  containerY: number;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
-  onDragMove?: (event: FederatedPointerEvent) => void;
+    text: string;
+    isCorrect: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    containerX: number;
+    containerY: number;
+    onDragStart?: (ref: Container | null) => void;
+    onDragEnd?: (ref: Container | null) => void;
+    onDragMove?: (event: FederatedPointerEvent) => void;
+    onIsDraggingChange?: (isDragging: boolean) => void;
+    onAnswerPositionChange?: (position: { x: number; y: number }) => void;
+    onChoosingAnswer?: (answer: { text: string; isCorrect: boolean }) => void;
 }
 
-export const Answer = ({ text, isCorrect, x, y, width, height, containerX, containerY }: IAnswerProps) => {
-
+export const Answer = ({
+    text,
+    isCorrect,
+    x,
+    y,
+    width,
+    height,
+    containerX,
+    containerY,
+    onIsDraggingChange,
+    onAnswerPositionChange,
+    onDragStart,
+    onDragEnd,
+}: IAnswerProps) => {
     const [isDragging, setIsDragging] = useState(false);
     const [answerPosition, setAnswerPosition] = useState({ x, y });
     const [isClicked, setIsClicked] = useState(false);
     const originalPosition = useRef({ x, y });
     const dragOffset = useRef({ x: 0, y: 0 });
     const wasDragged = useRef(false); // Ref para rastrear si hubo movimiento
+    const answerContainerRef = useRef<Container>(null);
 
-    const handlePointerMove = useCallback((event: PointerEvent) => {
-        wasDragged.current = true; // Marcamos que un movimiento ocurrió
-        setAnswerPosition({
-            x: event.clientX - containerX - dragOffset.current.x,
-            y: event.clientY - containerY - dragOffset.current.y
-        });
-    }, [containerX, containerY]);
+    const handlePointerMove = useCallback(
+        (event: PointerEvent) => {
+            wasDragged.current = true; // Marcamos que un movimiento ocurrió
+            setAnswerPosition({
+                x: event.clientX - containerX - dragOffset.current.x,
+                y: event.clientY - containerY - dragOffset.current.y,
+            });
+        },
+        [containerX, containerY],
+    );
 
     const handlePointerUp = useCallback(() => {
         window.removeEventListener('pointermove', handlePointerMove);
@@ -38,26 +57,28 @@ export const Answer = ({ text, isCorrect, x, y, width, height, containerX, conta
 
         if (wasDragged.current) {
             // Lógica para cuando se suelta después de arrastrar
-            console.log("Drag ended for:", text);
+            console.log('Drag ended for:', text);
+            onDragEnd?.(answerContainerRef.current);
         } else {
             // Lógica para un click (sin arrastre)
-            console.log("Clicked:", text);
-            setIsClicked(prev => !prev);
+            console.log('Clicked:', text);
+            setIsClicked((prev) => !prev);
         }
-        
+
         setIsDragging(false);
         setAnswerPosition({ x: originalPosition.current.x, y: originalPosition.current.y });
-    }, [handlePointerMove]); // Quitamos isDragging de las dependencias
+    }, [handlePointerMove, onDragEnd, text]); // Añadimos onDragEnd y text
 
     const handlePointerDown = (event: FederatedPointerEvent) => {
         // Prevenir comportamiento de drag-and-drop nativo del navegador
-        event.preventDefault(); 
+        event.preventDefault();
         wasDragged.current = false; // Reseteamos el estado de arrastre al iniciar
-        
+        onDragStart?.(answerContainerRef.current); // Notificamos que el arrastre ha comenzado
+
         // Guardamos la diferencia entre el punto de click y la esquina del componente
         dragOffset.current = {
             x: event.global.x - answerPosition.x - containerX,
-            y: event.global.y - answerPosition.y - containerY
+            y: event.global.y - answerPosition.y - containerY,
         };
 
         setIsDragging(true);
@@ -66,23 +87,31 @@ export const Answer = ({ text, isCorrect, x, y, width, height, containerX, conta
         window.addEventListener('pointerup', handlePointerUp);
     };
 
+    useEffect(() => {
+        onIsDraggingChange?.(isDragging);
+        if (!isDragging) {
+            setAnswerPosition({ x: originalPosition.current.x, y: originalPosition.current.y });
+        }
+    }, [isDragging, onIsDraggingChange]);
+
+    useEffect(() => {
+        if (isDragging) {
+            onAnswerPositionChange?.(answerPosition);
+        }
+    }, [isDragging, answerPosition, onAnswerPositionChange]);
+
     return (
-        <pixiContainer
-            x={answerPosition.x}
-            y={answerPosition.y}
-            eventMode="static"
-            onPointerDown={handlePointerDown}
-        >
-            <pixiGraphics 
+        <pixiContainer ref={answerContainerRef} x={answerPosition.x} y={answerPosition.y} eventMode="static" onPointerDown={handlePointerDown}>
+            <pixiGraphics
                 draw={(g) => {
                     g.clear();
-                    g.roundRect(0, 0, width - 10 , height);
+                    g.roundRect(0, 0, width - 10, height);
                     g.fill({ color: 0x000000, alpha: 0.01 });
-                    g.stroke({ color: isClicked ? 0x070BA6 : 0x5E5353, width: 2 });
-                }}  
-                x={0} 
-                y={0} 
-                alpha={isDragging ? 0.5 : 1}  
+                    g.stroke({ color: isClicked ? 0x070ba6 : 0x5e5353, width: 2 });
+                }}
+                x={0}
+                y={0}
+                alpha={isDragging ? 0.5 : 1}
             />
             <pixiText
                 interactive={false}
@@ -93,9 +122,9 @@ export const Answer = ({ text, isCorrect, x, y, width, height, containerX, conta
                 style={{
                     fontSize: 20,
                     fill: 0xffffff,
-                    fontFamily: "Arial"
+                    fontFamily: 'Arial',
                 }}
             />
         </pixiContainer>
-    )
-}
+    );
+};
