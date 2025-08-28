@@ -16,6 +16,7 @@ export const Exercise = ({ enemy }: IExerciseProps) => {
     const [answersTexture, setAnswersTexture] = useState<Texture | null>(null);
     const [isAnswerIsDragging, setIsAnswerIsDragging] = useState(false);
     const [isOverTarget, setIsOverTarget] = useState(false); // Nuevo estado para la colisión
+    const [isCancellingAnswer, setIsCancellingAnswer] = useState(false);
     const exerciseContainerX = window.innerWidth / 2 - (window.innerWidth * 0.5) / 2;
     const exerciseContainerY = window.innerHeight / 2 - (window.innerHeight * 0.8) / 2;
     const [answerSelectedPosition, setAnswerSelectedPosition] = useState<{ x: number; y: number } | null>(null);
@@ -32,43 +33,93 @@ export const Exercise = ({ enemy }: IExerciseProps) => {
         { text: '4', isCorrect: false },
     ]);
     const answerTargetRef = useRef<Graphics>(null);
-    const draggingAnswerRef = useRef<Graphics | null>(null); // Ref para el contenedor arrastrado
+    const answersGraphicsRef = useRef<Graphics>(null);
+    const draggingAnswerRef = useRef<Container | null>(null); // Ref para el contenedor arrastrado
 
-    const handleAnswerDragStart = (answerContainer: Graphics | null) => {
+    const handleAnswerDragStart = (answerContainer: Container | null) => {
         draggingAnswerRef.current = answerContainer;
     };
 
     const handleAnswerDragEnd = useCallback(
-        (answerContainer: Graphics | null) => {
-          console.log(isOverTarget);
-            if (isOverTarget) {
-                console.log('Answer dropped in target area!');
-                // Lógica para respuesta correcta
+        (answerContainer: Container | null) => {
+            if (answerContainer && answerTargetRef.current && answersGraphicsRef.current) {
+                const answerBounds = answerContainer.getBounds();
+
+                // Comprobar si se soltó en el área de cancelación (respuestas)
+                const answersBounds = answersGraphicsRef.current.getBounds();
+                const isOverAnswersArea =
+                    answerBounds.x < answersBounds.x + answersBounds.width &&
+                    answerBounds.x + answerBounds.width > answersBounds.x &&
+                    answerBounds.y < answersBounds.y + answersBounds.height &&
+                    answerBounds.y + answerBounds.height > answersBounds.y;
+
+                if (isOverAnswersArea) {
+                    console.log('Answer cancelled.');
+                    // Lógica para cuando se cancela (vuelve a su sitio)
+                } else {
+                    // Si no, comprobar si se soltó en el área del ejercicio
+                    const targetBounds = answerTargetRef.current.getBounds();
+                    const isOverTargetArea =
+                        answerBounds.x < targetBounds.x + targetBounds.width &&
+                        answerBounds.x + answerBounds.width > targetBounds.x &&
+                        answerBounds.y < targetBounds.y + targetBounds.height &&
+                        answerBounds.y + answerBounds.height > targetBounds.y;
+
+                    if (isOverTargetArea) {
+                        console.log('Answer dropped in the exercise area!');
+                        // Lógica para cuando se suelta en el objetivo
+                    } else {
+                        console.log('Answer dropped outside target area.');
+                    }
+                }
             } else {
                 console.log('Answer dropped outside target area.');
             }
+
             draggingAnswerRef.current = null;
             setIsOverTarget(false);
+            setIsCancellingAnswer(false);
         },
-        [isOverTarget],
+        [], // No se necesitan dependencias porque calculamos todo dentro
     );
 
     useEffect(() => {
-        if (isAnswerIsDragging && draggingAnswerRef.current && answerTargetRef.current) {
+        if (isAnswerIsDragging && draggingAnswerRef.current && answersGraphicsRef.current && answerTargetRef.current) {
             const answerBounds = draggingAnswerRef.current.getBounds();
-            const targetBounds = answerTargetRef.current.getBounds();
 
-            const collision =
-                answerBounds.x < targetBounds.x + targetBounds.width &&
-                answerBounds.x + answerBounds.width > targetBounds.x &&
-                answerBounds.y < targetBounds.y + targetBounds.height &&
-                answerBounds.y + answerBounds.height > targetBounds.y;
+            // 1. Comprobar colisión con el área de respuestas (pequeña)
+            const answersBounds = answersGraphicsRef.current.getBounds();
+            const isOverAnswersArea =
+                answerBounds.x < answersBounds.x + answersBounds.width &&
+                answerBounds.x + answerBounds.width > answersBounds.x &&
+                answerBounds.y < answersBounds.y + answersBounds.height &&
+                answerBounds.y + answerBounds.height > answersBounds.y;
 
-            console.log(collision);
+            if (isOverAnswersArea) {
+                // Si está sobre el área de respuestas, activa su borde y desactiva el del objetivo grande.
+                setIsCancellingAnswer(true);
+                setIsOverTarget(false);
+                console.log('Over answers area, cancelling answer...');
+            } else {
+                // 2. Si no está sobre el área de respuestas, comprobar colisión con el área objetivo (grande)
+                const targetBounds = answerTargetRef.current.getBounds();
+                const isOverTargetArea =
+                    answerBounds.x < targetBounds.x + targetBounds.width &&
+                    answerBounds.x + answerBounds.width > targetBounds.x &&
+                    answerBounds.y < targetBounds.y + targetBounds.height &&
+                    answerBounds.y + answerBounds.height > targetBounds.y;
 
-            setIsOverTarget(collision);
+                // Activa el borde del objetivo grande y desactiva el del área de respuestas.
+                setIsOverTarget(isOverTargetArea);
+                setIsCancellingAnswer(false);
+                console.log(isOverTargetArea ? 'Over target area!' : 'Not over target area.');
+            }
+        } else {
+            // Si no se está arrastrando, resetear ambos estados
+            setIsOverTarget(false);
+            setIsCancellingAnswer(false);
         }
-    }, [answerSelectedPosition, isAnswerIsDragging]); // Se ejecuta en cada movimiento
+    }, [isAnswerIsDragging, answerSelectedPosition]); // Se ejecuta en cada movimiento
 
     useEffect(() => {
         let cancelled = false;
@@ -145,6 +196,17 @@ export const Exercise = ({ enemy }: IExerciseProps) => {
                             />
                         );
                     })}
+                    {isAnswerIsDragging && (
+                        <pixiGraphics
+                            ref={answersGraphicsRef}
+                            draw={(g) => {
+                                g.clear();
+                                g.rect(0, 0, answersWidth, window.innerHeight * 0.2);
+                                // Cambia el color del borde según si está sobre el área o no
+                                g.stroke({ color: isCancellingAnswer ? 0x00ff00 : 0x0000ff, width: 5 });
+                            }}
+                        />
+                    )}
                 </pixiContainer>
             )}
             {isAnswerIsDragging && (
