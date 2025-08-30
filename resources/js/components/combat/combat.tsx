@@ -118,7 +118,12 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                   onAttack={setIsAttacking}
                   />
 
-            {isAttacking && <Exercise enemy="nombre quemado" />}
+            {isAttacking && 
+                <Exercise 
+                    enemy="nombre quemado" 
+                    onClose={() => setIsAttacking(false)}
+                />
+            }
         </pixiContainer>
     );
 };
