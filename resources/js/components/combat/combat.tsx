@@ -14,6 +14,13 @@ interface ICharacterProps {
     enemy: Texture;
 }
 
+const cards = [
+    { id: 1, name: 'Attack', damage: 10 },
+    { id: 2, name: 'Defend', damage: 5 },
+    { id: 3, name: 'Heal', damage: -5 },
+    { id: 4, name: 'Fireball', damage: 20 },
+];
+
 export const Combat = ({ hero, enemy }: ICharacterProps) => {
     const spriteBgCombat = '/assets/bg-battle.jpg';
 
@@ -112,11 +119,13 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                 />
             )}
 
-            <Card onHeldDownChange={setIsCardHeldDown} 
-                  onCardPositionChange={setCardPosition} 
-                  isTargetAssigned={isTargetAssigned}
-                  onAttack={setIsAttacking}
-                  />
+            <CombatCards
+                cards={cards}
+                setIsCardHeldDown={setIsCardHeldDown}
+                setCardPosition={setCardPosition}
+                isTargetAssigned={isTargetAssigned}
+                setIsAttacking={setIsAttacking}
+            />
 
             {isAttacking && 
                 <Exercise 
@@ -127,3 +136,49 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
         </pixiContainer>
     );
 };
+
+interface ICombatCardProps {
+    cards: Array<{ id: number; name: string; damage: number }>;
+    setIsCardHeldDown: (isHeldDown: boolean) => void;
+    setCardPosition: (position: { x: number; y: number }) => void;
+    isTargetAssigned: boolean;
+    setIsAttacking: (isAttacking: boolean) => void;
+}
+
+const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking }: ICombatCardProps) => {
+    return (
+        <>
+            {cards.map((card, index) => {
+                const cardWidth = 200;
+                const cardSpacing = 240;
+                const totalWidth = cards.length * cardSpacing - 20;
+                const startX = (window.innerWidth - totalWidth) / 2;
+                const baseYPosition = window.innerHeight - 320;
+                const centerIndex = (cards.length - 1) / 2;
+                const rotationAngle = (index - centerIndex) * 0.15;
+                const isFirstCard = index === 0;
+                const isLastCard = index === cards.length - 1;
+                const isExtremeCard = isFirstCard || isLastCard;
+                const elevationAmount = isExtremeCard ? 0 : -40;
+
+                const cardPosition = {
+                    x: startX + (index * cardSpacing),
+                    y: baseYPosition + elevationAmount
+                };
+
+                return (
+                    <Card 
+                        key={card.id} 
+                        onHeldDownChange={setIsCardHeldDown} 
+                        onCardPositionChange={setCardPosition} 
+                        isTargetAssigned={isTargetAssigned}
+                        onAttack={setIsAttacking}
+                        initialPosition={cardPosition}
+                        cardIndex={index}
+                        rotation={rotationAngle}
+                    />
+                );
+            })}
+        </>
+    );
+}
