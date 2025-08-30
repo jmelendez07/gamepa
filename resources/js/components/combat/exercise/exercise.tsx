@@ -7,9 +7,10 @@ extend({ Container, Sprite, Text, Graphics, Point });
 
 interface IExerciseProps {
     enemy: string;
+    onClose?: () => void;
 }
 
-export const Exercise = ({ enemy }: IExerciseProps) => {
+export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
     const bgAsset = '/assets/ui/exercise-ui.png';
     const answersAsset = '/assets/ui/answers-ui.png';
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -154,6 +155,18 @@ export const Exercise = ({ enemy }: IExerciseProps) => {
     return (
         <pixiContainer x={exerciseContainerX} y={exerciseContainerY}>
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
+            
+            <pixiText 
+                text="✕" x={width - 50} y={50} anchor={0.5} zIndex={10} interactive={true} cursor="pointer"
+                onClick={onClose}
+                style={{
+                    fontSize: 32,
+                    fill: 0xffffff,
+                    fontFamily: 'Arial',
+                    fontWeight: 'bold',
+                }}
+            />
+            
             <pixiText
                 text="f´(x) = 2x + 5"
                 x={100}
