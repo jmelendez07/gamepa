@@ -11,7 +11,7 @@ interface IAnswerProps {
     containerX: number;
     containerY: number;
     onDragStart?: (ref: Container | null) => void;
-    onDragEnd?: (ref: Container | null) => void;
+    onDragEnd?: (ref: Container | null, answerValue: { text: string; isCorrect: boolean }) => void;
     onDragMove?: (event: FederatedPointerEvent) => void;
     onIsDraggingChange?: (isDragging: boolean) => void;
     onAnswerPositionChange?: (position: { x: number; y: number }) => void;
@@ -58,7 +58,7 @@ export const Answer = ({
         if (wasDragged.current) {
             // Lógica para cuando se suelta después de arrastrar
             console.log('Drag ended for:', text);
-            onDragEnd?.(answerContainerRef.current);
+            onDragEnd?.(answerContainerRef.current, { text, isCorrect });
         } else {
             // Lógica para un click (sin arrastre)
             console.log('Clicked:', text);

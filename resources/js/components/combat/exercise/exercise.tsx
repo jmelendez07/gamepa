@@ -28,11 +28,17 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
     const answersWidth = window.innerWidth * 0.45;
     const centerXRelativeToContainer = (width - answersWidth) / 2;
     const [answersOptions, setAnswersOptions] = useState<{ text: string; isCorrect: boolean }[]>([
-        { text: '1', isCorrect: false },
-        { text: '2', isCorrect: true },
-        { text: '3', isCorrect: false },
-        { text: '4', isCorrect: false },
+        { text: '2(2) + 5(5)', isCorrect: false },
+        { text: '2(1) + 5(0)', isCorrect: true },
+        { text: '2 + 5', isCorrect: false },
+        { text: '2(0) + 5(0)', isCorrect: false },
     ]);
+    const [methodSteps, setMethodSteps] = useState<{ order: number; text: string }[]>([
+        { order: 1, text: 'f´(x) = 2(1) + 5(0)' },
+        { order: 2, text: 'f´(x) = 2 + 0' },
+        { order: 3, text: 'f´(x) = 2' },
+    ]);
+    const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
     const answerTargetRef = useRef<Graphics>(null);
     const answersGraphicsRef = useRef<Graphics>(null);
     const draggingAnswerRef = useRef<Container | null>(null); // Ref para el contenedor arrastrado
@@ -42,7 +48,7 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
     };
 
     const handleAnswerDragEnd = useCallback(
-        (answerContainer: Container | null) => {
+        (answerContainer: Container | null, answerValue: { text: string; isCorrect: boolean }) => {
             if (answerContainer && answerTargetRef.current && answersGraphicsRef.current) {
                 const answerBounds = answerContainer.getBounds();
 
@@ -68,7 +74,8 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
 
                     if (isOverTargetArea) {
                         console.log('Answer dropped in the exercise area!');
-                        // Lógica para cuando se suelta en el objetivo
+                        console.log('Selected answer:', answerValue);
+                        setPlayerAnswers((prev) => [...prev, { text: answerValue.text, isCorrect: answerValue.isCorrect }]);
                     } else {
                         console.log('Answer dropped outside target area.');
                     }
@@ -155,9 +162,15 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
     return (
         <pixiContainer x={exerciseContainerX} y={exerciseContainerY}>
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
-            
-            <pixiText 
-                text="✕" x={width - 50} y={50} anchor={0.5} zIndex={10} interactive={true} cursor="pointer"
+
+            <pixiText
+                text="✕"
+                x={width - 50}
+                y={50}
+                anchor={0.5}
+                zIndex={10}
+                interactive={true}
+                cursor="pointer"
                 onClick={onClose}
                 style={{
                     fontSize: 32,
@@ -166,7 +179,7 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
                     fontWeight: 'bold',
                 }}
             />
-            
+
             <pixiText
                 text="f´(x) = 2x + 5"
                 x={100}
@@ -179,6 +192,30 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
                     fontFamily: 'Arial',
                 }}
             />
+            {playerAnswers.map((step, index) => {
+                return (
+                    <><pixiGraphics
+                        key={index}
+                        draw={(g) => {
+                            g.clear();
+                            g.roundRect(26, 21 + (index + 1) * (height / 10 + 10), width - 55, height / 10);
+                            g.fill({ color: 0x000000, alpha: 0.01 });
+                            g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
+                        } } />
+                        <pixiText
+                            text={step.text}
+                            x={100}
+                            y={60 + (index + 1) * (height / 10 + 10)}
+                            anchor={0.5}
+                            zIndex={1}
+                            style={{
+                                fontSize: 24,
+                                fill: 0xffffff,
+                                fontFamily: 'Arial',
+                            }} />
+                    </>
+                );
+            })}
             {answersTexture && (
                 <pixiContainer x={centerXRelativeToContainer} y={430} width={answersWidth} height={window.innerHeight * 0.2} zIndex={1}>
                     <pixiSprite texture={answersTexture} width={answersWidth} height={window.innerHeight * 0.2} />
@@ -224,7 +261,7 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
             )}
             {isAnswerIsDragging && (
                 <pixiGraphics
-                ref={answerTargetRef}
+                    ref={answerTargetRef}
                     draw={(g) => {
                         g.clear();
                         g.rect(0, 0, width, height);
