@@ -26,7 +26,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
 
     const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
     const [isCardHeldDown, setIsCardHeldDown] = useState(false);
-    const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+    const [selectedCardPosition, setSelectedCardPosition] = useState({ x: 0, y: 0 });
     const [enemyPosition, setEnemyPosition] = useState({ x: window.innerWidth * 0.75, y: window.innerHeight * 0.3 });
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
     const [isAttacking, setIsAttacking] = useState(false);
@@ -73,7 +73,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
         updateHeroSprite('DOWN', true, true);
         updateEnemySprite('combatIdle', 'left');
         if (isCardHeldDown) {
-            if (assignCardTarget({ cardPosition, characterTarget: enemyPosition })) {
+            if (assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemyPosition })) {
                 setIsTargetAssigned(true);
             } else {
                 setIsTargetAssigned(false);
@@ -122,7 +122,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
             <CombatCards
                 cards={cards}
                 setIsCardHeldDown={setIsCardHeldDown}
-                setCardPosition={setCardPosition}
+                setCardPosition={setSelectedCardPosition}
                 isTargetAssigned={isTargetAssigned}
                 setIsAttacking={setIsAttacking}
             />
@@ -149,7 +149,6 @@ const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssign
     return (
         <>
             {cards.map((card, index) => {
-                const cardWidth = 200;
                 const cardSpacing = 240;
                 const totalWidth = cards.length * cardSpacing - 20;
                 const startX = (window.innerWidth - totalWidth) / 2;
@@ -174,8 +173,7 @@ const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssign
                         isTargetAssigned={isTargetAssigned}
                         onAttack={setIsAttacking}
                         initialPosition={cardPosition}
-                        cardIndex={index}
-                        rotation={rotationAngle}
+                        initialRotation={rotationAngle}
                     />
                 );
             })}

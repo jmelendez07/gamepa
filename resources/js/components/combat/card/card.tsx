@@ -1,7 +1,6 @@
 import { extend, useTick } from '@pixi/react';
-import type { FederatedPointerEvent } from 'pixi.js';
 import { Assets, Container, Sprite, Texture, Graphics } from 'pixi.js';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 extend({ Container, Sprite, Graphics });
 
@@ -12,28 +11,27 @@ interface ICardProps {
     onAttack?: (isAttacking: boolean) => void;
     initialPosition?: { x: number; y: number };
     cardIndex?: number;
-    rotation?: number;
+    initialRotation?: number;
 }
 
-export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack, initialPosition, cardIndex, rotation }: ICardProps) => {
+export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack, initialPosition, initialRotation }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
-    const [isPressed, setIsPressed] = useState(false);
-    const [isHeldDown, setIsHeldDown] = useState(false);
+    const [isPointerDown, setIsPointerDown] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const defaultPosition = initialPosition || { x: 500, y: 600 };
+    // Estados para posición y rotación actuales y objetivo
     const [cardPosition, setCardPosition] = useState(defaultPosition);
-    const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
-    const [isClicked, setIsClicked] = useState(false);
-    const [isAttacking, setIsAttacking] = useState(false);
+    const [targetCardPosition, setTargetCardPosition] = useState(defaultPosition);
+    const [cardRotation, setCardRotation] = useState(initialRotation || 0);
+    const [targetCardRotation, setTargetCardRotation] = useState(initialRotation || 0);
     const [currentHoverOffset, setCurrentHoverOffset] = useState(0);
     const [currentAlpha, setCurrentAlpha] = useState(0.8);
     const [currentTint, setCurrentTint] = useState(0x808080);
-    const targetHoverOffset = isHovered && !isHeldDown ? -20 : 0;
-    const targetAlpha = isHovered && !isHeldDown ? 1.0 : 0.8;
-    const targetTint = isHovered && !isHeldDown ? 0xFFFFFF : 0x808080;
-    const originalPosition = defaultPosition;
+    const targetHoverOffset = isHovered && !isPointerDown ? -20 : 0;
+    const targetAlpha = (isHovered || isPointerDown) ? 1.0 : 0.8;
+    const targetTint = (isHovered || isPointerDown) ? 0xFFFFFF : 0x808080;
     const currentCardPosition = {
         x: cardPosition.x,
         y: cardPosition.y + currentHoverOffset
@@ -41,6 +39,26 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
 
     useTick((ticker) => {
         const lerpSpeed = 0.15;
+
+        if (!isPointerDown) {
+            const posDiffX = targetCardPosition.x - cardPosition.x;
+            const posDiffY = targetCardPosition.y - cardPosition.y;
+            if (Math.abs(posDiffX) > 0.5 || Math.abs(posDiffY) > 0.5) {
+                setCardPosition(prev => ({
+                    x: prev.x + posDiffX * lerpSpeed,
+                    y: prev.y + posDiffY * lerpSpeed
+                }));
+            } else if (posDiffX !== 0 || posDiffY !== 0) {
+                setCardPosition(targetCardPosition);
+            }
+
+            const rotDiff = targetCardRotation - cardRotation;
+            if (Math.abs(rotDiff) > 0.01) {
+                setCardRotation(prev => prev + rotDiff * lerpSpeed);
+            } else if (rotDiff !== 0) {
+                setCardRotation(targetCardRotation);
+            }
+        }
         
         const offsetDiff = targetHoverOffset - currentHoverOffset;
         if (Math.abs(offsetDiff) > 0.1) {
@@ -75,73 +93,31 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
         }
     });
 
-    useEffect(() => {
-        onHeldDownChange?.(isHeldDown);
-        if (!isHeldDown) {
-            onCardPositionChange?.(cardPosition);
-        }
-    }, [isHeldDown, onHeldDownChange, cardPosition, onCardPositionChange]);
-
-    const resetCard = useCallback(() => {
-        setIsPressed(false);
-        setIsHeldDown(false);
-        setCardPosition(defaultPosition);
-
-        if (pressTimerRef.current) {
-            clearTimeout(pressTimerRef.current);
-            pressTimerRef.current = null;
-        }
-    }, [defaultPosition]);
-
     const handlePointerDown = () => {
-        setIsPressed(true);
-
-        pressTimerRef.current = setTimeout(() => {
-            setIsHeldDown(true);
-        }, 200);
+    setIsPointerDown(true);
+    setCardRotation(0); // Rotación directa al arrastrar
+    onHeldDownChange(true);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
     };
+
+    const handlePointerMove = (event: PointerEvent) => {
+    const globalPos = { x: event.clientX - 100, y: event.clientY - 150 };
+    setCardPosition(globalPos); // Posición directa al arrastrar
+    onCardPositionChange({ x: event.clientX, y: event.clientY });
+    }
 
     const handlePointerUp = () => {
-        const finalPosition = cardPosition;
-        
-        resetCard();
-
-        if (finalPosition.x == originalPosition.x && finalPosition.y == originalPosition.y) {
-            setIsClicked(!isClicked);
-        }
-
-        if (isTargetAssigned) {
-            console.log('Card played on target!', { finalPosition });
-            setIsAttacking(true);
-            onAttack?.(true);
-        }
-    };
-
-    const handlePointerUpOutside = () => {
-        const finalPosition = cardPosition;
-        console.log('Card released outside', { finalPosition });
-        resetCard();
-    };
-
-    const handlePointerMove = (event: FederatedPointerEvent) => {
-        if (isHeldDown) {
-            const globalPos = event.global;
-            const newPosition = {
-                x: globalPos.x - 100, // Adjust for center anchor
-                y: globalPos.y - 150, // Adjust for center anchor
-            };
-            setCardPosition(newPosition);
-            onCardPositionChange({
-                x: globalPos.x,
-                y: globalPos.y
-            });
-        }
-    };
+    setIsPointerDown(false);
+    onHeldDownChange(false);
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', handlePointerUp);
+    setTargetCardRotation(initialRotation || 0); // Rotación objetivo al soltar
+    setTargetCardPosition(initialPosition || { x: 500, y: 600 }); // Posición objetivo al soltar
+    }
 
     const handlePointerOver = () => {
-        if (!isHeldDown) {
-            setIsHovered(true);
-        }
+        if (!isPointerDown) setIsHovered(true);
     };
 
     const handlePointerOut = () => {
@@ -154,49 +130,32 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
         });
     }, []);
 
+    useEffect(() => {
+        if (!isPointerDown && isTargetAssigned) {
+            onAttack?.(true);
+        }
+    }, [isPointerDown]);
+
     return (
-        <pixiContainer interactive={true}>
+        <pixiContainer
+            interactive={true}
+            onPointerDown={handlePointerDown}
+        >
             {card1Texture && (
-                <>
-                    <pixiSprite
-                        interactive={true}
-                        texture={card1Texture}
-                        width={200}
-                        height={300}
-                        x={currentCardPosition.x + 100} // Offset for center anchor
-                        y={currentCardPosition.y + 150} // Offset for center anchor
-                        anchor={0.5} // Center anchor point
-                        rotation={rotation || 0} // Apply rotation
-                        tint={currentTint} // Aplicar tinte animado
-                        onPointerDown={handlePointerDown}
-                        onPointerUp={handlePointerUp}
-                        onPointerOver={handlePointerOver}
-                        onPointerOut={handlePointerOut}
-                        // onPointerUpOutside={handlePointerUpOutside}
-                        onPointerMove={handlePointerMove}
-                        alpha={isHeldDown ? (isTargetAssigned ? 0.1 : 0.7) : currentAlpha}
-                    />
-                    {isClicked && (
-                        <pixiGraphics
-                            interactive={true}
-                            onPointerDown={handlePointerDown}
-                            onPointerUp={handlePointerUp}
-                            onPointerOver={handlePointerOver}
-                            onPointerOut={handlePointerOut}
-                            // onPointerUpOutside={handlePointerUpOutside}
-                            onPointerMove={handlePointerMove}
-                            draw={(g) => {
-                                g.clear();
-                                g.rect(-103, -153, 206, 306); // Center the rectangle around origin
-                                // g.fill({ color: 0x00ff00, alpha: 0.3 }); para rellenar todo el rectangulo
-                                g.stroke({ color: 0x00ff00, width: 3 }); 
-                            }}
-                            x={currentCardPosition.x + 100}
-                            y={currentCardPosition.y + 150}
-                            rotation={rotation || 0}
-                        />
-                    )}
-                </>
+                <pixiSprite
+                    width={200}
+                    anchor={0.5}
+                    height={300}
+                    tint={currentTint}
+                    interactive={true}
+                    alpha={(isPointerDown && isTargetAssigned) ? 0.2 : currentAlpha}
+                    texture={card1Texture}
+                    rotation={cardRotation}
+                    x={currentCardPosition.x + 100}
+                    y={currentCardPosition.y + 150}
+                    onPointerOut={handlePointerOut}
+                    onPointerOver={handlePointerOver}
+                />
             )}
         </pixiContainer>
     );
