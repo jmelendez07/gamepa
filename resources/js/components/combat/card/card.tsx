@@ -21,7 +21,6 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
     const [isPointerDown, setIsPointerDown] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const defaultPosition = initialPosition || { x: 500, y: 600 };
-    // Estados para posición y rotación actuales y objetivo
     const [cardPosition, setCardPosition] = useState(defaultPosition);
     const [targetCardPosition, setTargetCardPosition] = useState(defaultPosition);
     const [cardRotation, setCardRotation] = useState(initialRotation || 0);
@@ -95,7 +94,7 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
 
     const handlePointerDown = () => {
     setIsPointerDown(true);
-    setCardRotation(0); // Rotación directa al arrastrar
+    setCardRotation(0);
     onHeldDownChange(true);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
@@ -103,7 +102,7 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
 
     const handlePointerMove = (event: PointerEvent) => {
     const globalPos = { x: event.clientX - 100, y: event.clientY - 150 };
-    setCardPosition(globalPos); // Posición directa al arrastrar
+    setCardPosition(globalPos);
     onCardPositionChange({ x: event.clientX, y: event.clientY });
     }
 
@@ -112,8 +111,8 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
     onHeldDownChange(false);
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointerup', handlePointerUp);
-    setTargetCardRotation(initialRotation || 0); // Rotación objetivo al soltar
-    setTargetCardPosition(initialPosition || { x: 500, y: 600 }); // Posición objetivo al soltar
+    setTargetCardRotation(initialRotation || 0);
+    setTargetCardPosition(initialPosition || { x: 500, y: 600 });
     }
 
     const handlePointerOver = () => {
