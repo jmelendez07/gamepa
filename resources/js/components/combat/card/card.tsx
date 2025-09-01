@@ -1,3 +1,4 @@
+import { ICard } from '@/types';
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Sprite, Texture, Graphics } from 'pixi.js';
 import { useEffect, useState } from 'react';
@@ -5,16 +6,17 @@ import { useEffect, useState } from 'react';
 extend({ Container, Sprite, Graphics });
 
 interface ICardProps {
+    card: ICard;
+    onSelectedCard: (card: ICard | null) => void;
     onHeldDownChange: (isHeldDown: boolean) => void;
     onCardPositionChange: (cardPosition: { x: number; y: number }) => void;
     isTargetAssigned?: boolean;
     onAttack?: (isAttacking: boolean) => void;
     initialPosition?: { x: number; y: number };
-    cardIndex?: number;
     initialRotation?: number;
 }
 
-export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack, initialPosition, initialRotation }: ICardProps) => {
+export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack, initialPosition, initialRotation }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
@@ -132,6 +134,7 @@ export const Card = ({ onHeldDownChange, onCardPositionChange, isTargetAssigned,
     useEffect(() => {
         if (!isPointerDown && isTargetAssigned) {
             onAttack?.(true);
+            onSelectedCard(card);
         }
     }, [isPointerDown]);
 

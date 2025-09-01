@@ -2,15 +2,26 @@ import { extend } from '@pixi/react';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
+import { ICard } from '@/types';
 
 extend({ Container, Sprite, Text, Graphics, Point });
 
 interface IExerciseProps {
     enemy: string;
+    card?: ICard | null;
     onClose?: () => void;
 }
 
-export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
+export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
+    // Método para obtener un ejercicio aleatorio disponible
+    const getRandomExercise = (card?: ICard | null) => {
+        if (card && card.exercises && card.exercises.length > 0) {
+            const idx = Math.floor(Math.random() * card.exercises.length);
+            return card.exercises[idx];
+        }
+        return undefined;
+    };
+
     const bgAsset = '/assets/ui/exercise-ui.png';
     const answersAsset = '/assets/ui/answers-ui.png';
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -181,7 +192,7 @@ export const Exercise = ({ enemy, onClose }: IExerciseProps) => {
             />
 
             <pixiText
-                text="f´(x) = 2x + 5"
+                text={getRandomExercise(card)?.operation || ''}
                 x={100}
                 y={60}
                 anchor={0.5}

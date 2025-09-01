@@ -41,3 +41,15 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface IExercise {
+    id: number;
+    operation: string;
+}
+
+export interface ICard {
+    id: number;
+    name: string;
+    stats: number;
+    exercises: IExercise[];
+}

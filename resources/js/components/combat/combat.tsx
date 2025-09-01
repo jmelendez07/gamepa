@@ -6,6 +6,7 @@ import useEnemyAnimation from '../enemy/useEnemyAnimation';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import { Card } from './card/card';
 import { Exercise } from './exercise/exercise';
+import { ICard } from '@/types';
 
 extend({ Sprite, Container, Graphics });
 
@@ -14,11 +15,60 @@ interface ICharacterProps {
     enemy: Texture;
 }
 
+interface ICombatCardProps {
+    cards: Array<{ id: number; name: string; stats: number; exercises: { id: number; operation: string; }[] }>;
+    setIsCardHeldDown: (isHeldDown: boolean) => void;
+    setCardPosition: (position: { x: number; y: number }) => void;
+    isTargetAssigned: boolean;
+    setIsAttacking: (isAttacking: boolean) => void;
+    setSelectedCard: (card: ICard | null) => void;
+}
+
 const cards = [
-    { id: 1, name: 'Attack', damage: 10 },
-    { id: 2, name: 'Defend', damage: 5 },
-    { id: 3, name: 'Heal', damage: -5 },
-    { id: 4, name: 'Fireball', damage: 20 },
+    { 
+        id: 1, 
+        name: 'Attack', 
+        stats: 10,
+        exercises: [
+            {
+                id: 1,
+                operation: 'f´(x)=2x+5',
+            }
+        ]
+    },
+    { 
+        id: 2, 
+        name: 'Defend', 
+        stats: 30,
+        exercises: [
+            {
+                id: 2,
+                operation: 'f´(x)=2x-4',
+            }
+        ] 
+    },
+    { 
+        id: 3, 
+        name: 'Heal', 
+        stats: 10,
+        exercises: [
+            {
+                id: 3,
+                operation: 'f´(x)=-3x-5',
+            }
+        ]
+    },
+    { 
+        id: 4, 
+        name: 'Fireball', 
+        stats: 20,
+        exercises: [
+            {
+                id: 4,
+                operation: 'f´(x)=4x+4',
+            }
+        ] 
+    },
 ];
 
 export const Combat = ({ hero, enemy }: ICharacterProps) => {
@@ -26,6 +76,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
 
     const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
     const [isCardHeldDown, setIsCardHeldDown] = useState(false);
+    const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
     const [selectedCardPosition, setSelectedCardPosition] = useState({ x: 0, y: 0 });
     const [enemyPosition, setEnemyPosition] = useState({ x: window.innerWidth * 0.75, y: window.innerHeight * 0.3 });
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
@@ -125,11 +176,13 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                 setCardPosition={setSelectedCardPosition}
                 isTargetAssigned={isTargetAssigned}
                 setIsAttacking={setIsAttacking}
+                setSelectedCard={setSelectedCard}
             />
 
             {isAttacking && 
                 <Exercise 
-                    enemy="nombre quemado" 
+                    enemy="nombre quemado"
+                    card={selectedCard}
                     onClose={() => setIsAttacking(false)}
                 />
             }
@@ -137,15 +190,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
     );
 };
 
-interface ICombatCardProps {
-    cards: Array<{ id: number; name: string; damage: number }>;
-    setIsCardHeldDown: (isHeldDown: boolean) => void;
-    setCardPosition: (position: { x: number; y: number }) => void;
-    isTargetAssigned: boolean;
-    setIsAttacking: (isAttacking: boolean) => void;
-}
-
-const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking }: ICombatCardProps) => {
+const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard }: ICombatCardProps) => {
     return (
         <>
             {cards.map((card, index) => {
@@ -168,12 +213,14 @@ const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssign
                 return (
                     <Card 
                         key={card.id} 
+                        card={card}
                         onHeldDownChange={setIsCardHeldDown} 
                         onCardPositionChange={setCardPosition} 
                         isTargetAssigned={isTargetAssigned}
                         onAttack={setIsAttacking}
                         initialPosition={cardPosition}
                         initialRotation={rotationAngle}
+                        onSelectedCard={setSelectedCard}
                     />
                 );
             })}
