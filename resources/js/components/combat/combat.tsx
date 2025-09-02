@@ -264,7 +264,7 @@ export const Combat = ({ hero }: ICharacterProps) => {
                 />
             )}
 
-            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} />
+            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={hero} />
             <CombatCards
                 cards={cards}
                 setIsCardHeldDown={setIsCardHeldDown}
