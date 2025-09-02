@@ -17,10 +17,13 @@ export const useHeroAnimation = ({texture, frameWidth, frameHeight, totalFrames,
   const frameRef = useRef(0);
   const elapsedTimeRef = useRef(0);
 
-  const getRowByDirection = (direction: Direction|null, isFighting: boolean) => {
+  const getRowByDirection = (direction: Direction|null, isFighting: boolean, isStat: boolean) => {
     if (isFighting) {
       return 45
+    } else if (isStat) {
+      return 44;
     }
+
     switch(direction) {
       case 'UP':
         return 8;
@@ -48,8 +51,8 @@ export const useHeroAnimation = ({texture, frameWidth, frameHeight, totalFrames,
     return newSprite;
   }
 
-  const updateSprite = (direction: Direction| null, isMoving: boolean, isFighting: boolean) => {
-      const row = getRowByDirection(direction, isFighting);
+  const updateSprite = (direction: Direction| null, isMoving: boolean, isFighting: boolean, isStat?: boolean) => {
+      const row = getRowByDirection(direction, isFighting, isStat ?? false);
       let column = 0;
 
       if (isMoving) {
