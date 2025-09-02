@@ -53,3 +53,10 @@ export interface ICard {
     stats: number;
     exercises: IExercise[];
 }
+
+export interface IEnemy {
+    id: number;
+    name: string;
+    avatar: string;
+    health: number;
+}

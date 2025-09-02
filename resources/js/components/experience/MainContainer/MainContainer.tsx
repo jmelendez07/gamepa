@@ -125,10 +125,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
                 {heroTexture && <Hero texture={heroTexture} onMove={updateHeroPosition} />}
             </Camera>
             {inCombat && heroTexture && enemyTexture && (
-                <Combat 
-                    hero={heroTexture} 
-                    enemy={enemyTexture} 
-                />
+                <Combat hero={heroTexture} />
             )}
         </pixiContainer>
     );

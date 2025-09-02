@@ -2,17 +2,17 @@ import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useCallback, useEffect, useState } from 'react';
 import { ANIMATION_SPEED } from '../constants/game-world';
-import useEnemyAnimation from '../enemy/useEnemyAnimation';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import { Card } from './card/card';
 import { Exercise } from './exercise/exercise';
-import { ICard } from '@/types';
+import { ICard, IEnemy } from '@/types';
+import { Enemy } from './enemy/enemy';
+import HeroStats from './hero-stats';
 
 extend({ Sprite, Container, Graphics });
 
 interface ICharacterProps {
     hero: Texture;
-    enemy: Texture;
 }
 
 interface ICombatCardProps {
@@ -22,6 +22,10 @@ interface ICombatCardProps {
     isTargetAssigned: boolean;
     setIsAttacking: (isAttacking: boolean) => void;
     setSelectedCard: (card: ICard | null) => void;
+}
+
+interface ICombatEnemiesProps {
+    initialPosition: { x: number; y: number };
 }
 
 const cards = [
@@ -71,9 +75,20 @@ const cards = [
     },
 ];
 
-export const Combat = ({ hero, enemy }: ICharacterProps) => {
+const enemies: IEnemy[] = [
+    {
+        id: 1,
+        name: 'Goblin',
+        avatar: '/assets/generic-enemy.png',
+        health: 100
+    }
+];
+
+export const Combat = ({ hero }: ICharacterProps) => {
     const spriteBgCombat = '/assets/bg-battle.jpg';
 
+    const [heroHealth, setHeroHealth] = useState(100);
+    const [maxHeroHealth] = useState(100);
     const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
     const [isCardHeldDown, setIsCardHeldDown] = useState(false);
     const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
@@ -84,14 +99,6 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: hero,
-        frameWidth: 64,
-        frameHeight: 64,
-        totalFrames: 2,
-        animationSpeed: ANIMATION_SPEED,
-    });
-
-    const { sprite: enemySprite, updateSprite: updateEnemySprite } = useEnemyAnimation({
-        texture: enemy,
         frameWidth: 64,
         frameHeight: 64,
         totalFrames: 2,
@@ -122,7 +129,6 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
         const deltaTime = ticker.deltaTime;
 
         updateHeroSprite('DOWN', true, true);
-        updateEnemySprite('combatIdle', 'left');
         if (isCardHeldDown) {
             if (assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemyPosition })) {
                 setIsTargetAssigned(true);
@@ -158,8 +164,8 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                 <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.3} width={128} height={128} />
             )}
 
-            {enemySprite && <pixiSprite texture={enemySprite.texture} x={enemyPosition.x} y={enemyPosition.y} width={128} height={128} />}
-
+            <CombatEnemies initialPosition={enemyPosition} />
+            
             {isCardHeldDown && (
                 <pixiGraphics
                     draw={(g) => {
@@ -170,6 +176,7 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                 />
             )}
 
+            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} />
             <CombatCards
                 cards={cards}
                 setIsCardHeldDown={setIsCardHeldDown}
@@ -178,7 +185,6 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
                 setIsAttacking={setIsAttacking}
                 setSelectedCard={setSelectedCard}
             />
-
             {isAttacking && 
                 <Exercise 
                     enemy="nombre quemado"
@@ -189,6 +195,18 @@ export const Combat = ({ hero, enemy }: ICharacterProps) => {
         </pixiContainer>
     );
 };
+
+const CombatEnemies = ({ initialPosition }: ICombatEnemiesProps) => {
+    return (
+        <>
+            {
+                enemies.map(enemy => (
+                    <Enemy key={enemy.id} initialPosition={initialPosition} enemy={enemy} />
+                ))
+            }
+        </>
+    );
+}
 
 const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard }: ICombatCardProps) => {
     return (

@@ -95,26 +95,26 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
     });
 
     const handlePointerDown = () => {
-    setIsPointerDown(true);
-    setCardRotation(0);
-    onHeldDownChange(true);
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
+        setIsPointerDown(true);
+        setCardRotation(0);
+        onHeldDownChange(true);
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
     };
 
     const handlePointerMove = (event: PointerEvent) => {
-    const globalPos = { x: event.clientX - 100, y: event.clientY - 150 };
-    setCardPosition(globalPos);
-    onCardPositionChange({ x: event.clientX, y: event.clientY });
+        const globalPos = { x: event.clientX - 100, y: event.clientY - 150 };
+        setCardPosition(globalPos);
+        onCardPositionChange({ x: event.clientX, y: event.clientY });
     }
 
     const handlePointerUp = () => {
-    setIsPointerDown(false);
-    onHeldDownChange(false);
-    window.removeEventListener('pointermove', handlePointerMove);
-    window.removeEventListener('pointerup', handlePointerUp);
-    setTargetCardRotation(initialRotation || 0);
-    setTargetCardPosition(initialPosition || { x: 500, y: 600 });
+        setIsPointerDown(false);
+        onHeldDownChange(false);
+        window.removeEventListener('pointermove', handlePointerMove);
+        window.removeEventListener('pointerup', handlePointerUp);
+        setTargetCardRotation(initialRotation || 0);
+        setTargetCardPosition(initialPosition || { x: 500, y: 600 });
     }
 
     const handlePointerOver = () => {
