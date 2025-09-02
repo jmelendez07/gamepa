@@ -1,12 +1,12 @@
+import { ICard, IEnemy } from '@/types';
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useCallback, useEffect, useState } from 'react';
 import { ANIMATION_SPEED } from '../constants/game-world';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import { Card } from './card/card';
-import { Exercise } from './exercise/exercise';
-import { ICard, IEnemy } from '@/types';
 import { Enemy } from './enemy/enemy';
+import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
 
 extend({ Sprite, Container, Graphics });
@@ -16,7 +16,7 @@ interface ICharacterProps {
 }
 
 interface ICombatCardProps {
-    cards: Array<{ id: number; name: string; stats: number; exercises: { id: number; operation: string; }[] }>;
+    cards: Array<{ id: number; name: string; stats: number; exercises: { id: number; operation: string }[] }>;
     setIsCardHeldDown: (isHeldDown: boolean) => void;
     setCardPosition: (position: { x: number; y: number }) => void;
     isTargetAssigned: boolean;
@@ -29,49 +29,145 @@ interface ICombatEnemiesProps {
 }
 
 const cards = [
-    { 
-        id: 1, 
-        name: 'Attack', 
+    {
+        id: 1,
+        name: 'Attack',
         stats: 10,
         exercises: [
             {
                 id: 1,
                 operation: 'f´(x)=2x+5',
-            }
-        ]
+                steps: [
+                    {
+                        id: 1,
+                        description: 'Identify the function and its derivative.',
+                        order: 1,
+                        options: [
+                            { id: 1, label: 'f(x)=x+5', isCorrect: false },
+                            { id: 2, label: 'f(x)=2(1)+5(0)', isCorrect: true },
+                            { id: 3, label: 'f(x)=2+5', isCorrect: false },
+                            { id: 4, label: 'f(x)=2(0)+5(1)', isCorrect: false },
+                        ],
+                    },
+                    {
+                        id: 2,
+                        description: 'Multiply the derivative by the coefficient.',
+                        order: 2,
+                        options: [
+                            { id: 1, label: 'f(x)=5', isCorrect: false },
+                            { id: 2, label: 'f(x)=x', isCorrect: false },
+                            { id: 3, label: 'f(x)=2', isCorrect: true },
+                            { id: 4, label: 'f(x)=7', isCorrect: false },
+                        ],
+                    },
+                ],
+            },
+        ],
     },
-    { 
-        id: 2, 
-        name: 'Defend', 
+    {
+        id: 2,
+        name: 'Defend',
         stats: 30,
         exercises: [
             {
                 id: 2,
                 operation: 'f´(x)=2x-4',
-            }
-        ] 
+                steps: [
+                    {
+                        id: 1,
+                        description: 'Identify the function and its derivative.',
+                        order: 1,
+                        options: [
+                            { id: 1, label: 'f(x)=2(0)-4(1)', isCorrect: false },
+                            { id: 2, label: 'f(x)=x-4', isCorrect: false },
+                            { id: 3, label: 'f(x)=2(1)-4(0)', isCorrect: true },
+                            { id: 4, label: 'f(x)=2-4', isCorrect: false },
+                        ],
+                    },
+                    {
+                        id: 2,
+                        description: 'Multiply the derivative by the coefficient.',
+                        order: 2,
+                        options: [
+                            { id: 1, label: 'f(x)=2', isCorrect: true },
+                            { id: 2, label: 'f(x)=x', isCorrect: false },
+                            { id: 3, label: 'f(x)=4', isCorrect: false },
+                            { id: 4, label: 'f(x)=-2', isCorrect: false },
+                        ],
+                    },
+                ],
+            },
+        ],
     },
-    { 
-        id: 3, 
-        name: 'Heal', 
+    {
+        id: 3,
+        name: 'Heal',
         stats: 10,
         exercises: [
             {
                 id: 3,
                 operation: 'f´(x)=-3x-5',
-            }
-        ]
+                steps: [
+                    {
+                        id: 1,
+                        description: 'Identify the function and its derivative.',
+                        order: 1,
+                        options: [
+                            { id: 1, label: 'f(x)=-3-5', isCorrect: false },
+                            { id: 2, label: 'f(x)=-x-5', isCorrect: false },
+                            { id: 3, label: 'f(x)=-3(0)-5(1)', isCorrect: false },
+                            { id: 4, label: 'f(x)=-3(1)-5(0)', isCorrect: true },
+                        ],
+                    },
+                    {
+                        id: 2,
+                        description: 'Multiply the derivative by the coefficient.',
+                        order: 2,
+                        options: [
+                            { id: 1, label: 'f(x)=3', isCorrect: false },
+                            { id: 2, label: 'f(x)=-3', isCorrect: true },
+                            { id: 3, label: 'f(x)=-8', isCorrect: false },
+                            { id: 4, label: 'f(x)=0', isCorrect: false },
+                        ],
+                    },
+                ],
+            },
+        ],
     },
-    { 
-        id: 4, 
-        name: 'Fireball', 
+    {
+        id: 4,
+        name: 'Fireball',
         stats: 20,
         exercises: [
             {
                 id: 4,
                 operation: 'f´(x)=4x+4',
-            }
-        ] 
+                steps: [
+                    {
+                        id: 1,
+                        description: 'Identify the function and its derivative.',
+                        order: 1,
+                        options: [
+                            { id: 1, label: 'f(x)=x+4', isCorrect: false },
+                            { id: 2, label: 'f(x)=4(0)+4(0)', isCorrect: false },
+                            { id: 3, label: 'f(x)=4(0)+4(1)', isCorrect: false },
+                            { id: 4, label: 'f(x)=4(1)+4(0)', isCorrect: true },
+                        ],
+                    },
+                    {
+                        id: 2,
+                        description: 'Multiply the derivative by the coefficient.',
+                        order: 2,
+                        options: [
+                            { id: 1, label: 'f(x)=8', isCorrect: false },
+                            { id: 2, label: 'f(x)=0', isCorrect: false },
+                            { id: 3, label: 'f(x)=4', isCorrect: true },
+                            { id: 4, label: 'f(x)=x', isCorrect: false },
+                        ],
+                    },
+                ],
+            },
+        ],
     },
 ];
 
@@ -80,8 +176,8 @@ const enemies: IEnemy[] = [
         id: 1,
         name: 'Goblin',
         avatar: '/assets/generic-enemy.png',
-        health: 100
-    }
+        health: 100,
+    },
 ];
 
 export const Combat = ({ hero }: ICharacterProps) => {
@@ -106,15 +202,7 @@ export const Combat = ({ hero }: ICharacterProps) => {
     });
 
     const assignCardTarget = useCallback(
-        (
-            {
-                cardPosition,
-                characterTarget,
-            }: {
-                cardPosition: { x: number; y: number };
-                characterTarget: { x: number; y: number };
-            },
-        ) => {
+        ({ cardPosition, characterTarget }: { cardPosition: { x: number; y: number }; characterTarget: { x: number; y: number } }) => {
             return (
                 cardPosition.x >= characterTarget.x &&
                 cardPosition.x <= characterTarget.x + 128 &&
@@ -165,7 +253,7 @@ export const Combat = ({ hero }: ICharacterProps) => {
             )}
 
             <CombatEnemies initialPosition={enemyPosition} />
-            
+
             {isCardHeldDown && (
                 <pixiGraphics
                     draw={(g) => {
@@ -185,13 +273,19 @@ export const Combat = ({ hero }: ICharacterProps) => {
                 setIsAttacking={setIsAttacking}
                 setSelectedCard={setSelectedCard}
             />
-            {isAttacking && 
-                <Exercise 
+            {isAttacking && (
+                <Exercise
                     enemy="nombre quemado"
                     card={selectedCard}
-                    onClose={() => setIsAttacking(false)}
+                    exercise={selectedCard?.exercises ? selectedCard.exercises[0] : undefined}
+                    onClose={() => {
+                        setIsAttacking(false);
+                        setIsTargetAssigned(false);
+                        setSelectedCardPosition({ x: 0, y: 0 });
+                    }}
+                    onIsAttacking={setIsAttacking}
                 />
-            }
+            )}
         </pixiContainer>
     );
 };
@@ -199,14 +293,12 @@ export const Combat = ({ hero }: ICharacterProps) => {
 const CombatEnemies = ({ initialPosition }: ICombatEnemiesProps) => {
     return (
         <>
-            {
-                enemies.map(enemy => (
-                    <Enemy key={enemy.id} initialPosition={initialPosition} enemy={enemy} />
-                ))
-            }
+            {enemies.map((enemy) => (
+                <Enemy key={enemy.id} initialPosition={initialPosition} enemy={enemy} />
+            ))}
         </>
     );
-}
+};
 
 const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard }: ICombatCardProps) => {
     return (
@@ -224,16 +316,16 @@ const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssign
                 const elevationAmount = isExtremeCard ? 0 : -40;
 
                 const cardPosition = {
-                    x: startX + (index * cardSpacing),
-                    y: baseYPosition + elevationAmount
+                    x: startX + index * cardSpacing,
+                    y: baseYPosition + elevationAmount,
                 };
 
                 return (
-                    <Card 
-                        key={card.id} 
+                    <Card
+                        key={card.id}
                         card={card}
-                        onHeldDownChange={setIsCardHeldDown} 
-                        onCardPositionChange={setCardPosition} 
+                        onHeldDownChange={setIsCardHeldDown}
+                        onCardPositionChange={setCardPosition}
                         isTargetAssigned={isTargetAssigned}
                         onAttack={setIsAttacking}
                         initialPosition={cardPosition}
@@ -244,4 +336,4 @@ const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssign
             })}
         </>
     );
-}
+};

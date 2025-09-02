@@ -1,18 +1,20 @@
+import { ICard, IExercise } from '@/types';
 import { extend } from '@pixi/react';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
-import { ICard } from '@/types';
 
 extend({ Container, Sprite, Text, Graphics, Point });
 
 interface IExerciseProps {
     enemy: string;
     card?: ICard | null;
+    exercise?: IExercise | null;
     onClose?: () => void;
+    onIsAttacking: (isAttacking: boolean) => void;
 }
 
-export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
+export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExerciseProps) => {
     // Método para obtener un ejercicio aleatorio disponible
     const getRandomExercise = (card?: ICard | null) => {
         if (card && card.exercises && card.exercises.length > 0) {
@@ -38,17 +40,9 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
     const containerY = window.innerHeight / 2 - height / 2;
     const answersWidth = window.innerWidth * 0.45;
     const centerXRelativeToContainer = (width - answersWidth) / 2;
-    const [answersOptions, setAnswersOptions] = useState<{ text: string; isCorrect: boolean }[]>([
-        { text: '2(2) + 5(5)', isCorrect: false },
-        { text: '2(1) + 5(0)', isCorrect: true },
-        { text: '2 + 5', isCorrect: false },
-        { text: '2(0) + 5(0)', isCorrect: false },
-    ]);
-    const [methodSteps, setMethodSteps] = useState<{ order: number; text: string }[]>([
-        { order: 1, text: 'f´(x) = 2(1) + 5(0)' },
-        { order: 2, text: 'f´(x) = 2 + 0' },
-        { order: 3, text: 'f´(x) = 2' },
-    ]);
+
+    const [currentStep, setCurrentStep] = useState(0);
+
     const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
     const answerTargetRef = useRef<Graphics>(null);
     const answersGraphicsRef = useRef<Graphics>(null);
@@ -73,9 +67,7 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
 
                 if (isOverAnswersArea) {
                     console.log('Answer cancelled.');
-                    // Lógica para cuando se cancela (vuelve a su sitio)
                 } else {
-                    // Si no, comprobar si se soltó en el área del ejercicio
                     const targetBounds = answerTargetRef.current.getBounds();
                     const isOverTargetArea =
                         answerBounds.x < targetBounds.x + targetBounds.width &&
@@ -87,6 +79,16 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
                         console.log('Answer dropped in the exercise area!');
                         console.log('Selected answer:', answerValue);
                         setPlayerAnswers((prev) => [...prev, { text: answerValue.text, isCorrect: answerValue.isCorrect }]);
+
+                        if (answerValue.isCorrect) {
+                            const nextStep = currentStep + 1;
+                            setCurrentStep(nextStep);
+
+                            // Ahora exercise y currentStep tienen los valores actuales
+                            if (nextStep === exercise!.steps!.length) {
+                                onIsAttacking(false);
+                            }
+                        }
                     } else {
                         console.log('Answer dropped outside target area.');
                     }
@@ -99,7 +101,7 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
             setIsOverTarget(false);
             setIsCancellingAnswer(false);
         },
-        [], // No se necesitan dependencias porque calculamos todo dentro
+        [currentStep, exercise, onIsAttacking], // ← Agregar dependencias
     );
 
     useEffect(() => {
@@ -205,14 +207,16 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
             />
             {playerAnswers.map((step, index) => {
                 return (
-                    <><pixiGraphics
-                        key={index}
-                        draw={(g) => {
-                            g.clear();
-                            g.roundRect(26, 21 + (index + 1) * (height / 10 + 10), width - 55, height / 10);
-                            g.fill({ color: 0x000000, alpha: 0.01 });
-                            g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
-                        } } />
+                    <>
+                        <pixiGraphics
+                            key={index}
+                            draw={(g) => {
+                                g.clear();
+                                g.roundRect(26, 21 + (index + 1) * (height / 10 + 10), width - 55, height / 10);
+                                g.fill({ color: 0x000000, alpha: 0.01 });
+                                g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
+                            }}
+                        />
                         <pixiText
                             text={step.text}
                             x={100}
@@ -223,14 +227,15 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
                                 fontSize: 24,
                                 fill: 0xffffff,
                                 fontFamily: 'Arial',
-                            }} />
+                            }}
+                        />
                     </>
                 );
             })}
             {answersTexture && (
                 <pixiContainer x={centerXRelativeToContainer} y={430} width={answersWidth} height={window.innerHeight * 0.2} zIndex={1}>
                     <pixiSprite texture={answersTexture} width={answersWidth} height={window.innerHeight * 0.2} />
-                    {answersOptions.map((option, index) => {
+                    {/* {answersOptions.map((option, index) => {
                         const padding = 20; // Padding de 20 píxeles
                         const availableWidth = answersWidth - padding * 2;
                         const availableHeight = window.innerHeight * 0.2 - padding * 2;
@@ -256,7 +261,36 @@ export const Exercise = ({ enemy, card, onClose }: IExerciseProps) => {
                                 onDragEnd={handleAnswerDragEnd}
                             />
                         );
-                    })}
+                    })} */}
+                    {exercise &&
+                        exercise.steps &&
+                        exercise.steps[currentStep].options.map((opt, index) => {
+                            const padding = 20; // Padding de 20 píxeles
+                            const availableWidth = answersWidth - padding * 2;
+                            const availableHeight = window.innerHeight * 0.2 - padding * 2;
+                            const answerWidth = availableWidth / exercise.steps![currentStep].options.length;
+                            const answerHeight = availableHeight;
+                            const xPosition = padding + index * answerWidth;
+                            const yPosition = padding;
+
+                            return (
+                                <Answer
+                                    key={opt.id}
+                                    text={opt.label}
+                                    isCorrect={opt.isCorrect}
+                                    x={xPosition}
+                                    y={yPosition}
+                                    width={answerWidth}
+                                    height={answerHeight}
+                                    containerX={containerX}
+                                    containerY={containerY}
+                                    onIsDraggingChange={setIsAnswerIsDragging}
+                                    onAnswerPositionChange={setAnswerSelectedPosition}
+                                    onDragStart={handleAnswerDragStart}
+                                    onDragEnd={handleAnswerDragEnd}
+                                />
+                            );
+                        })}
                     {isAnswerIsDragging && (
                         <pixiGraphics
                             ref={answersGraphicsRef}

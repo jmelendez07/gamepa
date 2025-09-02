@@ -45,6 +45,7 @@ export interface User {
 export interface IExercise {
     id: number;
     operation: string;
+    steps?: ISteps[];
 }
 
 export interface ICard {
@@ -59,4 +60,17 @@ export interface IEnemy {
     name: string;
     avatar: string;
     health: number;
+}
+
+export interface ISteps {
+    id: number;
+    description: string;
+    order: number;
+    options: IOptions[];
+}
+
+export interface IOptions {
+    id: number;
+    label: string;
+    isCorrect: boolean;
 }
