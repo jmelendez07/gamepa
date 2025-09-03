@@ -60,6 +60,14 @@ export interface IEnemy {
     name: string;
     avatar: string;
     health: number;
+    mapPosition: {
+        x: number;
+        y: number;
+    };
+    combatPosition: {
+        x: number;
+        y: number;
+    };
 }
 
 export interface ISteps {

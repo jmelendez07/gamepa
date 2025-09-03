@@ -1,21 +1,23 @@
-import { ICard, IExercise } from '@/types';
+import { ICard, IEnemy, IExercise } from '@/types';
 import { extend } from '@pixi/react';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
 
 extend({ Container, Sprite, Text, Graphics, Point });
 
 interface IExerciseProps {
-    enemy: string;
-    card?: ICard | null;
+    enemy: IEnemy;
+    card: ICard | null;
     exercise?: IExercise | null;
     onClose?: () => void;
+    attack: () => void;
     onIsAttacking: (isAttacking: boolean) => void;
 }
 
-export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExerciseProps) => {
-    // Método para obtener un ejercicio aleatorio disponible
+const assetSword = '/assets/sword.png';
+
+export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack }: IExerciseProps) => {
     const getRandomExercise = (card?: ICard | null) => {
         if (card && card.exercises && card.exercises.length > 0) {
             const idx = Math.floor(Math.random() * card.exercises.length);
@@ -26,6 +28,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExe
 
     const bgAsset = '/assets/ui/exercise-ui.png';
     const answersAsset = '/assets/ui/answers-ui.png';
+    const [swordTexture, setSwordTexture] = useState<Texture | null>(null);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
     const [answersTexture, setAnswersTexture] = useState<Texture | null>(null);
     const [isAnswerIsDragging, setIsAnswerIsDragging] = useState(false);
@@ -84,8 +87,8 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExe
                             const nextStep = currentStep + 1;
                             setCurrentStep(nextStep);
 
-                            // Ahora exercise y currentStep tienen los valores actuales
                             if (nextStep === exercise!.steps!.length) {
+                                attack();
                                 onIsAttacking(false);
                             }
                         }
@@ -172,6 +175,17 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExe
         };
     }, [bgAsset]);
 
+    useEffect(() => {
+        Assets.load<Texture>(assetSword)
+            .then((texture) => {
+                setSwordTexture(texture);
+            });
+
+        return () => {
+            swordTexture?.destroy();
+        };
+    }, []);
+
     return (
         <pixiContainer x={exerciseContainerX} y={exerciseContainerY}>
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
@@ -193,10 +207,32 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExe
                 }}
             />
 
+            <pixiContainer zIndex={10} x={width - 150} y={35.5}>
+                <pixiText 
+                    text={card?.stats}
+                    x={0}
+                    y={0}
+                    style={{
+                        fontSize: 28,
+                        fill: 0xffffff,
+                        fontFamily: 'Arial',
+                    }}
+                />
+                {swordTexture && (
+                    <pixiSprite 
+                        texture={swordTexture}
+                        x={30}
+                        y={0}
+                        width={45}
+                        height={30}
+                    />
+                )}
+            </pixiContainer>
+
             <pixiText
                 text={getRandomExercise(card)?.operation || ''}
                 x={100}
-                y={60}
+                y={50}
                 anchor={0.5}
                 zIndex={1}
                 style={{
@@ -207,9 +243,8 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExe
             />
             {playerAnswers.map((step, index) => {
                 return (
-                    <>
+                    <Fragment key={index}>
                         <pixiGraphics
-                            key={index}
                             draw={(g) => {
                                 g.clear();
                                 g.roundRect(26, 21 + (index + 1) * (height / 10 + 10), width - 55, height / 10);
@@ -229,7 +264,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking }: IExe
                                 fontFamily: 'Arial',
                             }}
                         />
-                    </>
+                    </Fragment>
                 );
             })}
             {answersTexture && (

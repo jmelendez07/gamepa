@@ -8,11 +8,15 @@ import { Card } from './card/card';
 import { Enemy } from './enemy/enemy';
 import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
+import { set } from 'react-hook-form';
 
 extend({ Sprite, Container, Graphics });
 
-interface ICharacterProps {
+interface ICombatProps {
     hero: Texture;
+    enemies: IEnemy[];
+    onSetSelectedEnemies: (enemies: IEnemy[]) => void;
+    finish: (isFinished: boolean) => void;
 }
 
 interface ICombatCardProps {
@@ -25,7 +29,7 @@ interface ICombatCardProps {
 }
 
 interface ICombatEnemiesProps {
-    initialPosition: { x: number; y: number };
+    enemies: IEnemy[];
 }
 
 const cards = [
@@ -171,27 +175,24 @@ const cards = [
     },
 ];
 
-const enemies: IEnemy[] = [
-    {
-        id: 1,
-        name: 'Goblin',
-        avatar: '/assets/generic-enemy.png',
-        health: 100,
-    },
-];
+const assetEnergy = '/assets/energy.png';
 
-export const Combat = ({ hero }: ICharacterProps) => {
+export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish }: ICombatProps) => {
     const spriteBgCombat = '/assets/bg-battle.jpg';
 
     const [heroHealth, setHeroHealth] = useState(100);
+    const [heroEnergy, setHeroEnergy] = useState(4);
+    const [turn, setTurn] = useState(0);
     const [maxHeroHealth] = useState(100);
+    const [maxHeroEnergy] = useState(4);
     const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
     const [isCardHeldDown, setIsCardHeldDown] = useState(false);
     const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
+    const [selectedEnemy, setSelectedEnemy] = useState<IEnemy | null>(null);
     const [selectedCardPosition, setSelectedCardPosition] = useState({ x: 0, y: 0 });
-    const [enemyPosition, setEnemyPosition] = useState({ x: window.innerWidth * 0.75, y: window.innerHeight * 0.3 });
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
     const [isAttacking, setIsAttacking] = useState(false);
+    const [energyTexture, setEnergyTexture] = useState<Texture | null>(null);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: hero,
@@ -213,16 +214,37 @@ export const Combat = ({ hero }: ICharacterProps) => {
         [],
     );
 
+    const attack = () => {
+        if (selectedCard && selectedEnemy) {
+            setTurn(prevTurn => prevTurn + 1);
+
+            if (heroEnergy > 0) {
+                setHeroEnergy(prevHeroEnergy => prevHeroEnergy - 1);
+                onSetSelectedEnemies(enemies.map(enemy => {
+                    if (enemy.id === selectedEnemy.id) {
+                        return { ...enemy, health: enemy.health - selectedCard.stats };
+                    } else {
+                        return enemy;
+                    }
+                }));
+            }
+        }
+    }
+
     useTick((ticker) => {
         const deltaTime = ticker.deltaTime;
 
         updateHeroSprite('DOWN', true, true);
         if (isCardHeldDown) {
-            if (assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemyPosition })) {
-                setIsTargetAssigned(true);
-            } else {
-                setIsTargetAssigned(false);
-            }
+            enemies.forEach(enemy => {
+                if (enemy.combatPosition && assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemy.combatPosition })) {
+                    setIsTargetAssigned(true);
+                    setSelectedEnemy(enemy);
+                } else {
+                    setIsTargetAssigned(false);
+                    setSelectedEnemy(null);
+                }
+            });
         }
     });
 
@@ -239,32 +261,58 @@ export const Combat = ({ hero }: ICharacterProps) => {
                 console.error('Failed to load combat background texture:', err);
             });
 
+        Assets.load<Texture>(assetEnergy)
+            .then((text) => {
+                setEnergyTexture(text);
+            });
+
         return () => {
             cancelled = true;
         };
     }, []);
 
+    useEffect(() => {
+        if (heroHealth <= 0 || enemies.every(enemy => enemy.health <= 0)) {
+            finish(true);
+
+        }
+    }, [heroHealth, enemies]);
+
     return (
         <pixiContainer>
             {combatTexture && <pixiSprite texture={combatTexture} width={window.innerWidth} height={window.innerHeight} x={0} y={0} />}
+
+            <pixiText
+                text={`Turno N°${turn + 1}`}
+                x={5}
+                y={5}
+                style={{
+                    fontFamily: 'Arial',
+                    fontSize: 28,
+                    fill: 0xffffff,
+                    fontWeight: 'bold',
+                    stroke: { color: 0x000000, width: 3 },
+                }}
+            />
 
             {heroSprite && (
                 <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.3} width={128} height={128} />
             )}
 
-            <CombatEnemies initialPosition={enemyPosition} />
+            <CombatEnemies enemies={enemies} />
 
-            {isCardHeldDown && (
+            {isCardHeldDown && enemies.map(enemy => (
                 <pixiGraphics
+                    key={enemy.id}
                     draw={(g) => {
                         g.clear();
-                        g.rect(enemyPosition.x, enemyPosition.y, 128, 128);
+                        g.rect(enemy.combatPosition.x, enemy.combatPosition.y, 128, 128);
                         g.stroke({ color: isTargetAssigned ? 0x00ff00 : 0xff0000, width: 5 });
                     }}
                 />
-            )}
+            ))}
 
-            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={hero} />
+            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={hero} energyTexture={energyTexture} maxEnergy={maxHeroEnergy} currentEnergy={heroEnergy} />
             <CombatCards
                 cards={cards}
                 setIsCardHeldDown={setIsCardHeldDown}
@@ -273,9 +321,9 @@ export const Combat = ({ hero }: ICharacterProps) => {
                 setIsAttacking={setIsAttacking}
                 setSelectedCard={setSelectedCard}
             />
-            {isAttacking && (
+            {(isAttacking && selectedCard && selectedEnemy) && (
                 <Exercise
-                    enemy="nombre quemado"
+                    enemy={selectedEnemy}
                     card={selectedCard}
                     exercise={selectedCard?.exercises ? selectedCard.exercises[0] : undefined}
                     onClose={() => {
@@ -284,17 +332,18 @@ export const Combat = ({ hero }: ICharacterProps) => {
                         setSelectedCardPosition({ x: 0, y: 0 });
                     }}
                     onIsAttacking={setIsAttacking}
+                    attack={attack}
                 />
             )}
         </pixiContainer>
     );
 };
 
-const CombatEnemies = ({ initialPosition }: ICombatEnemiesProps) => {
+const CombatEnemies = ({ enemies }: ICombatEnemiesProps) => {
     return (
         <>
             {enemies.map((enemy) => (
-                <Enemy key={enemy.id} initialPosition={initialPosition} enemy={enemy} />
+                <Enemy key={enemy.id} enemy={enemy} />
             ))}
         </>
     );

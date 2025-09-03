@@ -4,6 +4,7 @@ import { TILE_SIZE } from '@/components/constants/game-world';
 import Enemy from '@/components/enemy/enemy';
 import { Hero } from '@/components/Hero/hero';
 import { StageGame } from '@/components/stages/stageGame';
+import { IEnemy } from '@/types';
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
@@ -18,15 +19,61 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
     const bgAsset = '/assets/bg-galaxy.png';
     const heroAsset = '/assets/hero.png';
     const enemyAsset = '/assets/generic-enemy.png';
+    const [groupEnemies, setGroupEnemies] = useState<IEnemy[][]>([
+        [
+            {
+                id: 1,
+                name: 'Goblin',
+                avatar: '/assets/generic-enemy.png',
+                health: 100,
+                mapPosition: {
+                    x: Math.floor(200),
+                    y: Math.floor(200)
+                },
+                combatPosition: {
+                    x: window.innerWidth * 0.75,
+                    y: window.innerHeight * 0.3,
+                }
+            }
+        ],
+        [
+            {
+                id: 2,
+                name: 'Goblin 2',
+                avatar: '/assets/generic-enemy.png',
+                health: 80,
+                mapPosition: {
+                    x: Math.floor(300),
+                    y: Math.floor(250)
+                },
+                combatPosition: {
+                    x: window.innerWidth * 0.75,
+                    y: window.innerHeight * 0.3,
+                }
+            }
+        ],
+        [
+            {
+                id: 3,
+                name: 'Goblin 3',
+                avatar: '/assets/generic-enemy.png',
+                health: 80,
+                mapPosition: {
+                    x: Math.floor(200),
+                    y: Math.floor(300)
+                },
+                combatPosition: {
+                    x: window.innerWidth * 0.75,
+                    y: window.innerHeight * 0.3,
+                }
+            }
+        ]
+    ]);
+    const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
     const [heroTexture, setHeroTexture] = useState<Texture | null>(null);
     const [enemyTexture, setEnemyTexture] = useState<Texture | null>(null);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const [enemyPosition, setEnemyPosition] = useState<{ x: number; y: number }>({
-        x: Math.floor(200 / TILE_SIZE),
-        y: Math.floor(200 / TILE_SIZE),
-    });
-
     const [inCombat, setInCombat] = useState(false);
 
     const updateHeroPosition = useCallback((x: number, y: number) => {
@@ -87,25 +134,40 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
         };
     }, []);
 
-    const checkCollisionWithArea = useCallback(
-        (heroPos: { x: number; y: number }, enemyPos: { x: number; y: number }, threshold: number) => {
-            const dx = Math.abs(heroPos.x - enemyPos.x);
-            const dy = Math.abs(heroPos.y - enemyPos.y);
+    const checkCollisionWithArea = useCallback((heroPos: { x: number; y: number }, enemyPos: { x: number; y: number }, threshold: number) => 
+        {
+            const dx = Math.abs(heroPos.x - (enemyPos.x / TILE_SIZE));
+            const dy = Math.abs(heroPos.y - (enemyPos.y / TILE_SIZE));
             return dx <= threshold && dy <= threshold;
         },
         []
     );
 
-    useTick((ticker) => {
-        const delta = ticker.deltaTime;
-
-        // Ahora ambas posiciones están en el mismo sistema (tiles)
-        if (checkCollisionWithArea(heroPosition, enemyPosition, 1)) {
-            setInCombat(true);
-        } else {
-            setInCombat(false);
+    const finish = (value: boolean) => {
+        if (value && selectedEnemies) {
+            setGroupEnemies(groupEnemies => groupEnemies.filter(enemies => !enemies.some(enemy => selectedEnemies.some(selectedEnemy => selectedEnemy.id === enemy.id))));
+            setSelectedEnemies([]);
         }
-    });
+        setInCombat(!value);
+    }
+
+    const onSetSelectedEnemies = (e: IEnemy[]) => {
+        setSelectedEnemies(e);
+    }
+
+    useEffect(() => {
+        console.log(selectedEnemies);
+    }, [JSON.stringify(selectedEnemies)]);
+
+    useEffect(() => {
+        groupEnemies.forEach(enemies => enemies.forEach(enemy => {
+            console.log(enemy);
+            if (checkCollisionWithArea(heroPosition, enemy.mapPosition, 1)) {
+                setInCombat(true);
+                setSelectedEnemies(enemies);
+            }
+        }));
+    }, [heroPosition, groupEnemies]);
 
     return (
         <pixiContainer>
@@ -113,19 +175,18 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
             {children}
             <Camera canvasSize={canvasSize} heroPosition={heroPosition}>
                 <StageGame />
-                {enemyTexture && (
-                    <Enemy
-                        texture={enemyTexture}
-                        position={{
-                            x: enemyPosition.x * TILE_SIZE,
-                            y: enemyPosition.y * TILE_SIZE
-                        }}
-                    />
-                )}
+                {groupEnemies.map(enemies => enemies.map((enemy) => (
+                    <Enemy key={enemy.id} enemy={enemy} />
+                )))}
                 {heroTexture && <Hero texture={heroTexture} onMove={updateHeroPosition} />}
             </Camera>
-            {inCombat && heroTexture && enemyTexture && (
-                <Combat hero={heroTexture} />
+            {(inCombat && heroTexture && enemyTexture) && (
+                <Combat 
+                    hero={heroTexture} 
+                    enemies={selectedEnemies} 
+                    onSetSelectedEnemies={onSetSelectedEnemies} 
+                    finish={finish} 
+                />
             )}
         </pixiContainer>
     );

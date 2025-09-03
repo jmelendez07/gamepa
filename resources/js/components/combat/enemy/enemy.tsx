@@ -9,15 +9,12 @@ extend({ Container, Sprite, Graphics, Text });
 
 interface IEnemyProps {
     enemy: IEnemy;
-    initialPosition?: { x: number; y: number };
 }
 
-export const Enemy = ({ enemy, initialPosition }: IEnemyProps) => {
+export const Enemy = ({ enemy }: IEnemyProps) => {
     const [enemyTexture, setEnemyTexture] = useState<Texture | null>(null);
-    const [position, setPosition] = useState(initialPosition || { x: 0, y: 0 });
-    const [currentHp, setCurrentHp] = useState(enemy.health);
+    const [maxHp, setMaxHp] = useState(enemy.health);
     const [isHovered, setIsHovered] = useState(false);
-    const maxHp = enemy.health;
 
     const placeholderTexture = Texture.WHITE;
     const textureToUse = enemyTexture || placeholderTexture;
@@ -55,8 +52,8 @@ export const Enemy = ({ enemy, initialPosition }: IEnemyProps) => {
                     <pixiSprite 
                         interactive={true}
                         texture={enemySprite.texture} 
-                        x={position.x} 
-                        y={position.y} 
+                        x={enemy.combatPosition.x} 
+                        y={enemy.combatPosition.y} 
                         width={128} 
                         height={128}
                         onPointerOver={handlePointerOver}
@@ -67,8 +64,8 @@ export const Enemy = ({ enemy, initialPosition }: IEnemyProps) => {
                         <pixiText
                             text={enemy.name}
                             anchor={0.5}
-                            x={position.x + 64}
-                            y={position.y}
+                            x={enemy.combatPosition.x + 64}
+                            y={enemy.combatPosition.y}
                             style={{
                                 fontFamily: 'Arial',
                                 fontSize: 20,
@@ -78,8 +75,8 @@ export const Enemy = ({ enemy, initialPosition }: IEnemyProps) => {
                             }}
                         />
                     )}
-                    
-                    <pixiContainer x={position.x - 11} y={position.y + 140}>
+
+                    <pixiContainer x={enemy.combatPosition.x - 11} y={enemy.combatPosition.y + 140}>
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();
@@ -92,7 +89,7 @@ export const Enemy = ({ enemy, initialPosition }: IEnemyProps) => {
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();
-                                const healthPercentage = currentHp / maxHp;
+                                const healthPercentage = enemy.health / maxHp;
                                 const barWidth = (150 - 4) * healthPercentage;
                                 if (barWidth > 0) {
                                     g.roundRect(2, 2, barWidth, 12, 1);
@@ -105,7 +102,7 @@ export const Enemy = ({ enemy, initialPosition }: IEnemyProps) => {
                         />
                         
                         <pixiText
-                            text={`${currentHp}/${maxHp}`}
+                            text={`${enemy.health}/${maxHp}`}
                             anchor={0.5}
                             x={75}
                             y={8}

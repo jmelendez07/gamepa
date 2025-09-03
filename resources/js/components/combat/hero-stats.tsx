@@ -1,6 +1,6 @@
 import { extend, useTick } from '@pixi/react';
 import { Container, Sprite, Texture, Graphics, Text } from 'pixi.js';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
 import { ANIMATION_SPEED } from '../constants/game-world';
 
@@ -9,18 +9,20 @@ extend({ Container, Sprite, Graphics, Text });
 interface IHeroStatsProps {
     currentHp: number;
     maxHp: number;
+    maxEnergy: number;
+    currentEnergy: number;
     heroTexture: Texture;
+    energyTexture: Texture | null;
     position?: { x: number; y: number };
 }
 
-const HeroStats = ({ currentHp, maxHp, heroTexture, position }: IHeroStatsProps) => {
+const HeroStats = ({ currentHp, maxHp, maxEnergy, currentEnergy, heroTexture, energyTexture, position }: IHeroStatsProps) => {
     const defaultPosition = position || { x: 20, y: window.innerHeight - 80 };
     const [animatedHp, setAnimatedHp] = useState(currentHp);
     const [floatAnimation, setFloatAnimation] = useState(0);
     const [colorTransition, setColorTransition] = useState(0);
     const [isHeroHovered, setIsHeroHovered] = useState(false);
     const healthPercentage = animatedHp / maxHp;
-    const maskRef = useRef<Graphics>(null);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: heroTexture,
@@ -85,6 +87,31 @@ const HeroStats = ({ currentHp, maxHp, heroTexture, position }: IHeroStatsProps)
                             }}
                         />
                     )}
+                </>
+            )}
+            {energyTexture && (
+                <>
+                    <pixiSprite
+                        texture={energyTexture}
+                        x={272}
+                        y={-100}
+                        width={80}
+                        height={80}
+                        anchor={0}
+                    />
+                    <pixiText
+                        text={`${Math.round(currentEnergy)}/${maxEnergy}`}
+                        anchor={0.5}
+                        x={360}
+                        y={-60}
+                        style={{
+                            fontFamily: 'Arial',
+                            fontSize: 24,
+                            fill: 0xffffff,
+                            fontWeight: 'bold',
+                            stroke: { color: 0x000000, width: 2 },
+                        }}
+                    />
                 </>
             )}
             <pixiGraphics
