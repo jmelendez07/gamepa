@@ -17,6 +17,7 @@ interface ICombatProps {
     enemies: IEnemy[];
     onSetSelectedEnemies: (enemies: IEnemy[]) => void;
     finish: (isFinished: boolean) => void;
+    lose: () => void;
 }
 
 interface ICombatCardProps {
@@ -26,10 +27,15 @@ interface ICombatCardProps {
     isTargetAssigned: boolean;
     setIsAttacking: (isAttacking: boolean) => void;
     setSelectedCard: (card: ICard | null) => void;
+    isDisabled: boolean;
 }
 
 interface ICombatEnemiesProps {
     enemies: IEnemy[];
+}
+
+interface INextTurnButtonProps {
+    onClick?: () => void;
 }
 
 const cards = [
@@ -177,7 +183,7 @@ const cards = [
 
 const assetEnergy = '/assets/energy.png';
 
-export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish }: ICombatProps) => {
+export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
     const spriteBgCombat = '/assets/bg-battle.jpg';
 
     const [heroHealth, setHeroHealth] = useState(100);
@@ -215,20 +221,29 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish }: ICombatP
     );
 
     const attack = () => {
-        if (selectedCard && selectedEnemy) {
-            setTurn(prevTurn => prevTurn + 1);
-
-            if (heroEnergy > 0) {
-                setHeroEnergy(prevHeroEnergy => prevHeroEnergy - 1);
-                onSetSelectedEnemies(enemies.map(enemy => {
-                    if (enemy.id === selectedEnemy.id) {
-                        return { ...enemy, health: enemy.health - selectedCard.stats };
-                    } else {
-                        return enemy;
-                    }
-                }));
-            }
+        if (selectedCard && selectedEnemy && heroEnergy > 0) {
+            setHeroEnergy(prevHeroEnergy => prevHeroEnergy - 1);
+            onSetSelectedEnemies(enemies.map(enemy => {
+                if (enemy.id === selectedEnemy.id) {
+                    return { ...enemy, health: enemy.health - selectedCard.stats };
+                } else {
+                    return enemy;
+                }
+            }));
         }
+    }
+
+    const nextTurn = () => {
+        setTurn(prev => prev + 1);
+        setHeroEnergy(maxHeroEnergy);
+        enemies.forEach(enemy => {
+            if (heroHealth > 0) {
+                setHeroHealth(prevHeroHealth => {
+                    const newHealth = prevHeroHealth - enemy.basicAttack;
+                    return newHealth < 0 ? 0 : newHealth;
+                });
+            }
+        });
     }
 
     useTick((ticker) => {
@@ -272,9 +287,10 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish }: ICombatP
     }, []);
 
     useEffect(() => {
-        if (heroHealth <= 0 || enemies.every(enemy => enemy.health <= 0)) {
+        if (enemies.every(enemy => enemy.health <= 0)) {
             finish(true);
-
+        } else if (heroHealth <= 0) {
+            lose();
         }
     }, [heroHealth, enemies]);
 
@@ -320,7 +336,9 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish }: ICombatP
                 isTargetAssigned={isTargetAssigned}
                 setIsAttacking={setIsAttacking}
                 setSelectedCard={setSelectedCard}
+                isDisabled={heroEnergy <= 0}
             />
+            <NextTurnButton onClick={nextTurn} />
             {(isAttacking && selectedCard && selectedEnemy) && (
                 <Exercise
                     enemy={selectedEnemy}
@@ -349,7 +367,7 @@ const CombatEnemies = ({ enemies }: ICombatEnemiesProps) => {
     );
 };
 
-const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard }: ICombatCardProps) => {
+const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard, isDisabled }: ICombatCardProps) => {
     return (
         <>
             {cards.map((card, index) => {
@@ -373,16 +391,97 @@ const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssign
                     <Card
                         key={card.id}
                         card={card}
-                        onHeldDownChange={setIsCardHeldDown}
-                        onCardPositionChange={setCardPosition}
+                        onHeldDownChange={isDisabled ? () => {} : setIsCardHeldDown}
+                        onCardPositionChange={isDisabled ? () => {} : setCardPosition}
                         isTargetAssigned={isTargetAssigned}
-                        onAttack={setIsAttacking}
+                        onAttack={isDisabled ? () => {} : setIsAttacking}
                         initialPosition={cardPosition}
                         initialRotation={rotationAngle}
-                        onSelectedCard={setSelectedCard}
+                        onSelectedCard={isDisabled ? () => {} : setSelectedCard}
+                        isDisabled={isDisabled}
                     />
                 );
             })}
         </>
     );
 };
+
+const NextTurnButton = ({ onClick }: INextTurnButtonProps) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const [animationProgress, setAnimationProgress] = useState(0);
+
+    useTick(() => {
+        const target = isHovered ? 1 : 0;
+        const speed = 0.1;
+        setAnimationProgress(prev => {
+            const diff = target - prev;
+            if (Math.abs(diff) < 0.01) return target;
+            return prev + diff * speed;
+        });
+    });
+
+    const interpolateColor = (color1: number, color2: number, progress: number) => {
+        const r1 = (color1 >> 16) & 0xFF;
+        const g1 = (color1 >> 8) & 0xFF;
+        const b1 = color1 & 0xFF;
+        
+        const r2 = (color2 >> 16) & 0xFF;
+        const g2 = (color2 >> 8) & 0xFF;
+        const b2 = color2 & 0xFF;
+        
+        const r = Math.round(r1 + (r2 - r1) * progress);
+        const g = Math.round(g1 + (g2 - g1) * progress);
+        const b = Math.round(b1 + (b2 - b1) * progress);
+        
+        return (r << 16) | (g << 8) | b;
+    };
+
+    const backgroundColor = interpolateColor(0x2c2c2c, 0xFFD700, animationProgress);
+    const borderColor = interpolateColor(0x444444, 0xDAA520, animationProgress);
+    const strokeColor = interpolateColor(0x000000, 0xDAA520, animationProgress);
+    
+    const yOffset = animationProgress * 3;
+    const shadowAlpha = (1 - animationProgress) * 0.3;
+
+    return (
+        <pixiContainer 
+            x={window.innerWidth - 240} 
+            y={window.innerHeight - 100 + yOffset} 
+            interactive={true}
+            zIndex={10}
+            eventMode="static"
+            cursor="pointer"
+            onClick={onClick}
+            onPointerOver={() => setIsHovered(true)}
+            onPointerOut={() => setIsHovered(false)}
+        >
+            <pixiGraphics
+                draw={(g) => {
+                    g.clear();
+                    
+                    if (shadowAlpha > 0.01) {
+                        g.roundRect(5, 5, 200, 60, 12);
+                        g.fill({ color: 0x000000, alpha: shadowAlpha });
+                    }
+                    
+                    g.roundRect(0, 0, 200, 60, 12);
+                    g.fill({ color: backgroundColor });
+                    g.stroke({ color: borderColor, width: 2 });
+                }}
+            />
+            <pixiText
+                text="Terminar Turno"
+                anchor={0.5}
+                x={100}
+                y={30}
+                style={{
+                    fontFamily: 'Arial',
+                    fontSize: 20,
+                    fill: 0xffffff,
+                    fontWeight: '600',
+                    stroke: { color: strokeColor, width: 1 },
+                }}
+            />
+        </pixiContainer>
+    );
+}

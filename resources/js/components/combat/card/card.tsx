@@ -1,7 +1,7 @@
 import { ICard } from '@/types';
 import { extend, useTick } from '@pixi/react';
-import { Assets, Container, Sprite, Texture, Graphics } from 'pixi.js';
-import { useEffect, useState } from 'react';
+import { Assets, Container, Sprite, Texture, Graphics, ColorMatrixFilter } from 'pixi.js';
+import { useEffect, useState, useMemo } from 'react';
 
 extend({ Container, Sprite, Graphics });
 
@@ -14,9 +14,10 @@ interface ICardProps {
     onAttack?: (isAttacking: boolean) => void;
     initialPosition?: { x: number; y: number };
     initialRotation?: number;
+    isDisabled?: boolean;
 }
 
-export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack, initialPosition, initialRotation }: ICardProps) => {
+export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionChange, isTargetAssigned, onAttack, initialPosition, initialRotation, isDisabled = false }: ICardProps) => {
     const card1Asset = '/assets/cards/card-1.png';
 
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
@@ -30,9 +31,16 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
     const [currentHoverOffset, setCurrentHoverOffset] = useState(0);
     const [currentAlpha, setCurrentAlpha] = useState(0.8);
     const [currentTint, setCurrentTint] = useState(0x808080);
-    const targetHoverOffset = isHovered && !isPointerDown ? -20 : 0;
-    const targetAlpha = (isHovered || isPointerDown) ? 1.0 : 0.8;
-    const targetTint = (isHovered || isPointerDown) ? 0xFFFFFF : 0x808080;
+    const targetHoverOffset = (isHovered && !isPointerDown && !isDisabled) ? -20 : 0;
+    const targetAlpha = isDisabled ? 0.6 : ((isHovered || isPointerDown) ? 1.0 : 0.8);
+    const targetTint = isDisabled ? 0xFFFFFF : ((isHovered || isPointerDown) ? 0xFFFFFF : 0x808080);
+    
+    const grayscaleFilter = useMemo(() => {
+        const filter = new ColorMatrixFilter();
+        filter.desaturate();
+        return filter;
+    }, []);
+
     const currentCardPosition = {
         x: cardPosition.x,
         y: cardPosition.y + currentHoverOffset
@@ -95,6 +103,7 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
     });
 
     const handlePointerDown = () => {
+        if (isDisabled) return;
         setIsPointerDown(true);
         setCardRotation(0);
         onHeldDownChange(true);
@@ -118,11 +127,11 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
     }
 
     const handlePointerOver = () => {
-        if (!isPointerDown) setIsHovered(true);
+        if (!isPointerDown && !isDisabled) setIsHovered(true);
     };
 
     const handlePointerOut = () => {
-        setIsHovered(false);
+        if (!isDisabled) setIsHovered(false);
     };
 
     useEffect(() => {
@@ -140,8 +149,9 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
 
     return (
         <pixiContainer
-            interactive={true}
+            interactive={!isDisabled}
             onPointerDown={handlePointerDown}
+            cursor={isDisabled ? "default" : "pointer"}
         >
             {card1Texture && (
                 <pixiSprite
@@ -149,7 +159,7 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
                     anchor={0.5}
                     height={300}
                     tint={currentTint}
-                    interactive={true}
+                    interactive={!isDisabled}
                     alpha={(isPointerDown && isTargetAssigned) ? 0.2 : currentAlpha}
                     texture={card1Texture}
                     rotation={cardRotation}
@@ -157,6 +167,7 @@ export const Card = ({ card, onSelectedCard, onHeldDownChange, onCardPositionCha
                     y={currentCardPosition.y + 150}
                     onPointerOut={handlePointerOut}
                     onPointerOver={handlePointerOver}
+                    filters={isDisabled ? [grayscaleFilter] : []}
                 />
             )}
         </pixiContainer>

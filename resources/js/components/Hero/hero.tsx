@@ -1,6 +1,6 @@
 import { extend, useTick } from '@pixi/react';
 import { Container, Sprite, Texture } from 'pixi.js';
-import { useCallback, useEffect, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useRef } from 'react';
 import { ANIMATION_SPEED, DEFAULT_HERO_POSITION_X, DEFAULT_HERO_POSITION_Y, MOVE_SPEED } from '../constants/game-world';
 import { useHeroControls } from './useHeroControls';
 import { Direction, IPosition } from '../types/common';
@@ -11,11 +11,11 @@ extend({ Container, Sprite });
 
 interface IHeroProps {
     texture: Texture;
+    position: RefObject<{ x: number; y: number }>;
     onMove: (gridX: number, gridY: number) => void;
 }
 
-export const Hero = ({ texture, onMove }: IHeroProps) => {
-    const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
+export const Hero = ({ texture, position, onMove }: IHeroProps) => {
     const targetPosition = useRef<IPosition>(null);
     const currentDirection = useRef<Direction>(null);
     const { sprite, updateSprite } = useHeroAnimation({
@@ -36,7 +36,7 @@ export const Hero = ({ texture, onMove }: IHeroProps) => {
     }, [onMove]);
 
     const setNextTarget = useCallback((direction: Direction) => { 
-        if (targetPosition.current) return; // already moving
+        if (targetPosition.current) return;
         const {x, y} = position.current;
         currentDirection.current = direction;
         const newTarget = calculateNewTarget(x, y, direction);

@@ -58,6 +58,7 @@ export interface ICard {
 export interface IEnemy {
     id: number;
     name: string;
+    basicAttack: number;
     avatar: string;
     health: number;
     mapPosition: {

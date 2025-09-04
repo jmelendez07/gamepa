@@ -1,13 +1,13 @@
 import { Camera } from '@/components/camera/camera';
 import { Combat } from '@/components/combat/combat';
-import { TILE_SIZE } from '@/components/constants/game-world';
+import { DEFAULT_HERO_POSITION_X, DEFAULT_HERO_POSITION_Y, TILE_SIZE } from '@/components/constants/game-world';
 import Enemy from '@/components/enemy/enemy';
 import { Hero } from '@/components/Hero/hero';
 import { StageGame } from '@/components/stages/stageGame';
 import { IEnemy } from '@/types';
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
-import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 
 extend({ Container, Sprite });
 
@@ -19,6 +19,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
     const bgAsset = '/assets/bg-galaxy.png';
     const heroAsset = '/assets/hero.png';
     const enemyAsset = '/assets/generic-enemy.png';
+    const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [groupEnemies, setGroupEnemies] = useState<IEnemy[][]>([
         [
             {
@@ -26,6 +27,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
                 name: 'Goblin',
                 avatar: '/assets/generic-enemy.png',
                 health: 100,
+                basicAttack: 10,
                 mapPosition: {
                     x: Math.floor(200),
                     y: Math.floor(200)
@@ -42,6 +44,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
                 name: 'Goblin 2',
                 avatar: '/assets/generic-enemy.png',
                 health: 80,
+                basicAttack: 8,
                 mapPosition: {
                     x: Math.floor(300),
                     y: Math.floor(250)
@@ -58,6 +61,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
                 name: 'Goblin 3',
                 avatar: '/assets/generic-enemy.png',
                 health: 80,
+                basicAttack: 12,
                 mapPosition: {
                     x: Math.floor(200),
                     y: Math.floor(300)
@@ -83,7 +87,6 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
     useEffect(() => {
         let cancelled = false;
 
-        // Cargar background
         Assets.load<Texture>(bgAsset)
             .then((tex) => {
                 if (!cancelled) {
@@ -105,7 +108,6 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
             .catch((err) => {
                 console.error('Failed to load hero texture from:', heroAsset, err);
 
-                // Intentar con un path alternativo
                 const alternativePath = './assets/hero.png';
                 return Assets.load<Texture>(alternativePath);
             })
@@ -151,6 +153,13 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
         setInCombat(!value);
     }
 
+    const loseCombat = () => {
+        setInCombat(false);
+        setSelectedEnemies([]);
+        updateHeroPosition(0, 0);
+        position.current = { x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y };
+    }
+
     const onSetSelectedEnemies = (e: IEnemy[]) => {
         setSelectedEnemies(e);
     }
@@ -178,7 +187,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
                 {groupEnemies.map(enemies => enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} />
                 )))}
-                {heroTexture && <Hero texture={heroTexture} onMove={updateHeroPosition} />}
+                {heroTexture && <Hero position={position} texture={heroTexture} onMove={updateHeroPosition} />}
             </Camera>
             {(inCombat && heroTexture && enemyTexture) && (
                 <Combat 
@@ -186,6 +195,7 @@ export const MainContainer = ({ canvasSize, children }: PropsWithChildren<IMainC
                     enemies={selectedEnemies} 
                     onSetSelectedEnemies={onSetSelectedEnemies} 
                     finish={finish} 
+                    lose={loseCombat}
                 />
             )}
         </pixiContainer>
