@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TypeCardSeeder::class,
             DificultySeeder::class,
+            PlanetSeeder::class,
+            ExerciseSeeder::class,
         ]);
     }
 }

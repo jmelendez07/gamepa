@@ -4,19 +4,32 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, Earth, Dumbbell } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Panel de Control',
-        href: '/dashboard',
+        href: route('dashboard'),
         icon: LayoutGrid,
     },
     {
         title: 'Usuarios',
-        href: '/users',
+        href: route('users.index'),
         icon: Users,
+    }
+];
+
+const gameplayNavItems: NavItem[] = [
+    {
+        title: 'Planetas',
+        href: route('planets.index'),
+        icon: Earth,
+    },
+    {
+        title: 'Ejercicios',
+        href: route('exercises.index'),
+        icon: Dumbbell,
     }
 ];
 
@@ -40,7 +53,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href={route('dashboard')} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -49,7 +62,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={mainNavItems} gameplayItems={gameplayNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

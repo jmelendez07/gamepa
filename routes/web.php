@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PlanetController;
+use App\Http\Controllers\ExerciseController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -11,12 +13,11 @@ Route::get('/', function () {
 Route::inertia('/gameplay', 'gameplay')->name('gameplay');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
     Route::middleware(['role:administrador'])->group(function () {
+        Route::get('panel', function () { return Inertia::render('dashboard'); })->name('dashboard');
         Route::resource('users', UserController::class)->names('users');
+        Route::resource('planetas', PlanetController::class)->names('planets');
+        Route::resource('ejercicios', ExerciseController::class)->names('exercises');
     });
 });
 

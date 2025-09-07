@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
+import type { PageProps as InertiaPageProps } from '@inertiajs/core';
 
 export interface Auth {
     user: User;
@@ -82,4 +83,15 @@ export interface IOptions {
     id: number;
     label: string;
     isCorrect: boolean;
+}
+
+export interface PageProps extends InertiaPageProps {
+    auth: {
+        user: User | null;
+    };
+    flash?: {
+        success?: string;
+        error?: string;
+    };
+    [key: string]: unknown;
 }

@@ -14,7 +14,9 @@ class Exercise extends Model
     protected $collection = 'exercises';
 
     protected $fillable = [
-        'operation'
+        'operation',
+        'planet_id',
+        'difficulty_id'
     ];
 
     #[SearchUsingPrefix(['operation'])]
@@ -31,7 +33,7 @@ class Exercise extends Model
         return $this->belongsTo(Planet::class);
     }
 
-    public function dificulty()
+    public function difficulty()
     {
         return $this->belongsTo(Dificulty::class);
     }

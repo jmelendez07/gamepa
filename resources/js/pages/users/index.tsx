@@ -9,11 +9,11 @@ import { useState, useEffect, useRef } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Panel de Control',
-        href: '/dashboard',
+        href: route('dashboard'),
     },
     {
         title: 'Usuarios',
-        href: '/users',
+        href: route('users.index'),
     },
 ];
 

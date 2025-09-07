@@ -41,11 +41,11 @@ export default function UserShow({ user, sessions, isCurrentUser }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Panel de Control',
-            href: '/dashboard',
-        },
+            href: route('dashboard'),
+        },  
         {
             title: 'Usuarios',
-            href: '/usuarios',
+            href: route('users.index'),
         },
         {
             title: user.name,
