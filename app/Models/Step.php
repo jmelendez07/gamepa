@@ -14,6 +14,7 @@ class Step extends Model
     protected $collection = 'steps';
 
     protected $fillable = [
+        'exercise_id',
         'order'
     ];
 

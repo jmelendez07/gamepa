@@ -37,4 +37,9 @@ class Exercise extends Model
     {
         return $this->belongsTo(Dificulty::class);
     }
+
+    public function steps()
+    {
+        return $this->hasMany(Step::class);
+    }
 }

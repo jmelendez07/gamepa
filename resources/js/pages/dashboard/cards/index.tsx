@@ -179,7 +179,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
             <Head title="Cartas" />
             
             <div className="space-y-6 p-6">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Cartas de Batalla</h1>
@@ -237,7 +236,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                     })}
                 </div>
 
-                {/* Búsqueda y filtros activos */}
                 <div className="flex flex-col lg:flex-row gap-4">
                     <div className="flex-1">
                         <div className="relative">
@@ -252,7 +250,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                         </div>
                     </div>
 
-                    {/* Filtros activos */}
                     {(selectedType || searchTerm) && (
                         <div className="flex items-center gap-2">
                             {selectedType && (
@@ -273,7 +270,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                     )}
                 </div>
 
-                {/* Resultados */}
                 <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
                         {selectedType ? (
@@ -284,7 +280,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                     </div>
                 </div>
 
-                {/* Grid de cartas - diseño diferente a ejercicios */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredCards.length > 0 ? (
                         filteredCards.map((card) => {
@@ -297,7 +292,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                     key={card.id}
                                     className="bg-white rounded-2xl border-2 border-gray-200 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 overflow-hidden group"
                                 >
-                                    {/* Header con gradiente del tipo */}
                                     <div className={`bg-gradient-to-r ${gradientClass} p-4 relative`}>
                                         <div className="flex items-center justify-between text-white">
                                             <h3 className="font-bold text-lg truncate pr-2">{card.name}</h3>
@@ -307,14 +301,11 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                             </div>
                                         </div>
                                         
-                                        {/* Patrón decorativo */}
                                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full"></div>
                                         <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-white/5 rounded-full"></div>
                                     </div>
 
-                                    {/* Contenido principal */}
                                     <div className="p-6">
-                                        {/* Tipo con icono */}
                                         <div className="flex items-center gap-2 mb-4">
                                             <div className={`p-2 rounded-lg ${colorClass.replace('hover:', '').replace('text-', 'text-').replace('bg-', 'bg-').replace('border-', 'border-')}`}>
                                                 {icon}
@@ -327,7 +318,6 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                             </Badge>
                                         </div>
 
-                                        {/* Stats destacados */}
                                         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 mb-4">
                                             <div className="text-center">
                                                 <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
@@ -339,13 +329,12 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                             </div>
                                         </div>
 
-                                        {/* Acciones */}
                                         <div className="flex items-center justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleEdit(card)}
-                                                className="flex-1 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50"
+                                                className="cursor-pointer flex-1 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50"
                                             >
                                                 <Edit className="w-4 h-4 mr-1" />
                                                 Editar
@@ -354,7 +343,7 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => handleDelete(card)}
-                                                className="flex-1 text-red-600 hover:text-red-800 hover:bg-red-50"
+                                                className="cursor-pointer flex-1 text-red-600 hover:text-red-800 hover:bg-red-50"
                                             >
                                                 <Trash2 className="w-4 h-4 mr-1" />
                                                 Eliminar

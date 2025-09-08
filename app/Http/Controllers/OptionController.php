@@ -3,63 +3,69 @@
 namespace App\Http\Controllers;
 
 use App\Models\Option;
+use App\Models\Step;
 use Illuminate\Http\Request;
 
 class OptionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'step_id' => 'required|exists:steps,id',
+            'result' => 'required|string',
+            'is_correct' => 'required|boolean'
+        ]);
+
+        $step = Step::findOrFail($request->step_id);
+        $option = $step->options()->create([
+            'result' => $request->result,
+            'is_correct' => $request->is_correct ?? false,
+        ]);
+
+        return redirect()->back()->with('success', "Opción {$option->result} creada exitosamente.");
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Option $option)
+    public function show($optionId)
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Option $option)
+    public function edit($optionId)
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Option $option)
+    public function update(Request $request, $optionId)
     {
-        //
+        $request->validate([
+            'result' => 'required|string',
+            'is_correct' => 'required|boolean'
+        ]);
+
+        $option = Option::findOrFail($optionId);
+        $option->update([
+            'result' => $request->result,
+            'is_correct' => $request->is_correct ?? false,
+        ]);
+
+        return redirect()->back()->with('success', "Opción {$option->result} actualizada exitosamente.");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Option $option)
+    public function destroy($optionId)
     {
-        //
+        $option = Option::findOrFail($optionId);
+        $option->delete();
+
+        return redirect()->back()->with('success', "Opción {$option->result} eliminada exitosamente.");
     }
 }

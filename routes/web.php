@@ -4,6 +4,9 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PlanetController;
 use App\Http\Controllers\ExerciseController;
+use App\Http\Controllers\StepController;
+use App\Http\Controllers\OptionController;
+use App\Http\Controllers\EnemyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('planetas', PlanetController::class)->names('planets');
         Route::resource('ejercicios', ExerciseController::class)->names('exercises');
         Route::resource('cartas', CardController::class)->names('cards');
+        Route::resource('pasos', StepController::class)->names('steps');
+        Route::resource('opciones', OptionController::class)->names('options');
+        Route::resource('enemigos', EnemyController::class)->names('enemies');
     });
 });
 

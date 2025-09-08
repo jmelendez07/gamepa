@@ -2,34 +2,27 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
+use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Scout\Searchable;
 
-class Option extends Model
+class EnemyType extends Model
 {
     use Searchable;
 
     protected $connection = 'mongodb';
-    protected $collection = 'options';
+    protected $collection = 'enemy_types';
 
     protected $fillable = [
-        'result',
-        'step_id',
-        'is_correct'
+        'name',
     ];
 
-    #[SearchUsingPrefix(['result'])]
+    #[SearchUsingPrefix(['name'])]
     public function toSearchableArray()
     {
         return [
             'id' => $this->id,
-            'result' => $this->result
+            'name' => $this->name,
         ];
-    }
-
-    public function step()
-    {
-        return $this->belongsTo(Step::class);
     }
 }

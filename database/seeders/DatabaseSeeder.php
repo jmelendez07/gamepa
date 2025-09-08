@@ -19,6 +19,10 @@ class DatabaseSeeder extends Seeder
             DificultySeeder::class,
             PlanetSeeder::class,
             ExerciseSeeder::class,
+            StepSeeder::class,
+            OptionSeeder::class,
+            EnemyTypeSeeder::class,
+            EnemySeeder::class,
         ]);
     }
 }

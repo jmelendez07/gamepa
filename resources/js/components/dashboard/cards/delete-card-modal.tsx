@@ -105,14 +105,6 @@ export default function DeleteCardModal({
                             <AlertTriangle className="h-5 w-5 text-red-600" />
                             <span>Eliminar Carta</span>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCancel}
-                            className="h-6 w-6 p-0"
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
                     </DialogTitle>
                 </DialogHeader>
                 
@@ -144,7 +136,7 @@ export default function DeleteCardModal({
                             </div>
                         </div>
 
-                        <div className="mt-3 text-sm text-gray-600 text-center">
+                        <div className="mt-3 text-sm grid grid-cols-3 text-gray-600 text-center">
                             <div><strong>Tipo:</strong> {card.type.name}</div>
                             <div><strong>Energía:</strong> {card.energy_cost}</div>
                             <div><strong>Estadísticas:</strong> {card.stats}</div>
@@ -160,10 +152,10 @@ export default function DeleteCardModal({
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="confirmation">
+                            <Label htmlFor="confirmation" className='block'>
                                 Para confirmar, escribe <strong>"{card.name}"</strong> en el campo a continuación:
                             </Label>
-                            <div className="flex space-x-2">
+                            <div className="flex items-center space-x-2">
                                 <Input
                                     id="confirmation"
                                     type="text"
@@ -177,7 +169,7 @@ export default function DeleteCardModal({
                                     variant="outline"
                                     size="sm"
                                     onClick={handlePasteCardName}
-                                    className="px-3 shrink-0"
+                                    className="px-3 size-8 shrink-0 cursor-pointer"
                                     title="Pegar nombre de la carta"
                                 >
                                     {copied ? (
@@ -200,6 +192,7 @@ export default function DeleteCardModal({
                                 variant="outline"
                                 onClick={handleCancel}
                                 disabled={processing}
+                                className='cursor-pointer'
                             >
                                 Cancelar
                             </Button>
@@ -207,7 +200,7 @@ export default function DeleteCardModal({
                                 type="submit"
                                 variant="destructive"
                                 disabled={processing || !isConfirmationValid}
-                                className="bg-red-600 hover:bg-red-700"
+                                className="cursor-pointer disabled:cursor-not-allowed bg-red-600 hover:bg-red-700"
                             >
                                 {processing ? 'Eliminando...' : 'Eliminar Carta'}
                             </Button>

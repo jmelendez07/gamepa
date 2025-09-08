@@ -3,63 +3,67 @@
 namespace App\Http\Controllers;
 
 use App\Models\Step;
+use App\Models\Exercise;
 use Illuminate\Http\Request;
 
 class StepController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'exercise_id' => 'required|exists:exercises,id',
+            'order' => 'required|integer',
+        ]);
+
+        $exercise = Exercise::findOrFail($request->exercise_id);
+
+        $step = $exercise->steps()->create([
+            'order' => $request->order,
+        ]);
+
+        return redirect()->back()->with('success', "Paso {$step->order} creado exitosamente.");
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Step $step)
+    public function show($stepId)
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Step $step)
+    public function edit($stepId)
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Step $step)
+    public function update(Request $request, $stepId)
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Step $step)
+    public function destroy($stepId)
     {
-        //
+        $step = Step::findOrFail($stepId);
+
+        $steps = Step::where('exercise_id', $step->exercise_id)
+            ->where('order', '>', $step->order)
+            ->orderBy('order')
+            ->get();
+
+        foreach ($steps as $s) {
+            $s->decrement('order');
+        }
+
+        $step->delete();
+        
+        return redirect()->back()->with('success', "Paso {$step->order} eliminado exitosamente.");
     }
 }
