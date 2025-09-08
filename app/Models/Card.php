@@ -14,6 +14,7 @@ class Card extends Model
     protected $collection = 'cards';
 
     protected $fillable = [
+        'name',
         'energy_cost',
         'stats'
     ];
@@ -30,6 +31,6 @@ class Card extends Model
 
     public function type()
     {
-        return $this->belongsTo(TypeCard::class);
+        return $this->belongsTo(TypeCard::class, 'type_card_id', '_id');
     }
 }

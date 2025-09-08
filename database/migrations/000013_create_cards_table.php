@@ -11,6 +11,7 @@ return new class extends Migration
     {
         Schema::create('cards', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique();
             $table->integer('energy_cost');
             $table->integer('stats');
             $table->foreignIdFor(TypeCard::class)->constrained()->onDelete('set null');

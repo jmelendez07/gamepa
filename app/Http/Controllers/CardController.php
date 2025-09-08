@@ -3,63 +3,83 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Models\TypeCard;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $cards = Card::with('type')->get();
+        $types = TypeCard::all();
+
+        return Inertia::render('dashboard/cards/index', [
+            'cards' => $cards,
+            'types' => $types,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return redirect()->route('cards.index');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255|unique:cards',
+            'energy_cost' => 'required|integer|min:0',
+            'stats' => 'required|integer|min:0',
+            'type_id' => 'required|exists:type_cards,_id',
+        ]);
+
+        Card::create([
+            'name' => $request->name,
+            'energy_cost' => $request->energy_cost,
+            'stats' => $request->stats,
+            'type_card_id' => $request->type_id,
+        ]);
+
+        return redirect()->route('cards.index')->with('success', 'Carta creada exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Card $card)
+    public function show($cardId)
     {
-        //
+        return redirect()->route('cards.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Card $card)
+    public function edit($cardId)
     {
-        //
+        return redirect()->route('cards.index');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Card $card)
+
+    public function update(Request $request, $cardId)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255|unique:cards,name,' . $cardId,
+            'energy_cost' => 'required|integer|min:0',
+            'stats' => 'required|integer|min:0',
+            'type_id' => 'required|exists:type_cards,_id',
+        ]);
+
+        $card = Card::findOrFail($cardId);
+        $card->update([
+            'name' => $request->name,
+            'energy_cost' => $request->energy_cost,
+            'stats' => $request->stats,
+            'type_card_id' => $request->type_id,
+        ]);
+
+        return redirect()->route('cards.index')->with('success', 'Carta actualizada exitosamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Card $card)
+    public function destroy($cardId)
     {
-        //
+        $card = Card::findOrFail($cardId);
+        $card->delete();
+
+        return redirect()->route('cards.index')->with('success', 'Carta eliminada exitosamente.');
     }
 }
