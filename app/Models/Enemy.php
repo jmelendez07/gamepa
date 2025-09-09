@@ -18,24 +18,29 @@ class Enemy extends Model
         'spritesheet',
         'health',
         'is_hostile',
-        'basick_attack',
+        'basic_attack',
         'planet_id',
         'enemy_type_id',
     ];
 
-    #[SearchUsingPrefix(['name', 'health', 'basick_attack'])]
+    #[SearchUsingPrefix(['name', 'health', 'basic_attack'])]
     public function toSearchableArray()
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
             'health' => $this->health,
-            'basick_attack' => $this->basick_attack,
+            'basic_attack' => $this->basic_attack,
         ];
     }
 
     public function type()
     {
         return $this->belongsTo(EnemyType::class, 'enemy_type_id');
+    }
+
+    public function planet()
+    {
+        return $this->belongsTo(Planet::class, 'planet_id');
     }
 }
