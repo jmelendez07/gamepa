@@ -1,5 +1,6 @@
 import { ICard, IEnemy, IExercise } from '@/types';
 import { extend } from '@pixi/react';
+import * as PIXI from 'pixi.js';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
@@ -45,15 +46,19 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const centerXRelativeToContainer = (width - answersWidth) / 2;
 
     const [currentStep, setCurrentStep] = useState(0);
+    const [scrollOffset, setScrollOffset] = useState(0);
 
     const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
     const answerTargetRef = useRef<Graphics>(null);
     const answersGraphicsRef = useRef<Graphics>(null);
+    const answersContainerRef = useRef<Container>(null);
     const draggingAnswerRef = useRef<Container | null>(null); // Ref para el contenedor arrastrado
 
     const handleAnswerDragStart = (answerContainer: Container | null) => {
         draggingAnswerRef.current = answerContainer;
     };
+    // Guardar el stat base de la carta para resetearlo después del ejercicio
+    const [cardBaseStat] = useState<number | null>(card ? card.stats : null);
 
     const handleAnswerDragEnd = useCallback(
         (answerContainer: Container | null, answerValue: { text: string; isCorrect: boolean }) => {
@@ -90,6 +95,18 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             if (nextStep === exercise!.steps!.length) {
                                 attack();
                                 onIsAttacking(false);
+                                //resetear el stat de la carta
+                                if (card && cardBaseStat) {
+                                    card.stats = cardBaseStat;
+                                    console.log('Card attack stat reset to base:', card.stats);
+                                }
+                            }
+                        } else {
+                            console.log('Wrong answer, try again.');
+                            const newDamage = updateAttackStat(card);
+                            if (newDamage) {
+                                console.log('New damage after wrong answer:', newDamage);
+                                card!.stats = newDamage; // Actualiza el stat de la carta
                             }
                         }
                     } else {
@@ -106,6 +123,22 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
         },
         [currentStep, exercise, onIsAttacking], // ← Agregar dependencias
     );
+
+    const updateAttackStat = (card: ICard | null) => {
+        if (card) {
+            const updatedCard = { ...card, stats: card.stats - card.stats * 0.1 }; // Reduce en 10% el stat de ataque
+            // Aquí deberías actualizar el estado global o el contexto donde se almacena la carta
+            console.log('Card attack stat decreased:', updatedCard);
+            const newDamage = updatedCard.stats;
+            return Math.floor(newDamage);
+        }
+    };
+
+    const handleWheelOnExerciseArea = useCallback((e: PIXI.FederatedWheelEvent) => {
+        e.stopPropagation();
+        // Actualiza el estado del desplazamiento basado en el movimiento de la rueda del ratón
+        setScrollOffset((prevOffset) => prevOffset - e.deltaY);
+    }, []);
 
     useEffect(() => {
         if (isAnswerIsDragging && draggingAnswerRef.current && answersGraphicsRef.current && answerTargetRef.current) {
@@ -176,10 +209,9 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     }, [bgAsset]);
 
     useEffect(() => {
-        Assets.load<Texture>(assetSword)
-            .then((texture) => {
-                setSwordTexture(texture);
-            });
+        Assets.load<Texture>(assetSword).then((texture) => {
+            setSwordTexture(texture);
+        });
 
         return () => {
             swordTexture?.destroy();
@@ -187,7 +219,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     }, []);
 
     return (
-        <pixiContainer x={exerciseContainerX} y={exerciseContainerY}>
+        <pixiContainer x={exerciseContainerX} y={exerciseContainerY} onWheel={handleWheelOnExerciseArea} interactive={true}>
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
 
             <pixiText
@@ -208,7 +240,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             />
 
             <pixiContainer zIndex={10} x={width - 150} y={35.5}>
-                <pixiText 
+                <pixiText
                     text={card?.stats}
                     x={0}
                     y={0}
@@ -218,15 +250,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                         fontFamily: 'Arial',
                     }}
                 />
-                {swordTexture && (
-                    <pixiSprite 
-                        texture={swordTexture}
-                        x={30}
-                        y={0}
-                        width={45}
-                        height={30}
-                    />
-                )}
+                {swordTexture && <pixiSprite texture={swordTexture} x={30} y={0} width={45} height={30} />}
             </pixiContainer>
 
             <pixiText
@@ -243,60 +267,37 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             />
             {playerAnswers.map((step, index) => {
                 return (
-                    <Fragment key={index}>
-                        <pixiGraphics
-                            draw={(g) => {
-                                g.clear();
-                                g.roundRect(26, 21 + (index + 1) * (height / 10 + 10), width - 55, height / 10);
-                                g.fill({ color: 0x000000, alpha: 0.01 });
-                                g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
-                            }}
-                        />
-                        <pixiText
-                            text={step.text}
-                            x={100}
-                            y={60 + (index + 1) * (height / 10 + 10)}
-                            anchor={0.5}
-                            zIndex={1}
-                            style={{
-                                fontSize: 24,
-                                fill: 0xffffff,
-                                fontFamily: 'Arial',
-                            }}
-                        />
-                    </Fragment>
+                    <pixiContainer key={index} zIndex={0}>
+                        <Fragment key={index}>
+                            <pixiGraphics
+                                draw={(g) => {
+                                    g.clear();
+                                    // Aplica el desplazamiento a la posición Y del rectángulo
+                                    g.roundRect(26, 21 + (index + 1) * (height / 10 + 10) + scrollOffset, width - 55, height / 10);
+                                    g.fill({ color: 0x000000, alpha: 0.01 });
+                                    g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
+                                }}
+                            />
+                            <pixiText
+                                text={step.text}
+                                x={100}
+                                // Aplica el desplazamiento a la posición Y del texto
+                                y={60 + (index + 1) * (height / 10 + 10) + scrollOffset}
+                                anchor={0.5}
+                                zIndex={1}
+                                style={{
+                                    fontSize: 24,
+                                    fill: 0xffffff,
+                                    fontFamily: 'Arial',
+                                }}
+                            />
+                        </Fragment>
+                    </pixiContainer>
                 );
             })}
             {answersTexture && (
                 <pixiContainer x={centerXRelativeToContainer} y={430} width={answersWidth} height={window.innerHeight * 0.2} zIndex={1}>
                     <pixiSprite texture={answersTexture} width={answersWidth} height={window.innerHeight * 0.2} />
-                    {/* {answersOptions.map((option, index) => {
-                        const padding = 20; // Padding de 20 píxeles
-                        const availableWidth = answersWidth - padding * 2;
-                        const availableHeight = window.innerHeight * 0.2 - padding * 2;
-                        const answerWidth = availableWidth / answersOptions.length;
-                        const answerHeight = availableHeight;
-                        const xPosition = padding + index * answerWidth;
-                        const yPosition = padding;
-
-                        return (
-                            <Answer
-                                key={index}
-                                text={option.text}
-                                isCorrect={option.isCorrect}
-                                x={xPosition}
-                                y={yPosition}
-                                width={answerWidth}
-                                height={answerHeight}
-                                containerX={containerX}
-                                containerY={containerY}
-                                onIsDraggingChange={setIsAnswerIsDragging}
-                                onAnswerPositionChange={setAnswerSelectedPosition}
-                                onDragStart={handleAnswerDragStart}
-                                onDragEnd={handleAnswerDragEnd}
-                            />
-                        );
-                    })} */}
                     {exercise &&
                         exercise.steps &&
                         exercise.steps[currentStep].options.map((opt, index) => {
@@ -332,7 +333,6 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             draw={(g) => {
                                 g.clear();
                                 g.rect(0, 0, answersWidth, window.innerHeight * 0.2);
-                                // Cambia el color del borde según si está sobre el área o no
                                 g.stroke({ color: isCancellingAnswer ? 0x00ff00 : 0x0000ff, width: 5 });
                             }}
                         />
@@ -345,7 +345,6 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                     draw={(g) => {
                         g.clear();
                         g.rect(0, 0, width, height);
-                        // Cambia el color del borde según si está sobre el área o no
                         g.stroke({ color: isOverTarget ? 0x00ff00 : 0x0000ff, width: 5 });
                     }}
                 />
