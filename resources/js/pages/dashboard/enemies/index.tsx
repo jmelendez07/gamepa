@@ -255,7 +255,14 @@ export default function EnemiesIndex({ enemies, planets, types }: IEnemiesIndexP
                                             <AvatarImage 
                                                 src={enemy.spritesheet} 
                                                 alt={enemy.name}
-                                                className="object-cover"
+                                                className="object-none"
+                                                style={{
+                                                    width: '400%',
+                                                    height: '400%',
+                                                    objectPosition: '0px -135px',
+                                                    transform: 'scale(1.4)',
+                                                    transformOrigin: 'top left',
+                                                }}
                                             />
                                             <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-500 text-white font-bold text-xl">
                                                 <User className="h-10 w-10" />

@@ -37,7 +37,7 @@ class EnemyController extends Controller
 
         $enemy = Enemy::create([
             'name' => $request->name,
-            'spritesheet' => asset($request->file('spritesheet')->store('enemies', 'public')),
+            'spritesheet' => asset('storage/' . $request->file('spritesheet')->store('enemies', 'public')),
             'health' => $request->health,
             'is_hostile' => $request->is_hostile,
             'basic_attack' => $request->basic_attack,
@@ -64,7 +64,7 @@ class EnemyController extends Controller
 
         $enemy->update([
             'name' => $request->name,
-            'spritesheet' => $request->file('spritesheet') ? asset($request->file('spritesheet')->store('enemies', 'public')) : $enemy->spritesheet,
+            'spritesheet' => $request->file('spritesheet') ? asset('storage/' . $request->file('spritesheet')->store('enemies', 'public')) : $enemy->spritesheet,
             'health' => $request->health,
             'is_hostile' => $request->is_hostile,
             'basic_attack' => $request->basic_attack,
