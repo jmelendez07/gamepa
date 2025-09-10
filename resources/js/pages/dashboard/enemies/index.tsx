@@ -4,7 +4,7 @@ import Enemy, { EnemyType } from "@/types/enemy";
 import Planet from "@/types/planet";
 import { Head, router } from "@inertiajs/react";
 import { useState } from "react";
-import { Search, Plus, Edit2, Trash2, Shield, Zap, Heart, Filter, X, User } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Shield, Zap, Heart, Filter, X, User, MapPinned } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -290,9 +290,17 @@ export default function EnemiesIndex({ enemies, planets, types }: IEnemiesIndexP
                                     </div>
 
                                     <div>
-                                        <h3 className="font-bold text-xl text-gray-900 line-clamp-1 mb-3">
-                                            {enemy.name}
-                                        </h3>
+                                        <div className="flex items-center gap-1 mb-3">
+                                            <h3 className="font-bold text-xl text-gray-900 line-clamp-1">
+                                                {enemy.name}
+                                            </h3>
+                                            {enemy.planet && (        
+                                                <div className="flex items-center gap-1 text-gray-600 text-xs">
+                                                    <MapPinned className={`size-4`} />
+                                                    <span>{enemy.planet?.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex flex-wrap gap-2">
                                             <Badge 
                                                 className={`${getTypeColor(enemy.enemy_type_id, getTypeName(enemy.enemy_type_id))} px-3 py-1 text-sm font-medium`}

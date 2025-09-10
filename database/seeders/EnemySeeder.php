@@ -20,25 +20,25 @@ class EnemySeeder extends Seeder
                 'name' => 'Goblin',
                 'health' => 50,
                 'basic_attack' => 10,
-                'spritesheet' => asset('assets/generic-enemy.png'),
+                'spritesheet' => asset('assets/default_enemies/enemy-1.png'),
             ],
             [
                 'name' => 'Orc',
                 'health' => 80,
                 'basic_attack' => 15,
-                'spritesheet' => asset('assets/generic-enemy.png'),
+                'spritesheet' => asset('assets/default_enemies/enemy-2.png'),
             ],
             [
                 'name' => 'Troll',
                 'health' => 120,
                 'basic_attack' => 20,
-                'spritesheet' => asset('assets/generic-enemy.png'),
+                'spritesheet' => asset('assets/default_enemies/enemy-3.png'),
             ],
             [
                 'name' => 'Dragon',
                 'health' => 300,
                 'basic_attack' => 50,
-                'spritesheet' => asset('assets/generic-enemy.png'),
+                'spritesheet' => asset('assets/default_enemies/enemy-4.png'),
             ],
         ];
 
