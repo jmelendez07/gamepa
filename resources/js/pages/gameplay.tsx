@@ -1,9 +1,16 @@
 import { Experience } from "@/components/experience/Experience";
+import Card from "@/types/card";
+import Enemy from "@/types/enemy";
 
-const Gameplay = () => {
+interface IGameplayProps {
+	enemies: Enemy[];
+	cards: Card[];
+}
+
+const Gameplay = ({ enemies, cards }: IGameplayProps) => {
 	return (
 		<>
-			<Experience />
+			<Experience enemies={enemies} cards={cards} />
 		</>
 	);
 };

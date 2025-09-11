@@ -56,21 +56,21 @@ export interface ICard {
     exercises: IExercise[];
 }
 
-export interface IEnemy {
-    id: number;
-    name: string;
-    basicAttack: number;
-    avatar: string;
-    health: number;
-    mapPosition: {
-        x: number;
-        y: number;
-    };
-    combatPosition: {
-        x: number;
-        y: number;
-    };
-}
+// export interface IEnemy {
+//     id: number;
+//     name: string;
+//     basicAttack: number;
+//     avatar: string;
+//     health: number;
+//     mapPosition: {
+//         x: number;
+//         y: number;
+//     };
+//     combatPosition: {
+//         x: number;
+//         y: number;
+//     };
+// }
 
 export interface ISteps {
     id: number;

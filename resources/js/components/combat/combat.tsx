@@ -1,5 +1,4 @@
-import { ICard, IEnemy } from '@/types';
-import { extend, useTick } from '@pixi/react';
+    import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useCallback, useEffect, useState } from 'react';
 import { ANIMATION_SPEED } from '../constants/game-world';
@@ -8,20 +7,22 @@ import { Card } from './card/card';
 import { Enemy } from './enemy/enemy';
 import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
-import { set } from 'react-hook-form';
+import IEnemy from '@/types/enemy';
+import ICard from '@/types/card';
 
 extend({ Sprite, Container, Graphics });
 
 interface ICombatProps {
     hero: Texture;
     enemies: IEnemy[];
+    cards: ICard[];
     onSetSelectedEnemies: (enemies: IEnemy[]) => void;
     finish: (isFinished: boolean) => void;
     lose: () => void;
 }
 
 interface ICombatCardProps {
-    cards: Array<{ id: number; name: string; stats: number; exercises: { id: number; operation: string }[] }>;
+    cards: ICard[];
     setIsCardHeldDown: (isHeldDown: boolean) => void;
     setCardPosition: (position: { x: number; y: number }) => void;
     isTargetAssigned: boolean;
@@ -38,152 +39,152 @@ interface INextTurnButtonProps {
     onClick?: () => void;
 }
 
-const cards = [
-    {
-        id: 1,
-        name: 'Attack',
-        stats: 10,
-        exercises: [
-            {
-                id: 1,
-                operation: 'f´(x)=2x+5',
-                steps: [
-                    {
-                        id: 1,
-                        description: 'Identify the function and its derivative.',
-                        order: 1,
-                        options: [
-                            { id: 1, label: 'f(x)=x+5', isCorrect: false },
-                            { id: 2, label: 'f(x)=2(1)+5(0)', isCorrect: true },
-                            { id: 3, label: 'f(x)=2+5', isCorrect: false },
-                            { id: 4, label: 'f(x)=2(0)+5(1)', isCorrect: false },
-                        ],
-                    },
-                    {
-                        id: 2,
-                        description: 'Multiply the derivative by the coefficient.',
-                        order: 2,
-                        options: [
-                            { id: 1, label: 'f(x)=5', isCorrect: false },
-                            { id: 2, label: 'f(x)=x', isCorrect: false },
-                            { id: 3, label: 'f(x)=2', isCorrect: true },
-                            { id: 4, label: 'f(x)=7', isCorrect: false },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        id: 2,
-        name: 'Defend',
-        stats: 30,
-        exercises: [
-            {
-                id: 2,
-                operation: 'f´(x)=2x-4',
-                steps: [
-                    {
-                        id: 1,
-                        description: 'Identify the function and its derivative.',
-                        order: 1,
-                        options: [
-                            { id: 1, label: 'f(x)=2(0)-4(1)', isCorrect: false },
-                            { id: 2, label: 'f(x)=x-4', isCorrect: false },
-                            { id: 3, label: 'f(x)=2(1)-4(0)', isCorrect: true },
-                            { id: 4, label: 'f(x)=2-4', isCorrect: false },
-                        ],
-                    },
-                    {
-                        id: 2,
-                        description: 'Multiply the derivative by the coefficient.',
-                        order: 2,
-                        options: [
-                            { id: 1, label: 'f(x)=2', isCorrect: true },
-                            { id: 2, label: 'f(x)=x', isCorrect: false },
-                            { id: 3, label: 'f(x)=4', isCorrect: false },
-                            { id: 4, label: 'f(x)=-2', isCorrect: false },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        id: 3,
-        name: 'Heal',
-        stats: 10,
-        exercises: [
-            {
-                id: 3,
-                operation: 'f´(x)=-3x-5',
-                steps: [
-                    {
-                        id: 1,
-                        description: 'Identify the function and its derivative.',
-                        order: 1,
-                        options: [
-                            { id: 1, label: 'f(x)=-3-5', isCorrect: false },
-                            { id: 2, label: 'f(x)=-x-5', isCorrect: false },
-                            { id: 3, label: 'f(x)=-3(0)-5(1)', isCorrect: false },
-                            { id: 4, label: 'f(x)=-3(1)-5(0)', isCorrect: true },
-                        ],
-                    },
-                    {
-                        id: 2,
-                        description: 'Multiply the derivative by the coefficient.',
-                        order: 2,
-                        options: [
-                            { id: 1, label: 'f(x)=3', isCorrect: false },
-                            { id: 2, label: 'f(x)=-3', isCorrect: true },
-                            { id: 3, label: 'f(x)=-8', isCorrect: false },
-                            { id: 4, label: 'f(x)=0', isCorrect: false },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        id: 4,
-        name: 'Fireball',
-        stats: 20,
-        exercises: [
-            {
-                id: 4,
-                operation: 'f´(x)=4x+4',
-                steps: [
-                    {
-                        id: 1,
-                        description: 'Identify the function and its derivative.',
-                        order: 1,
-                        options: [
-                            { id: 1, label: 'f(x)=x+4', isCorrect: false },
-                            { id: 2, label: 'f(x)=4(0)+4(0)', isCorrect: false },
-                            { id: 3, label: 'f(x)=4(0)+4(1)', isCorrect: false },
-                            { id: 4, label: 'f(x)=4(1)+4(0)', isCorrect: true },
-                        ],
-                    },
-                    {
-                        id: 2,
-                        description: 'Multiply the derivative by the coefficient.',
-                        order: 2,
-                        options: [
-                            { id: 1, label: 'f(x)=8', isCorrect: false },
-                            { id: 2, label: 'f(x)=0', isCorrect: false },
-                            { id: 3, label: 'f(x)=4', isCorrect: true },
-                            { id: 4, label: 'f(x)=x', isCorrect: false },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
-];
+// const cards = [
+//     {
+//         id: 1,
+//         name: 'Attack',
+//         stats: 10,
+//         exercises: [
+//             {
+//                 id: 1,
+//                 operation: 'f´(x)=2x+5',
+//                 steps: [
+//                     {
+//                         id: 1,
+//                         description: 'Identify the function and its derivative.',
+//                         order: 1,
+//                         options: [
+//                             { id: 1, label: 'f(x)=x+5', isCorrect: false },
+//                             { id: 2, label: 'f(x)=2(1)+5(0)', isCorrect: true },
+//                             { id: 3, label: 'f(x)=2+5', isCorrect: false },
+//                             { id: 4, label: 'f(x)=2(0)+5(1)', isCorrect: false },
+//                         ],
+//                     },
+//                     {
+//                         id: 2,
+//                         description: 'Multiply the derivative by the coefficient.',
+//                         order: 2,
+//                         options: [
+//                             { id: 1, label: 'f(x)=5', isCorrect: false },
+//                             { id: 2, label: 'f(x)=x', isCorrect: false },
+//                             { id: 3, label: 'f(x)=2', isCorrect: true },
+//                             { id: 4, label: 'f(x)=7', isCorrect: false },
+//                         ],
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+//     {
+//         id: 2,
+//         name: 'Defend',
+//         stats: 30,
+//         exercises: [
+//             {
+//                 id: 2,
+//                 operation: 'f´(x)=2x-4',
+//                 steps: [
+//                     {
+//                         id: 1,
+//                         description: 'Identify the function and its derivative.',
+//                         order: 1,
+//                         options: [
+//                             { id: 1, label: 'f(x)=2(0)-4(1)', isCorrect: false },
+//                             { id: 2, label: 'f(x)=x-4', isCorrect: false },
+//                             { id: 3, label: 'f(x)=2(1)-4(0)', isCorrect: true },
+//                             { id: 4, label: 'f(x)=2-4', isCorrect: false },
+//                         ],
+//                     },
+//                     {
+//                         id: 2,
+//                         description: 'Multiply the derivative by the coefficient.',
+//                         order: 2,
+//                         options: [
+//                             { id: 1, label: 'f(x)=2', isCorrect: true },
+//                             { id: 2, label: 'f(x)=x', isCorrect: false },
+//                             { id: 3, label: 'f(x)=4', isCorrect: false },
+//                             { id: 4, label: 'f(x)=-2', isCorrect: false },
+//                         ],
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+//     {
+//         id: 3,
+//         name: 'Heal',
+//         stats: 10,
+//         exercises: [
+//             {
+//                 id: 3,
+//                 operation: 'f´(x)=-3x-5',
+//                 steps: [
+//                     {
+//                         id: 1,
+//                         description: 'Identify the function and its derivative.',
+//                         order: 1,
+//                         options: [
+//                             { id: 1, label: 'f(x)=-3-5', isCorrect: false },
+//                             { id: 2, label: 'f(x)=-x-5', isCorrect: false },
+//                             { id: 3, label: 'f(x)=-3(0)-5(1)', isCorrect: false },
+//                             { id: 4, label: 'f(x)=-3(1)-5(0)', isCorrect: true },
+//                         ],
+//                     },
+//                     {
+//                         id: 2,
+//                         description: 'Multiply the derivative by the coefficient.',
+//                         order: 2,
+//                         options: [
+//                             { id: 1, label: 'f(x)=3', isCorrect: false },
+//                             { id: 2, label: 'f(x)=-3', isCorrect: true },
+//                             { id: 3, label: 'f(x)=-8', isCorrect: false },
+//                             { id: 4, label: 'f(x)=0', isCorrect: false },
+//                         ],
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+//     {
+//         id: 4,
+//         name: 'Fireball',
+//         stats: 20,
+//         exercises: [
+//             {
+//                 id: 4,
+//                 operation: 'f´(x)=4x+4',
+//                 steps: [
+//                     {
+//                         id: 1,
+//                         description: 'Identify the function and its derivative.',
+//                         order: 1,
+//                         options: [
+//                             { id: 1, label: 'f(x)=x+4', isCorrect: false },
+//                             { id: 2, label: 'f(x)=4(0)+4(0)', isCorrect: false },
+//                             { id: 3, label: 'f(x)=4(0)+4(1)', isCorrect: false },
+//                             { id: 4, label: 'f(x)=4(1)+4(0)', isCorrect: true },
+//                         ],
+//                     },
+//                     {
+//                         id: 2,
+//                         description: 'Multiply the derivative by the coefficient.',
+//                         order: 2,
+//                         options: [
+//                             { id: 1, label: 'f(x)=8', isCorrect: false },
+//                             { id: 2, label: 'f(x)=0', isCorrect: false },
+//                             { id: 3, label: 'f(x)=4', isCorrect: true },
+//                             { id: 4, label: 'f(x)=x', isCorrect: false },
+//                         ],
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+// ];
 
 const assetEnergy = '/assets/energy.png';
 
-export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
+export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
     const spriteBgCombat = '/assets/bg-battle.jpg';
 
     const [heroHealth, setHeroHealth] = useState(100);
@@ -199,6 +200,7 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
     const [isAttacking, setIsAttacking] = useState(false);
     const [energyTexture, setEnergyTexture] = useState<Texture | null>(null);
+    // const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: hero,
@@ -220,6 +222,8 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
         [],
     );
 
+    
+
     const attack = () => {
         if (selectedCard && selectedEnemy && heroEnergy > 0) {
             setHeroEnergy(prevHeroEnergy => prevHeroEnergy - 1);
@@ -239,7 +243,7 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
         enemies.forEach(enemy => {
             if (heroHealth > 0) {
                 setHeroHealth(prevHeroHealth => {
-                    const newHealth = prevHeroHealth - enemy.basicAttack;
+                    const newHealth = prevHeroHealth - enemy.basic_attack;
                     return newHealth < 0 ? 0 : newHealth;
                 });
             }
@@ -247,15 +251,13 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
     }
 
     useTick((ticker) => {
-        const deltaTime = ticker.deltaTime;
-
         updateHeroSprite('DOWN', true, true);
         if (isCardHeldDown) {
             enemies.forEach(enemy => {
-                if (enemy.combatPosition && assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemy.combatPosition })) {
+                if (enemy.combat_position && assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemy.combat_position })) {
                     setIsTargetAssigned(true);
                     setSelectedEnemy(enemy);
-                } else {
+                } else if (selectedEnemy?.id === enemy.id) {
                     setIsTargetAssigned(false);
                     setSelectedEnemy(null);
                 }
@@ -271,9 +273,6 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
                 if (!cancelled) {
                     setCombatTexture(tex);
                 }
-            })
-            .catch((err) => {
-                console.error('Failed to load combat background texture:', err);
             });
 
         Assets.load<Texture>(assetEnergy)
@@ -312,7 +311,7 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
             />
 
             {heroSprite && (
-                <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.3} width={128} height={128} />
+                <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.4} width={128} height={128} />
             )}
 
             <CombatEnemies enemies={enemies} />
@@ -322,8 +321,8 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
                     key={enemy.id}
                     draw={(g) => {
                         g.clear();
-                        g.rect(enemy.combatPosition.x, enemy.combatPosition.y, 128, 128);
-                        g.stroke({ color: isTargetAssigned ? 0x00ff00 : 0xff0000, width: 5 });
+                        g.rect(enemy.combat_position?.x || 0, enemy.combat_position?.y || 0, 128, 128);
+                        g.stroke({ color: (isTargetAssigned && selectedEnemy?.id === enemy.id) ? 0x00ff00 : 0xff0000, width: 5 });
                     }}
                 />
             ))}
@@ -339,11 +338,11 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
                 isDisabled={heroEnergy <= 0}
             />
             <NextTurnButton onClick={nextTurn} />
-            {(isAttacking && selectedCard && selectedEnemy) && (
+            {(isAttacking && selectedCard && selectedEnemy && selectedCard.exercises && selectedCard.exercises.length > 0) && (
                 <Exercise
                     enemy={selectedEnemy}
                     card={selectedCard}
-                    exercise={selectedCard?.exercises ? selectedCard.exercises[0] : undefined}
+                    exercise={selectedCard.exercises[0]}
                     onClose={() => {
                         setIsAttacking(false);
                         setIsTargetAssigned(false);

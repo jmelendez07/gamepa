@@ -10,7 +10,15 @@ export default interface Enemy {
     planet_id: string;
     enemy_type_id: string;
     type?: EnemyType;
-    planet?: Planet; 
+    planet?: Planet;
+    map_position?: {
+        x: number;
+        y: number;
+    },
+    combat_position?: {
+        x: number;
+        y: number;
+    }
 }
 
 export interface EnemyType {

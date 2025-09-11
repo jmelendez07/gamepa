@@ -1,16 +1,18 @@
 import { extend, useTick } from '@pixi/react'
 import { Container, Sprite, Texture, Assets } from 'pixi.js'
-import React, { use, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import useEnemyAnimation from './useEnemyAnimation';
-import { IEnemy } from '@/types';
+import IEnemy from '@/types/enemy';
 
 extend({ Container, Sprite })
 
 interface IEnemyProps {
 	enemy: IEnemy;
+	x: number;
+	y: number;
 }
 
-export default function Enemy({ enemy }: IEnemyProps) {
+export default function Enemy({ enemy, x, y }: IEnemyProps) {
 	const [texture, setTexture] = useState<Texture>(Texture.WHITE);
 
 	const { sprite, updateSprite } = useEnemyAnimation({
@@ -26,14 +28,16 @@ export default function Enemy({ enemy }: IEnemyProps) {
 	});
 
 	useEffect(() => {
-		Assets.load<Texture>(enemy.avatar)
+		Assets.load<Texture>(enemy.spritesheet)
 			.then((text) => {
 				setTexture(text);
 			});
 	}, []);
 
+
+
 	return (
-		<pixiContainer x={enemy.mapPosition.x} y={enemy.mapPosition.y}>
+		<pixiContainer x={x} y={y}>
 			{sprite && (
 				<pixiSprite 
 					texture={sprite.texture}

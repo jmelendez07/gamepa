@@ -14,7 +14,7 @@ class OptionSeeder extends Seeder
         foreach ($steps as $step) {
             for ($i = 1; $i <= 4; $i++) {
                 $step->options()->create([
-                    'result' => "Opción $i para el paso {$step->order}",
+                    'result' => 'Opción ' . $i . ' para el paso ' . $step->order . ($i === 1 ? ' - (correcta)' : ''),
                     'is_correct' => $i === 1,
                 ]);
             }

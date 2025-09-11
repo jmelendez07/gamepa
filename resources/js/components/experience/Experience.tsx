@@ -2,33 +2,39 @@ import { Application } from '@pixi/react';
 import { useCallback, useEffect, useState } from 'react';
 import { calculateCanvasSize } from '../helpers/common';
 import { MainContainer } from './MainContainer/MainContainer';
+import Enemy from '@/types/enemy';
+import Card from '@/types/card';
 
-export const Experience = () => {
-  const [isClient, setIsClient] = useState(false);
-  const [canvasSize, setCanvasSize] = useState(calculateCanvasSize());
+interface IExperienceProps {
+	enemies: Enemy[];
+	cards: Card[];
+}
 
-  const updateCanvasSize = useCallback(() => {
-    setCanvasSize(calculateCanvasSize());
-  }, []);
+export const Experience = ({ enemies, cards }: IExperienceProps) => {
+	const [isClient, setIsClient] = useState(false);
+	const [canvasSize, setCanvasSize] = useState(calculateCanvasSize());
 
-  useEffect(() => {
-    setIsClient(true);
-    window.addEventListener('resize', updateCanvasSize);
-    return () => {
-      window.removeEventListener('resize', updateCanvasSize);
-    };
-  }, [updateCanvasSize]);
+	const updateCanvasSize = useCallback(() => {
+		setCanvasSize(calculateCanvasSize());
+	}, []);
 
-  return (
-    <>
-      {isClient && (
-        <Application width={canvasSize.width} height={canvasSize.height}>
-          <MainContainer canvasSize={canvasSize}>
-            {/* Aquí puedes agregar otros componentes o elementos */}
-          </MainContainer>
-        </Application>
-      )}
-    </>
-  );
+	useEffect(() => {
+		setIsClient(true);
+		window.addEventListener('resize', updateCanvasSize);
+		return () => {
+			window.removeEventListener('resize', updateCanvasSize);
+		};
+	}, [updateCanvasSize]);
+
+	return (
+		<>
+			{isClient && (
+				<Application width={canvasSize.width} height={canvasSize.height}>
+					<MainContainer defaultEnemies={enemies} cards={cards} canvasSize={canvasSize}>
+					</MainContainer>
+				</Application>
+			)}
+		</>
+	);
 };
 

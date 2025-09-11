@@ -7,6 +7,7 @@ use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\StepController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\EnemyController;
+use App\Http\Controllers\GameplayController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,7 +15,7 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::inertia('/gameplay', 'gameplay')->name('gameplay');
+Route::resource('gameplay', GameplayController::class)->names('gameplay');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:administrador'])->group(function () {

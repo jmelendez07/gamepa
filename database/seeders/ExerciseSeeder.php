@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Dificulty;
 use App\Models\Exercise;
 use App\Models\Planet;
+use App\Models\Card;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,11 +18,19 @@ class ExerciseSeeder extends Seeder
 
         foreach ($planets as $planet) {
             foreach ($difficulties as $difficulty) {
-                Exercise::create([
+                $exercise = Exercise::create([
                     'operation' => 'some operation',
                     'planet_id' => $planet->id,
                     'difficulty_id' => $difficulty->id,
                 ]);
+
+                $card = Card::raw(function($collection) {
+                    return $collection->aggregate([
+                        ['$sample' => ['size' => 1]]
+                    ]);
+                })->first();
+
+                $card->exercises()->attach($exercise);
             }
         }
     }
