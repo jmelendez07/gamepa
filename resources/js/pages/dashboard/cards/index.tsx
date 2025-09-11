@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type PageProps, type BreadcrumbItem } from '@/types';
 import Card, { TypeCard } from '@/types/card';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { Plus, Search, Sword, Shield, Heart, Zap, Filter, Sparkles, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -290,7 +290,7 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                             return (
                                 <div
                                     key={card.id}
-                                    className="bg-white rounded-2xl border-2 border-gray-200 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                                    className="bg-white relative rounded-2xl border-2 border-gray-200 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 overflow-hidden group"
                                 >
                                     <div className={`bg-gradient-to-r ${gradientClass} p-4 relative`}>
                                         <div className="flex items-center justify-between text-white">
@@ -329,7 +329,7 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <div className="flex items-center relative z-1 justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -350,6 +350,7 @@ export default function CardsIndex({ cards, types }: ICardsIndexProps) {
                                             </Button>
                                         </div>
                                     </div>
+                                    <Link href={route('cards.show', card.id)} className='absolute inset-0' />
                                 </div>
                             );
                         })

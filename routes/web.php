@@ -23,6 +23,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('planetas', PlanetController::class)->names('planets');
         Route::resource('ejercicios', ExerciseController::class)->names('exercises');
         Route::resource('cartas', CardController::class)->names('cards');
+
+        Route::post('cartas/{carta}/ejercicios/{ejercicio}', [CardController::class, 'assignExercise'])->name('cards.exercises.assign');
+        Route::delete('cartas/{carta}/ejercicios/{ejercicio}', [CardController::class, 'unassignExercise'])->name('cards.exercises.unassign');
+
         Route::resource('pasos', StepController::class)->names('steps');
         Route::resource('opciones', OptionController::class)->names('options');
         Route::resource('enemigos', EnemyController::class)->names('enemies');

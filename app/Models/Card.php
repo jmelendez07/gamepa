@@ -33,4 +33,9 @@ class Card extends Model
     {
         return $this->belongsTo(TypeCard::class, 'type_card_id', '_id');
     }
+
+    public function exercises()
+    {
+        return $this->belongsToMany(Exercise::class);
+    }
 }

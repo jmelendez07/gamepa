@@ -42,4 +42,9 @@ class Exercise extends Model
     {
         return $this->hasMany(Step::class);
     }
+
+    public function cards()
+    {
+        return $this->belongsToMany(Card::class);
+    }
 }
