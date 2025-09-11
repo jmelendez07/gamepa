@@ -1,14 +1,17 @@
-    import { extend, useTick } from '@pixi/react';
+import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useCallback, useEffect, useState } from 'react';
 import { ANIMATION_SPEED } from '../constants/game-world';
 import { useHeroAnimation } from '../Hero/useHeroAnimation';
-import { Card } from './card/card';
 import { Enemy } from './enemy/enemy';
 import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
 import IEnemy from '@/types/enemy';
 import ICard from '@/types/card';
+import NextTurnButton from './combat/next-turn-button';
+import DiscardedCardsStack from './combat/discarded-cards-stack';
+import CardsInHand from './combat/cards-in-hand';
+import { set } from 'react-hook-form';
 
 extend({ Sprite, Container, Graphics });
 
@@ -21,172 +24,14 @@ interface ICombatProps {
     lose: () => void;
 }
 
-interface ICombatCardProps {
-    cards: ICard[];
-    setIsCardHeldDown: (isHeldDown: boolean) => void;
-    setCardPosition: (position: { x: number; y: number }) => void;
-    isTargetAssigned: boolean;
-    setIsAttacking: (isAttacking: boolean) => void;
-    setSelectedCard: (card: ICard | null) => void;
-    isDisabled: boolean;
-}
-
 interface ICombatEnemiesProps {
     enemies: IEnemy[];
 }
 
-interface INextTurnButtonProps {
-    onClick?: () => void;
-}
-
-// const cards = [
-//     {
-//         id: 1,
-//         name: 'Attack',
-//         stats: 10,
-//         exercises: [
-//             {
-//                 id: 1,
-//                 operation: 'f´(x)=2x+5',
-//                 steps: [
-//                     {
-//                         id: 1,
-//                         description: 'Identify the function and its derivative.',
-//                         order: 1,
-//                         options: [
-//                             { id: 1, label: 'f(x)=x+5', isCorrect: false },
-//                             { id: 2, label: 'f(x)=2(1)+5(0)', isCorrect: true },
-//                             { id: 3, label: 'f(x)=2+5', isCorrect: false },
-//                             { id: 4, label: 'f(x)=2(0)+5(1)', isCorrect: false },
-//                         ],
-//                     },
-//                     {
-//                         id: 2,
-//                         description: 'Multiply the derivative by the coefficient.',
-//                         order: 2,
-//                         options: [
-//                             { id: 1, label: 'f(x)=5', isCorrect: false },
-//                             { id: 2, label: 'f(x)=x', isCorrect: false },
-//                             { id: 3, label: 'f(x)=2', isCorrect: true },
-//                             { id: 4, label: 'f(x)=7', isCorrect: false },
-//                         ],
-//                     },
-//                 ],
-//             },
-//         ],
-//     },
-//     {
-//         id: 2,
-//         name: 'Defend',
-//         stats: 30,
-//         exercises: [
-//             {
-//                 id: 2,
-//                 operation: 'f´(x)=2x-4',
-//                 steps: [
-//                     {
-//                         id: 1,
-//                         description: 'Identify the function and its derivative.',
-//                         order: 1,
-//                         options: [
-//                             { id: 1, label: 'f(x)=2(0)-4(1)', isCorrect: false },
-//                             { id: 2, label: 'f(x)=x-4', isCorrect: false },
-//                             { id: 3, label: 'f(x)=2(1)-4(0)', isCorrect: true },
-//                             { id: 4, label: 'f(x)=2-4', isCorrect: false },
-//                         ],
-//                     },
-//                     {
-//                         id: 2,
-//                         description: 'Multiply the derivative by the coefficient.',
-//                         order: 2,
-//                         options: [
-//                             { id: 1, label: 'f(x)=2', isCorrect: true },
-//                             { id: 2, label: 'f(x)=x', isCorrect: false },
-//                             { id: 3, label: 'f(x)=4', isCorrect: false },
-//                             { id: 4, label: 'f(x)=-2', isCorrect: false },
-//                         ],
-//                     },
-//                 ],
-//             },
-//         ],
-//     },
-//     {
-//         id: 3,
-//         name: 'Heal',
-//         stats: 10,
-//         exercises: [
-//             {
-//                 id: 3,
-//                 operation: 'f´(x)=-3x-5',
-//                 steps: [
-//                     {
-//                         id: 1,
-//                         description: 'Identify the function and its derivative.',
-//                         order: 1,
-//                         options: [
-//                             { id: 1, label: 'f(x)=-3-5', isCorrect: false },
-//                             { id: 2, label: 'f(x)=-x-5', isCorrect: false },
-//                             { id: 3, label: 'f(x)=-3(0)-5(1)', isCorrect: false },
-//                             { id: 4, label: 'f(x)=-3(1)-5(0)', isCorrect: true },
-//                         ],
-//                     },
-//                     {
-//                         id: 2,
-//                         description: 'Multiply the derivative by the coefficient.',
-//                         order: 2,
-//                         options: [
-//                             { id: 1, label: 'f(x)=3', isCorrect: false },
-//                             { id: 2, label: 'f(x)=-3', isCorrect: true },
-//                             { id: 3, label: 'f(x)=-8', isCorrect: false },
-//                             { id: 4, label: 'f(x)=0', isCorrect: false },
-//                         ],
-//                     },
-//                 ],
-//             },
-//         ],
-//     },
-//     {
-//         id: 4,
-//         name: 'Fireball',
-//         stats: 20,
-//         exercises: [
-//             {
-//                 id: 4,
-//                 operation: 'f´(x)=4x+4',
-//                 steps: [
-//                     {
-//                         id: 1,
-//                         description: 'Identify the function and its derivative.',
-//                         order: 1,
-//                         options: [
-//                             { id: 1, label: 'f(x)=x+4', isCorrect: false },
-//                             { id: 2, label: 'f(x)=4(0)+4(0)', isCorrect: false },
-//                             { id: 3, label: 'f(x)=4(0)+4(1)', isCorrect: false },
-//                             { id: 4, label: 'f(x)=4(1)+4(0)', isCorrect: true },
-//                         ],
-//                     },
-//                     {
-//                         id: 2,
-//                         description: 'Multiply the derivative by the coefficient.',
-//                         order: 2,
-//                         options: [
-//                             { id: 1, label: 'f(x)=8', isCorrect: false },
-//                             { id: 2, label: 'f(x)=0', isCorrect: false },
-//                             { id: 3, label: 'f(x)=4', isCorrect: true },
-//                             { id: 4, label: 'f(x)=x', isCorrect: false },
-//                         ],
-//                     },
-//                 ],
-//             },
-//         ],
-//     },
-// ];
-
 const assetEnergy = '/assets/energy.png';
+const spriteBgCombat = '/assets/bg-battle.jpg';
 
 export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
-    const spriteBgCombat = '/assets/bg-battle.jpg';
-
     const [heroHealth, setHeroHealth] = useState(100);
     const [heroEnergy, setHeroEnergy] = useState(4);
     const [turn, setTurn] = useState(0);
@@ -200,7 +45,9 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
     const [isAttacking, setIsAttacking] = useState(false);
     const [energyTexture, setEnergyTexture] = useState<Texture | null>(null);
-    // const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
+    const [stolenCards, setStolenCards] = useState<ICard[]>(cards.slice(4, cards.length));
+    const [cardsInHand, setCardsInHand] = useState<ICard[]>(cards.slice(0, 4));
+    const [discardedCards, setDiscardedCards] = useState<ICard[]>([]);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: hero,
@@ -222,8 +69,6 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
         [],
     );
 
-    
-
     const attack = () => {
         if (selectedCard && selectedEnemy && heroEnergy > 0) {
             setHeroEnergy(prevHeroEnergy => prevHeroEnergy - 1);
@@ -234,6 +79,8 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
                     return enemy;
                 }
             }));
+            setDiscardedCards(prev => [...prev, selectedCard]);
+            setCardsInHand(prev => prev.filter(card => card.id !== selectedCard.id));
         }
     }
 
@@ -328,8 +175,8 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
             ))}
 
             <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={hero} energyTexture={energyTexture} maxEnergy={maxHeroEnergy} currentEnergy={heroEnergy} />
-            <CombatCards
-                cards={cards}
+            <CardsInHand
+                cards={cardsInHand}
                 setIsCardHeldDown={setIsCardHeldDown}
                 setCardPosition={setSelectedCardPosition}
                 isTargetAssigned={isTargetAssigned}
@@ -338,6 +185,7 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
                 isDisabled={heroEnergy <= 0}
             />
             <NextTurnButton onClick={nextTurn} />
+            <DiscardedCardsStack cards={discardedCards} />
             {(isAttacking && selectedCard && selectedEnemy && selectedCard.exercises && selectedCard.exercises.length > 0) && (
                 <Exercise
                     enemy={selectedEnemy}
@@ -365,122 +213,3 @@ const CombatEnemies = ({ enemies }: ICombatEnemiesProps) => {
         </>
     );
 };
-
-const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard, isDisabled }: ICombatCardProps) => {
-    return (
-        <>
-            {cards.map((card, index) => {
-                const cardSpacing = 240;
-                const totalWidth = cards.length * cardSpacing - 20;
-                const startX = (window.innerWidth - totalWidth) / 2;
-                const baseYPosition = window.innerHeight - 320;
-                const centerIndex = (cards.length - 1) / 2;
-                const rotationAngle = (index - centerIndex) * 0.15;
-                const isFirstCard = index === 0;
-                const isLastCard = index === cards.length - 1;
-                const isExtremeCard = isFirstCard || isLastCard;
-                const elevationAmount = isExtremeCard ? 0 : -40;
-
-                const cardPosition = {
-                    x: startX + index * cardSpacing,
-                    y: baseYPosition + elevationAmount,
-                };
-
-                return (
-                    <Card
-                        key={card.id}
-                        card={card}
-                        onHeldDownChange={isDisabled ? () => {} : setIsCardHeldDown}
-                        onCardPositionChange={isDisabled ? () => {} : setCardPosition}
-                        isTargetAssigned={isTargetAssigned}
-                        onAttack={isDisabled ? () => {} : setIsAttacking}
-                        initialPosition={cardPosition}
-                        initialRotation={rotationAngle}
-                        onSelectedCard={isDisabled ? () => {} : setSelectedCard}
-                        isDisabled={isDisabled}
-                    />
-                );
-            })}
-        </>
-    );
-};
-
-const NextTurnButton = ({ onClick }: INextTurnButtonProps) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [animationProgress, setAnimationProgress] = useState(0);
-
-    useTick(() => {
-        const target = isHovered ? 1 : 0;
-        const speed = 0.1;
-        setAnimationProgress(prev => {
-            const diff = target - prev;
-            if (Math.abs(diff) < 0.01) return target;
-            return prev + diff * speed;
-        });
-    });
-
-    const interpolateColor = (color1: number, color2: number, progress: number) => {
-        const r1 = (color1 >> 16) & 0xFF;
-        const g1 = (color1 >> 8) & 0xFF;
-        const b1 = color1 & 0xFF;
-        
-        const r2 = (color2 >> 16) & 0xFF;
-        const g2 = (color2 >> 8) & 0xFF;
-        const b2 = color2 & 0xFF;
-        
-        const r = Math.round(r1 + (r2 - r1) * progress);
-        const g = Math.round(g1 + (g2 - g1) * progress);
-        const b = Math.round(b1 + (b2 - b1) * progress);
-        
-        return (r << 16) | (g << 8) | b;
-    };
-
-    const backgroundColor = interpolateColor(0x2c2c2c, 0xFFD700, animationProgress);
-    const borderColor = interpolateColor(0x444444, 0xDAA520, animationProgress);
-    const strokeColor = interpolateColor(0x000000, 0xDAA520, animationProgress);
-    
-    const yOffset = animationProgress * 3;
-    const shadowAlpha = (1 - animationProgress) * 0.3;
-
-    return (
-        <pixiContainer 
-            x={window.innerWidth - 240} 
-            y={window.innerHeight - 100 + yOffset} 
-            interactive={true}
-            zIndex={10}
-            eventMode="static"
-            cursor="pointer"
-            onClick={onClick}
-            onPointerOver={() => setIsHovered(true)}
-            onPointerOut={() => setIsHovered(false)}
-        >
-            <pixiGraphics
-                draw={(g) => {
-                    g.clear();
-                    
-                    if (shadowAlpha > 0.01) {
-                        g.roundRect(5, 5, 200, 60, 12);
-                        g.fill({ color: 0x000000, alpha: shadowAlpha });
-                    }
-                    
-                    g.roundRect(0, 0, 200, 60, 12);
-                    g.fill({ color: backgroundColor });
-                    g.stroke({ color: borderColor, width: 2 });
-                }}
-            />
-            <pixiText
-                text="Terminar Turno"
-                anchor={0.5}
-                x={100}
-                y={30}
-                style={{
-                    fontFamily: 'Arial',
-                    fontSize: 20,
-                    fill: 0xffffff,
-                    fontWeight: '600',
-                    stroke: { color: strokeColor, width: 1 },
-                }}
-            />
-        </pixiContainer>
-    );
-}
