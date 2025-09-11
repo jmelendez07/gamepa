@@ -4,6 +4,7 @@ import * as PIXI from 'pixi.js';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
+import { Tricks } from './tricks';
 
 extend({ Container, Sprite, Text, Graphics, Point });
 
@@ -33,26 +34,27 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
     const [answersTexture, setAnswersTexture] = useState<Texture | null>(null);
     const [isAnswerIsDragging, setIsAnswerIsDragging] = useState(false);
-    const [isOverTarget, setIsOverTarget] = useState(false); // Nuevo estado para la colisión
+    const [isOverTarget, setIsOverTarget] = useState(false);
+    const [isShowingTricks, setIsShowingTricks] = useState(false);
     const [isCancellingAnswer, setIsCancellingAnswer] = useState(false);
-    const exerciseContainerX = window.innerWidth / 2 - (window.innerWidth * 0.5) / 2;
-    const exerciseContainerY = window.innerHeight / 2 - (window.innerHeight * 0.8) / 2;
     const [answerSelectedPosition, setAnswerSelectedPosition] = useState<{ x: number; y: number } | null>(null);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [scrollOffset, setScrollOffset] = useState(0);
+    const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
+
     const width = window.innerWidth * 0.5;
     const height = window.innerHeight * 0.8;
     const containerX = window.innerWidth / 2 - width / 2;
     const containerY = window.innerHeight / 2 - height / 2;
     const answersWidth = window.innerWidth * 0.45;
     const centerXRelativeToContainer = (width - answersWidth) / 2;
+    const exerciseContainerX = window.innerWidth / 2 - (window.innerWidth * 0.5) / 2;
+    const exerciseContainerY = window.innerHeight / 2 - (window.innerHeight * 0.8) / 2;
 
-    const [currentStep, setCurrentStep] = useState(0);
-    const [scrollOffset, setScrollOffset] = useState(0);
-
-    const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
     const answerTargetRef = useRef<Graphics>(null);
     const answersGraphicsRef = useRef<Graphics>(null);
-    const answersContainerRef = useRef<Container>(null);
-    const draggingAnswerRef = useRef<Container | null>(null); // Ref para el contenedor arrastrado
+    const draggingAnswerRef = useRef<Container | null>(null);
+    const exerciseContainerRef = useRef<Container>(null);
 
     const handleAnswerDragStart = (answerContainer: Container | null) => {
         draggingAnswerRef.current = answerContainer;
@@ -103,6 +105,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             }
                         } else {
                             console.log('Wrong answer, try again.');
+                            setIsShowingTricks(true);
                             const newDamage = updateAttackStat(card);
                             if (newDamage) {
                                 console.log('New damage after wrong answer:', newDamage);
@@ -121,24 +124,76 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             setIsOverTarget(false);
             setIsCancellingAnswer(false);
         },
-        [currentStep, exercise, onIsAttacking], // ← Agregar dependencias
+        [currentStep, exercise, onIsAttacking, card, cardBaseStat], // ← Dependencias actualizadas
     );
 
     const updateAttackStat = (card: ICard | null) => {
         if (card) {
             const updatedCard = { ...card, stats: card.stats - card.stats * 0.1 }; // Reduce en 10% el stat de ataque
-            // Aquí deberías actualizar el estado global o el contexto donde se almacena la carta
             console.log('Card attack stat decreased:', updatedCard);
             const newDamage = updatedCard.stats;
             return Math.floor(newDamage);
         }
     };
 
-    const handleWheelOnExerciseArea = useCallback((e: PIXI.FederatedWheelEvent) => {
-        e.stopPropagation();
-        // Actualiza el estado del desplazamiento basado en el movimiento de la rueda del ratón
-        setScrollOffset((prevOffset) => prevOffset - e.deltaY);
-    }, []);
+    const handleWheelOnExerciseArea = useCallback(
+        (e: PIXI.FederatedWheelEvent) => {
+            e.stopPropagation();
+            const delta = e.deltaY * 0.5;
+
+            setScrollOffset((prevOffset) => {
+                const newOffset = prevOffset - delta;
+
+                const topBoundary = 80;
+                const bottomBoundary = 430;
+                const visibleHeight = bottomBoundary - topBoundary;
+
+                const answerHeight = height / 10;
+                const singleStepHeight = answerHeight + 10;
+                const totalStepsHeight = playerAnswers.length * singleStepHeight;
+
+                const maxScroll = 0;
+                if (newOffset > maxScroll) return maxScroll;
+
+                if (totalStepsHeight > visibleHeight) {
+                    const minScroll = bottomBoundary - (answerHeight + 21 + playerAnswers.length * singleStepHeight);
+                    if (newOffset < minScroll) return minScroll;
+                } else {
+                    return maxScroll;
+                }
+
+                return newOffset;
+            });
+        },
+        [playerAnswers.length, height],
+    );
+
+    // Click en flechas: desplaza una fila y hace clamp a los límites
+    const scrollByArrow = useCallback(
+        (direction: 'up' | 'down') => {
+            setScrollOffset((prev) => {
+                const topBoundary = 80;
+                const bottomBoundary = 430;
+
+                const answerHeight = height / 10;
+                const singleStepHeight = answerHeight + 10;
+                const totalStepsHeight = playerAnswers.length * singleStepHeight;
+                const visibleHeight = bottomBoundary - topBoundary;
+
+                const maxScroll = 0;
+                const minScroll = totalStepsHeight > visibleHeight ? bottomBoundary - (answerHeight + 21 + totalStepsHeight) : 0;
+
+                const delta = direction === 'up' ? singleStepHeight : -singleStepHeight;
+                let next = prev + delta;
+
+                if (next > maxScroll) next = maxScroll;
+                if (next < minScroll) next = minScroll;
+
+                return next;
+            });
+        },
+        [height, playerAnswers.length],
+    );
 
     useEffect(() => {
         if (isAnswerIsDragging && draggingAnswerRef.current && answersGraphicsRef.current && answerTargetRef.current) {
@@ -177,6 +232,25 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             setIsCancellingAnswer(false);
         }
     }, [isAnswerIsDragging, answerSelectedPosition]); // Se ejecuta en cada movimiento
+
+    useEffect(() => {
+        if (playerAnswers.length > 0) {
+            const topBoundary = 80;
+            const bottomBoundary = 430; // ← unificado con el wheel y el render
+            const answerHeight = height / 10;
+            const singleStepHeight = answerHeight + 10;
+
+            const visibleHeight = bottomBoundary - topBoundary;
+            const totalStepsHeight = playerAnswers.length * singleStepHeight;
+
+            if (totalStepsHeight > visibleHeight) {
+                // Offset exacto para alinear el último elemento al borde inferior visible
+                const newScrollOffset = bottomBoundary - (answerHeight + 21 + playerAnswers.length * singleStepHeight);
+
+                setScrollOffset(Math.min(0, newScrollOffset)); // clamp por arriba
+            }
+        }
+    }, [playerAnswers.length, height]); // Se ejecuta cada vez que se añade una respuesta
 
     useEffect(() => {
         let cancelled = false;
@@ -218,8 +292,28 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
         };
     }, []);
 
+    // Cálculo para visibilidad de flechas
+    const topBoundary = 80;
+    const bottomBoundary = 430;
+    const answerItemHeight = height / 10;
+    const singleStepHeight = answerItemHeight + 10;
+    const totalStepsHeight = playerAnswers.length * singleStepHeight;
+    const visibleHeight = bottomBoundary - topBoundary;
+    const hasOverflow = totalStepsHeight > visibleHeight;
+    const minScroll = hasOverflow ? bottomBoundary - (answerItemHeight + 21 + totalStepsHeight) : 0;
+
+    const canScrollUp = hasOverflow && scrollOffset < 0;
+    const canScrollDown = hasOverflow && scrollOffset > minScroll;
+
     return (
-        <pixiContainer x={exerciseContainerX} y={exerciseContainerY} onWheel={handleWheelOnExerciseArea} interactive={true}>
+        <pixiContainer
+            ref={exerciseContainerRef}
+            x={exerciseContainerX}
+            y={exerciseContainerY}
+            onWheel={handleWheelOnExerciseArea}
+            interactive={true}
+            sortableChildren={true}
+        >
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
 
             <pixiText
@@ -265,15 +359,54 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                     fontFamily: 'Arial',
                 }}
             />
+
+            {canScrollUp && (
+                <pixiText
+                    text="↑"
+                    x={width / 2}
+                    y={50}
+                    anchor={0.5}
+                    zIndex={1}
+                    interactive={true}
+                    cursor="pointer"
+                    onClick={() => scrollByArrow('up')}
+                    style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                />
+            )}
+
+            {canScrollDown && (
+                <pixiText
+                    text="↓"
+                    x={width / 2}
+                    y={height / 2}
+                    anchor={0.5}
+                    zIndex={1}
+                    interactive={true}
+                    cursor="pointer"
+                    onClick={() => scrollByArrow('down')}
+                    style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                />
+            )}
+
             {playerAnswers.map((step, index) => {
+                const answerHeight = height / 10;
+                const singleStepHeight = answerHeight + 10;
+
+                const answerY = 21 + (index + 1) * singleStepHeight + scrollOffset;
+                const topBoundary = 80;
+                const bottomBoundary = 430; // ← unificado
+
+                const isVisible = answerY >= topBoundary && answerY + answerHeight <= bottomBoundary;
+
+                if (!isVisible) return null;
+
                 return (
                     <pixiContainer key={index} zIndex={0}>
                         <Fragment key={index}>
                             <pixiGraphics
                                 draw={(g) => {
                                     g.clear();
-                                    // Aplica el desplazamiento a la posición Y del rectángulo
-                                    g.roundRect(26, 21 + (index + 1) * (height / 10 + 10) + scrollOffset, width - 55, height / 10);
+                                    g.roundRect(26, answerY, width - 55, answerHeight);
                                     g.fill({ color: 0x000000, alpha: 0.01 });
                                     g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
                                 }}
@@ -281,15 +414,10 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             <pixiText
                                 text={step.text}
                                 x={100}
-                                // Aplica el desplazamiento a la posición Y del texto
-                                y={60 + (index + 1) * (height / 10 + 10) + scrollOffset}
+                                y={answerY + answerHeight / 2}
                                 anchor={0.5}
                                 zIndex={1}
-                                style={{
-                                    fontSize: 24,
-                                    fill: 0xffffff,
-                                    fontFamily: 'Arial',
-                                }}
+                                style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
                             />
                         </Fragment>
                     </pixiContainer>
@@ -349,6 +477,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                     }}
                 />
             )}
+            {isShowingTricks && <Tricks onClose={() => setIsShowingTricks(false)} />}
         </pixiContainer>
     );
 };
