@@ -8,7 +8,6 @@ import { Card } from './card/card';
 import { Enemy } from './enemy/enemy';
 import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
-import { set } from 'react-hook-form';
 
 extend({ Sprite, Container, Graphics });
 
@@ -199,13 +198,45 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
     const [isAttacking, setIsAttacking] = useState(false);
     const [energyTexture, setEnergyTexture] = useState<Texture | null>(null);
+    const [isAttackingAnimation, setIsAttackingAnimation] = useState(false);
 
-    const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
+    const {
+        sprite: heroSprite,
+        updateSprite: updateHeroSprite,
+        updateAttackSprite: updateHeroAttackSprite,
+        resetAnimation: resetHeroAnimation,
+    } = useHeroAnimation({
         texture: hero,
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: 2,
+        totalFrames: isAttackingAnimation ? 21 : 2,
         animationSpeed: ANIMATION_SPEED,
+    });
+
+    useTick((ticker) => {
+        const deltaTime = ticker.deltaTime;
+
+        if (isAttackingAnimation) {
+            const keepPlaying = updateHeroAttackSprite('RIGHT', false, false, false, true);
+            if (!keepPlaying) {
+                resetHeroAnimation();
+                setIsAttackingAnimation(false);
+            }
+        } else {
+            updateHeroSprite('DOWN', true, true, false, false);
+        }
+
+        if (isCardHeldDown) {
+            enemies.forEach((enemy) => {
+                if (enemy.combatPosition && assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemy.combatPosition })) {
+                    setIsTargetAssigned(true);
+                    setSelectedEnemy(enemy);
+                } else {
+                    setIsTargetAssigned(false);
+                    setSelectedEnemy(null);
+                }
+            });
+        }
     });
 
     const assignCardTarget = useCallback(
@@ -222,46 +253,33 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
 
     const attack = () => {
         if (selectedCard && selectedEnemy && heroEnergy > 0) {
-            setHeroEnergy(prevHeroEnergy => prevHeroEnergy - 1);
-            onSetSelectedEnemies(enemies.map(enemy => {
-                if (enemy.id === selectedEnemy.id) {
-                    return { ...enemy, health: enemy.health - selectedCard.stats };
-                } else {
-                    return enemy;
-                }
-            }));
+            setHeroEnergy((prevHeroEnergy) => prevHeroEnergy - 1);
+            onSetSelectedEnemies(
+                enemies.map((enemy) => {
+                    if (enemy.id === selectedEnemy.id) {
+                        resetHeroAnimation();
+                        setIsAttackingAnimation(true);
+                        return { ...enemy, health: enemy.health - selectedCard.stats };
+                    } else {
+                        return enemy;
+                    }
+                }),
+            );
         }
-    }
+    };
 
     const nextTurn = () => {
-        setTurn(prev => prev + 1);
+        setTurn((prev) => prev + 1);
         setHeroEnergy(maxHeroEnergy);
-        enemies.forEach(enemy => {
+        enemies.forEach((enemy) => {
             if (heroHealth > 0) {
-                setHeroHealth(prevHeroHealth => {
+                setHeroHealth((prevHeroHealth) => {
                     const newHealth = prevHeroHealth - enemy.basicAttack;
                     return newHealth < 0 ? 0 : newHealth;
                 });
             }
         });
-    }
-
-    useTick((ticker) => {
-        const deltaTime = ticker.deltaTime;
-
-        updateHeroSprite('DOWN', true, true);
-        if (isCardHeldDown) {
-            enemies.forEach(enemy => {
-                if (enemy.combatPosition && assignCardTarget({ cardPosition: selectedCardPosition, characterTarget: enemy.combatPosition })) {
-                    setIsTargetAssigned(true);
-                    setSelectedEnemy(enemy);
-                } else {
-                    setIsTargetAssigned(false);
-                    setSelectedEnemy(null);
-                }
-            });
-        }
-    });
+    };
 
     useEffect(() => {
         let cancelled = false;
@@ -276,10 +294,9 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
                 console.error('Failed to load combat background texture:', err);
             });
 
-        Assets.load<Texture>(assetEnergy)
-            .then((text) => {
-                setEnergyTexture(text);
-            });
+        Assets.load<Texture>(assetEnergy).then((text) => {
+            setEnergyTexture(text);
+        });
 
         return () => {
             cancelled = true;
@@ -287,7 +304,7 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
     }, []);
 
     useEffect(() => {
-        if (enemies.every(enemy => enemy.health <= 0)) {
+        if (enemies.every((enemy) => enemy.health <= 0)) {
             finish(true);
         } else if (heroHealth <= 0) {
             lose();
@@ -317,18 +334,26 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
 
             <CombatEnemies enemies={enemies} />
 
-            {isCardHeldDown && enemies.map(enemy => (
-                <pixiGraphics
-                    key={enemy.id}
-                    draw={(g) => {
-                        g.clear();
-                        g.rect(enemy.combatPosition.x, enemy.combatPosition.y, 128, 128);
-                        g.stroke({ color: isTargetAssigned ? 0x00ff00 : 0xff0000, width: 5 });
-                    }}
-                />
-            ))}
+            {isCardHeldDown &&
+                enemies.map((enemy) => (
+                    <pixiGraphics
+                        key={enemy.id}
+                        draw={(g) => {
+                            g.clear();
+                            g.rect(enemy.combatPosition.x, enemy.combatPosition.y, 128, 128);
+                            g.stroke({ color: isTargetAssigned ? 0x00ff00 : 0xff0000, width: 5 });
+                        }}
+                    />
+                ))}
 
-            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={hero} energyTexture={energyTexture} maxEnergy={maxHeroEnergy} currentEnergy={heroEnergy} />
+            <HeroStats
+                currentHp={heroHealth}
+                maxHp={maxHeroHealth}
+                heroTexture={hero}
+                energyTexture={energyTexture}
+                maxEnergy={maxHeroEnergy}
+                currentEnergy={heroEnergy}
+            />
             <CombatCards
                 cards={cards}
                 setIsCardHeldDown={setIsCardHeldDown}
@@ -339,7 +364,7 @@ export const Combat = ({ hero, enemies, onSetSelectedEnemies, finish, lose }: IC
                 isDisabled={heroEnergy <= 0}
             />
             <NextTurnButton onClick={nextTurn} />
-            {(isAttacking && selectedCard && selectedEnemy) && (
+            {isAttacking && selectedCard && selectedEnemy && (
                 <Exercise
                     enemy={selectedEnemy}
                     card={selectedCard}
@@ -367,7 +392,15 @@ const CombatEnemies = ({ enemies }: ICombatEnemiesProps) => {
     );
 };
 
-const CombatCards = ({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard, isDisabled }: ICombatCardProps) => {
+const CombatCards = ({
+    cards,
+    setIsCardHeldDown,
+    setCardPosition,
+    isTargetAssigned,
+    setIsAttacking,
+    setSelectedCard,
+    isDisabled,
+}: ICombatCardProps) => {
     return (
         <>
             {cards.map((card, index) => {
@@ -413,7 +446,7 @@ const NextTurnButton = ({ onClick }: INextTurnButtonProps) => {
     useTick(() => {
         const target = isHovered ? 1 : 0;
         const speed = 0.1;
-        setAnimationProgress(prev => {
+        setAnimationProgress((prev) => {
             const diff = target - prev;
             if (Math.abs(diff) < 0.01) return target;
             return prev + diff * speed;
@@ -421,32 +454,32 @@ const NextTurnButton = ({ onClick }: INextTurnButtonProps) => {
     });
 
     const interpolateColor = (color1: number, color2: number, progress: number) => {
-        const r1 = (color1 >> 16) & 0xFF;
-        const g1 = (color1 >> 8) & 0xFF;
-        const b1 = color1 & 0xFF;
-        
-        const r2 = (color2 >> 16) & 0xFF;
-        const g2 = (color2 >> 8) & 0xFF;
-        const b2 = color2 & 0xFF;
-        
+        const r1 = (color1 >> 16) & 0xff;
+        const g1 = (color1 >> 8) & 0xff;
+        const b1 = color1 & 0xff;
+
+        const r2 = (color2 >> 16) & 0xff;
+        const g2 = (color2 >> 8) & 0xff;
+        const b2 = color2 & 0xff;
+
         const r = Math.round(r1 + (r2 - r1) * progress);
         const g = Math.round(g1 + (g2 - g1) * progress);
         const b = Math.round(b1 + (b2 - b1) * progress);
-        
+
         return (r << 16) | (g << 8) | b;
     };
 
-    const backgroundColor = interpolateColor(0x2c2c2c, 0xFFD700, animationProgress);
-    const borderColor = interpolateColor(0x444444, 0xDAA520, animationProgress);
-    const strokeColor = interpolateColor(0x000000, 0xDAA520, animationProgress);
-    
+    const backgroundColor = interpolateColor(0x2c2c2c, 0xffd700, animationProgress);
+    const borderColor = interpolateColor(0x444444, 0xdaa520, animationProgress);
+    const strokeColor = interpolateColor(0x000000, 0xdaa520, animationProgress);
+
     const yOffset = animationProgress * 3;
     const shadowAlpha = (1 - animationProgress) * 0.3;
 
     return (
-        <pixiContainer 
-            x={window.innerWidth - 240} 
-            y={window.innerHeight - 100 + yOffset} 
+        <pixiContainer
+            x={window.innerWidth - 240}
+            y={window.innerHeight - 100 + yOffset}
             interactive={true}
             zIndex={10}
             eventMode="static"
@@ -458,12 +491,12 @@ const NextTurnButton = ({ onClick }: INextTurnButtonProps) => {
             <pixiGraphics
                 draw={(g) => {
                     g.clear();
-                    
+
                     if (shadowAlpha > 0.01) {
                         g.roundRect(5, 5, 200, 60, 12);
                         g.fill({ color: 0x000000, alpha: shadowAlpha });
                     }
-                    
+
                     g.roundRect(0, 0, 200, 60, 12);
                     g.fill({ color: backgroundColor });
                     g.stroke({ color: borderColor, width: 2 });
@@ -484,4 +517,4 @@ const NextTurnButton = ({ onClick }: INextTurnButtonProps) => {
             />
         </pixiContainer>
     );
-}
+};

@@ -56,6 +56,19 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const draggingAnswerRef = useRef<Container | null>(null);
     const exerciseContainerRef = useRef<Container>(null);
 
+    // Cálculo para visibilidad de flechas
+    const topBoundary = 80;
+    const bottomBoundary = 430;
+    const answerItemHeight = height / 10;
+    const singleStepHeight = answerItemHeight + 10;
+    const totalStepsHeight = playerAnswers.length * singleStepHeight;
+    const visibleHeight = bottomBoundary - topBoundary;
+    const hasOverflow = totalStepsHeight > visibleHeight;
+    const minScroll = hasOverflow ? bottomBoundary - (answerItemHeight + 21 + totalStepsHeight) : 0;
+
+    const canScrollUp = hasOverflow && scrollOffset < 0;
+    const canScrollDown = hasOverflow && scrollOffset > minScroll;
+
     const handleAnswerDragStart = (answerContainer: Container | null) => {
         draggingAnswerRef.current = answerContainer;
     };
@@ -291,19 +304,6 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             swordTexture?.destroy();
         };
     }, []);
-
-    // Cálculo para visibilidad de flechas
-    const topBoundary = 80;
-    const bottomBoundary = 430;
-    const answerItemHeight = height / 10;
-    const singleStepHeight = answerItemHeight + 10;
-    const totalStepsHeight = playerAnswers.length * singleStepHeight;
-    const visibleHeight = bottomBoundary - topBoundary;
-    const hasOverflow = totalStepsHeight > visibleHeight;
-    const minScroll = hasOverflow ? bottomBoundary - (answerItemHeight + 21 + totalStepsHeight) : 0;
-
-    const canScrollUp = hasOverflow && scrollOffset < 0;
-    const canScrollDown = hasOverflow && scrollOffset > minScroll;
 
     return (
         <pixiContainer
