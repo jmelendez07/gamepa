@@ -18,7 +18,7 @@ class GameplayController extends Controller
         });
 
         $skip = mt_rand(0, max(0, Card::count() - 8));
-        $cards = Card::with(['exercises.steps.options'])->skip($skip)->take(8)->get();
+        $cards = Card::with(['exercises.steps.options', 'type'])->skip($skip)->take(8)->get();
 
         return Inertia::render('gameplay', [
             'enemies' => $enemies,

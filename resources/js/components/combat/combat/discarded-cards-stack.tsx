@@ -2,10 +2,11 @@ import Card from "@/types/card";
 import { useCallback, useState } from 'react';
 
 interface IDiscardedCardsStackProps {
+    onClick: (value: boolean) => void;
     cards: Card[];
 }
 
-export default function DiscardedCardsStack({ cards }: IDiscardedCardsStackProps) {
+export default function DiscardedCardsStack({ onClick, cards }: IDiscardedCardsStackProps) {
     const [isHovered, setIsHovered] = useState(false);
     
 
@@ -48,6 +49,7 @@ export default function DiscardedCardsStack({ cards }: IDiscardedCardsStackProps
             y={window.innerHeight - 210}
             onPointerOver={() => setIsHovered(true)}
             onPointerOut={() => setIsHovered(false)}
+            onClick={() => onClick(true)}
         >
             <pixiGraphics draw={drawCardStack} />
 

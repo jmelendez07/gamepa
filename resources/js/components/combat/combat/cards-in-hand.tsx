@@ -33,7 +33,7 @@ export default function CardsInHand({ cards, setIsCardHeldDown, setCardPosition,
 
                 return (
                     <Card
-                        key={card.id}
+                        key={card.id + '-' + cards.length}
                         card={card}
                         onHeldDownChange={isDisabled ? () => {} : setIsCardHeldDown}
                         onCardPositionChange={isDisabled ? () => {} : setCardPosition}

@@ -15,6 +15,8 @@ class ExerciseSeeder extends Seeder
     {
         $planets = Planet::all();
         $difficulties = Dificulty::all();
+        $cards = Card::all();
+        $cardIndex = 0;
 
         foreach ($planets as $planet) {
             foreach ($difficulties as $difficulty) {
@@ -24,13 +26,10 @@ class ExerciseSeeder extends Seeder
                     'difficulty_id' => $difficulty->id,
                 ]);
 
-                $card = Card::raw(function($collection) {
-                    return $collection->aggregate([
-                        ['$sample' => ['size' => 1]]
-                    ]);
-                })->first();
-
+                $card = $cards[$cardIndex];
                 $card->exercises()->attach($exercise);
+
+                $cardIndex = ($cardIndex + 1) % count($cards);
             }
         }
     }

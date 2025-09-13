@@ -11,7 +11,9 @@ import ICard from '@/types/card';
 import NextTurnButton from './combat/next-turn-button';
 import DiscardedCardsStack from './combat/discarded-cards-stack';
 import CardsInHand from './combat/cards-in-hand';
-import { set } from 'react-hook-form';
+import StolenCardsStack from './combat/stolen-cards-stack';
+import DiscardedCardsModal from './combat/discarded-cards-modal';
+import StolenCardsModal from './combat/stolen-cards-modal';
 
 extend({ Sprite, Container, Graphics });
 
@@ -27,6 +29,8 @@ interface ICombatProps {
 interface ICombatEnemiesProps {
     enemies: IEnemy[];
 }
+
+const MAX_CARDS_IN_HAND = 4;
 
 const assetEnergy = '/assets/energy.png';
 const spriteBgCombat = '/assets/bg-battle.jpg';
@@ -45,9 +49,11 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
     const [isTargetAssigned, setIsTargetAssigned] = useState(false);
     const [isAttacking, setIsAttacking] = useState(false);
     const [energyTexture, setEnergyTexture] = useState<Texture | null>(null);
-    const [stolenCards, setStolenCards] = useState<ICard[]>(cards.slice(4, cards.length));
-    const [cardsInHand, setCardsInHand] = useState<ICard[]>(cards.slice(0, 4));
+    const [stolenCards, setStolenCards] = useState<ICard[]>(cards.slice(MAX_CARDS_IN_HAND, cards.length));
+    const [cardsInHand, setCardsInHand] = useState<ICard[]>(cards.slice(0, MAX_CARDS_IN_HAND));
     const [discardedCards, setDiscardedCards] = useState<ICard[]>([]);
+    const [showDiscardedCardsModal, setShowDiscardedCardsModal] = useState(false);
+    const [showStolenCardsModal, setShowStolenCardsModal] = useState(false);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
         texture: hero,
@@ -81,12 +87,26 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
             }));
             setDiscardedCards(prev => [...prev, selectedCard]);
             setCardsInHand(prev => prev.filter(card => card.id !== selectedCard.id));
+            setSelectedCard(null);
+            setIsAttacking(false);
+            setIsTargetAssigned(false);
+            setSelectedCardPosition({ x: 0, y: 0 });
         }
     }
 
     const nextTurn = () => {
         setTurn(prev => prev + 1);
         setHeroEnergy(maxHeroEnergy);
+        setStolenCards(prev => [...prev,...discardedCards]);
+        setDiscardedCards([]);
+
+        if (cardsInHand.length < MAX_CARDS_IN_HAND) {
+            const cardsNeeded = MAX_CARDS_IN_HAND - cardsInHand.length;
+            const newCards = stolenCards.slice(0, cardsNeeded);
+            setCardsInHand(prev => [...prev, ...newCards]);
+            setStolenCards(prev => prev.slice(newCards.length, prev.length));
+        }
+
         enemies.forEach(enemy => {
             if (heroHealth > 0) {
                 setHeroHealth(prevHeroHealth => {
@@ -184,8 +204,9 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
                 setSelectedCard={setSelectedCard}
                 isDisabled={heroEnergy <= 0}
             />
+            <StolenCardsStack onClick={(value) => setShowStolenCardsModal(value)} cards={stolenCards} />
             <NextTurnButton onClick={nextTurn} />
-            <DiscardedCardsStack cards={discardedCards} />
+            <DiscardedCardsStack onClick={(value) => setShowDiscardedCardsModal(value)} cards={discardedCards} />
             {(isAttacking && selectedCard && selectedEnemy && selectedCard.exercises && selectedCard.exercises.length > 0) && (
                 <Exercise
                     enemy={selectedEnemy}
@@ -200,6 +221,8 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
                     attack={attack}
                 />
             )}
+            <DiscardedCardsModal cards={discardedCards} onClose={(value) => setShowDiscardedCardsModal(value)} isOpen={showDiscardedCardsModal} />
+            <StolenCardsModal cards={stolenCards} onClose={(value) => setShowStolenCardsModal(value)} isOpen={showStolenCardsModal} />
         </pixiContainer>
     );
 };
