@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { type PageProps, type BreadcrumbItem } from '@/types';
 import Exercise, { Difficulty } from '@/types/exercise';
 import { useState, useEffect } from 'react';
@@ -257,7 +257,7 @@ export default function ExercisesIndex({ exercises, difficulties, planets }: IEx
                         filteredExercises.map((exercise) => (
                             <div
                                 key={exercise.id}
-                                className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all duration-200 p-6"
+                                className="bg-white rounded-xl relative border border-gray-200 hover:shadow-md transition-all duration-200 p-6"
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
@@ -300,7 +300,7 @@ export default function ExercisesIndex({ exercises, difficulties, planets }: IEx
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleEdit(exercise)}
-                                            className="cursor-pointer size-8 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                                            className="cursor-pointer z-1 size-8 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                                         >
                                             <Edit className="w-4 h-4" />
                                         </Button>
@@ -308,12 +308,13 @@ export default function ExercisesIndex({ exercises, difficulties, planets }: IEx
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleDelete(exercise)}
-                                            className="cursor-pointer size-8 text-red-600 hover:text-red-800 hover:bg-red-50"
+                                            className="cursor-pointer z-1 size-8 text-red-600 hover:text-red-800 hover:bg-red-50"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
                                 </div>
+                                <Link href={route('exercises.show', exercise.id)} className='absolute inset-0'></Link>
                             </div>
                         ))
                     ) : (

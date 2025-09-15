@@ -110,6 +110,8 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
                 return false; // ← animación terminada
             }
 
+            console.log('next attack frame:', next);
+
             // Aún hay frames por reproducir: avanzamos
             frameRef.current = next;
             column = frameRef.current;

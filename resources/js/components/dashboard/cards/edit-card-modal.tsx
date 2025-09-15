@@ -112,26 +112,18 @@ export default function EditCardModal({
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                            <Sparkles className="h-5 w-5 text-emerald-600" />
+                            <Sparkles className="h-5 w-5" />
                             <span>Editar Carta</span>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCancel}
-                            className="h-6 w-6 p-0"
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
                     </DialogTitle>
                 </DialogHeader>
                 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6 mt-2">
                     <div className="space-y-2">
                         <Label htmlFor="edit-name">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                                Nombre de la Carta <span className="text-red-500">*</span>
+                                Nombre de la Carta
                             </div>
                         </Label>
                         <Input
@@ -154,7 +146,7 @@ export default function EditCardModal({
                         <Label htmlFor="edit-energy-cost">
                             <div className="flex items-center gap-2">
                                 <Zap className="w-4 h-4 text-yellow-600" />
-                                Costo de Energía <span className="text-red-500">*</span>
+                                Costo de Energía
                             </div>
                         </Label>
                         <Input
@@ -182,7 +174,7 @@ export default function EditCardModal({
                         <Label htmlFor="edit-stats">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-purple-600" />
-                                Estadísticas <span className="text-red-500">*</span>
+                                Estadísticas
                             </div>
                         </Label>
                         <Input
@@ -210,7 +202,7 @@ export default function EditCardModal({
                         <Label htmlFor="edit-type">
                             <div className="flex items-center gap-2">
                                 <Sword className="w-4 h-4 text-gray-600" />
-                                Tipo de Carta <span className="text-red-500">*</span>
+                                Tipo de Carta
                             </div>
                         </Label>
                         <Select value={data.type_id} onValueChange={(value) => handleInputChange('type_id', value)}>
@@ -285,13 +277,14 @@ export default function EditCardModal({
                             variant="outline"
                             onClick={handleCancel}
                             disabled={processing}
+                            className='cursor-pointer'
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="bg-emerald-600 hover:bg-emerald-700"
+                            className="cursor-pointer disabled:cursor-not-allowed bg-emerald-600 hover:bg-emerald-700"
                         >
                             {processing ? 'Actualizando...' : 'Actualizar Carta'}
                         </Button>

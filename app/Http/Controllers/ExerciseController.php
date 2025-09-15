@@ -47,7 +47,10 @@ class ExerciseController extends Controller
 
     public function show($exerciseId)
     {
-        return redirect()->route('exercises.index');
+        $exercise = Exercise::with(['planet', 'difficulty', 'steps.options'])->findOrFail($exerciseId);
+        return Inertia::render('dashboard/exercises/show', [
+            'exercise' => $exercise
+        ]);
     }
 
     public function edit($exerciseId)

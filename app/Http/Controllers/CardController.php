@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Models\Exercise;
 use App\Models\TypeCard;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -46,7 +47,15 @@ class CardController extends Controller
 
     public function show($cardId)
     {
-        return redirect()->route('cards.index');
+        $card = Card::with(['type', 'exercises.difficulty', 'exercises.planet', 'exercises.steps'])->findOrFail($cardId);
+        $exercises = Exercise::with(['difficulty', 'planet', 'steps'])->orderBy('updated_at', 'desc')->get();
+        $types = TypeCard::all();
+
+        return Inertia::render('dashboard/cards/show', [
+            'card' => $card,
+            'availableExercises' => $exercises,
+            'types' => $types,
+        ]);
     }
 
     public function edit($cardId)
@@ -72,7 +81,7 @@ class CardController extends Controller
             'type_card_id' => $request->type_id,
         ]);
 
-        return redirect()->route('cards.index')->with('success', 'Carta actualizada exitosamente.');
+        return redirect()->back()->with('success', 'Carta actualizada exitosamente.');
     }
 
     public function destroy($cardId)
@@ -81,5 +90,25 @@ class CardController extends Controller
         $card->delete();
 
         return redirect()->route('cards.index')->with('success', 'Carta eliminada exitosamente.');
+    }
+
+    public function assignExercise($cardId, $exerciseId)
+    {
+        $card = Card::findOrFail($cardId);
+        $exercise = Exercise::findOrFail($exerciseId);
+
+        $card->exercises()->attach($exercise);
+
+        return redirect()->back()->with('success', "Ejercicio {$exercise->operation} asignado.");
+    }
+
+    public function unassignExercise($cardId, $exerciseId)
+    {
+        $card = Card::findOrFail($cardId);
+        $exercise = Exercise::findOrFail($exerciseId);
+
+        $card->exercises()->detach($exercise);
+
+        return redirect()->back()->with('success', "Ejercicio {$exercise->operation} desasignado.");
     }
 }

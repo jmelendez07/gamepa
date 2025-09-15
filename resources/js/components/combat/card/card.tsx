@@ -1,4 +1,4 @@
-import { ICard } from '@/types';
+import ICard from '@/types/card';
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Sprite, Texture, Graphics, ColorMatrixFilter } from 'pixi.js';
 import { useEffect, useState, useMemo } from 'react';

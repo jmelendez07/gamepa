@@ -1,17 +1,19 @@
-import { ICard, IEnemy, IExercise } from '@/types';
 import { extend } from '@pixi/react';
 import * as PIXI from 'pixi.js';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
 import { Tricks } from './tricks';
+import IEnemy from '@/types/enemy';
+import ICard from '@/types/card';
+import IExercise from '@/types/exercise';
 
 extend({ Container, Sprite, Text, Graphics, Point });
 
 interface IExerciseProps {
     enemy: IEnemy;
-    card: ICard | null;
-    exercise?: IExercise | null;
+    card: ICard;
+    exercise: IExercise;
     onClose?: () => void;
     attack: () => void;
     onIsAttacking: (isAttacking: boolean) => void;
@@ -440,8 +442,8 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             return (
                                 <Answer
                                     key={opt.id}
-                                    text={opt.label}
-                                    isCorrect={opt.isCorrect}
+                                    text={opt.result}
+                                    isCorrect={opt.is_correct}
                                     x={xPosition}
                                     y={yPosition}
                                     width={answerWidth}

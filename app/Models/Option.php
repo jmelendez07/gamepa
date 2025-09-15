@@ -15,6 +15,7 @@ class Option extends Model
 
     protected $fillable = [
         'result',
+        'step_id',
         'is_correct'
     ];
 
