@@ -16,9 +16,16 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::resource('gameplay', GameplayController::class)->names('gameplay');
-
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware(['role:estudiante'])->group(function () {
+        Route::get('heroes/opciones', [HeroController::class, 'options'])->name('heroes.options');
+        Route::post('heroes/seleccionar', [HeroController::class, 'select'])->name('heroes.select');
+
+        Route::middleware(['check_user_hero'])->group(function () {
+            Route::resource('gameplay', GameplayController::class)->names('gameplay');
+        });
+    });
+
     Route::middleware(['role:administrador'])->group(function () {
         Route::get('panel', function () { return Inertia::render('dashboard'); })->name('dashboard');
         Route::resource('users', UserController::class)->names('users');

@@ -14,11 +14,13 @@ import CardsInHand from './combat/cards-in-hand';
 import StolenCardsStack from './combat/stolen-cards-stack';
 import DiscardedCardsModal from './combat/discarded-cards-modal';
 import StolenCardsModal from './combat/stolen-cards-modal';
+import Hero from '@/types/hero';
 
 extend({ Sprite, Container, Graphics });
 
 interface ICombatProps {
-    hero: Texture;
+    hero: Hero;
+    heroTexture: Texture;
     enemies: IEnemy[];
     cards: ICard[];
     onSetSelectedEnemies: (enemies: IEnemy[]) => void;
@@ -35,11 +37,11 @@ const MAX_CARDS_IN_HAND = 4;
 const assetEnergy = '/assets/energy.png';
 const spriteBgCombat = '/assets/bg-battle.jpg';
 
-export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
-    const [heroHealth, setHeroHealth] = useState(100);
+export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
+    const [heroHealth, setHeroHealth] = useState(hero.health);
     const [heroEnergy, setHeroEnergy] = useState(4);
     const [turn, setTurn] = useState(0);
-    const [maxHeroHealth] = useState(100);
+    const [maxHeroHealth] = useState(hero.health);
     const [maxHeroEnergy] = useState(4);
     const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
     const [isCardHeldDown, setIsCardHeldDown] = useState(false);
@@ -56,7 +58,7 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
     const [showStolenCardsModal, setShowStolenCardsModal] = useState(false);
 
     const { sprite: heroSprite, updateSprite: updateHeroSprite } = useHeroAnimation({
-        texture: hero,
+        texture: heroTexture,
         frameWidth: 64,
         frameHeight: 64,
         totalFrames: 2,
@@ -194,7 +196,7 @@ export const Combat = ({ hero, enemies, cards, onSetSelectedEnemies, finish, los
                 />
             ))}
 
-            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={hero} energyTexture={energyTexture} maxEnergy={maxHeroEnergy} currentEnergy={heroEnergy} />
+            <HeroStats currentHp={heroHealth} maxHp={maxHeroHealth} heroTexture={heroTexture} energyTexture={energyTexture} maxEnergy={maxHeroEnergy} currentEnergy={heroEnergy} />
             <CardsInHand
                 cards={cardsInHand}
                 setIsCardHeldDown={setIsCardHeldDown}

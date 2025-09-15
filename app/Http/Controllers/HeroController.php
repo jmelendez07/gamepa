@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hero;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class HeroController extends Controller
 {
@@ -58,5 +59,30 @@ class HeroController extends Controller
         $hero->delete();
 
         return redirect()->route('heroes.index')->with('success', 'Heroe ' . $hero->name . ' eliminado exitosamente.');
+    }
+
+    public function options() 
+    {
+        if (Auth::user()->heroes()->exists()) {
+            return redirect()->route('gameplay.index');
+        }
+
+        $heroes = Hero::all();
+
+        return Inertia::render('gameplay/heroes/options', [
+            'heroes' => $heroes,
+        ]);
+    }
+
+    public function select(Request $request) 
+    {
+        $request->validate([
+            'id' => 'required|string|exists:heroes,id'
+        ]);
+
+        $hero = Hero::findOrFail($request->id);
+        Auth::user()->heroes()->attach($hero->id);
+
+        return redirect()->route('gameplay.index');
     }
 }

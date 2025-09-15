@@ -6,6 +6,7 @@ import { Hero } from '@/components/Hero/hero';
 import { StageGame } from '@/components/stages/stageGame';
 import Card from '@/types/card';
 import IEnemy from '@/types/enemy';
+import IHero from '@/types/hero';
 import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
@@ -16,11 +17,12 @@ interface IMainContainerProps {
     canvasSize: { width: number; height: number };
     defaultEnemies: IEnemy[];
     cards: Card[];
+    hero: IHero;
 }
 
-export const MainContainer = ({ canvasSize, defaultEnemies, cards, children }: PropsWithChildren<IMainContainerProps>) => {
-    const bgAsset = '/assets/bg-galaxy.png';
-    const heroAsset = '/assets/hero.png';
+const bgAsset = '/assets/bg-galaxy.png';
+
+export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -67,33 +69,14 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, children }: P
             .then((tex) => {
                 if (!cancelled) {
                     setBgTexture(tex);
-                    console.log('Background texture loaded successfully');
                 }
-            })
-            .catch((err) => {
-                console.error('Failed to load background texture', err);
             });
 
-        Assets.load<Texture>(heroAsset)
+        Assets.load<Texture>(hero.spritesheet)
             .then((tex) => {
                 if (!cancelled) {
                     setHeroTexture(tex);
-                    console.log('Hero texture loaded successfully:', tex);
                 }
-            })
-            .catch((err) => {
-                console.error('Failed to load hero texture from:', heroAsset, err);
-
-                const alternativePath = './assets/hero.png';
-                return Assets.load<Texture>(alternativePath);
-            })
-            .then((tex) => {
-                if (!cancelled && tex) {
-                    setHeroTexture(tex);
-                }
-            })
-            .catch((err) => {
-                console.error('Failed to load hero texture from alternative path:', err);
             });
 
         return () => {
@@ -174,7 +157,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, children }: P
             </Camera>
             {(inCombat && heroTexture) && (
                 <Combat 
-                    hero={heroTexture}
+                    hero={hero}
+                    heroTexture={heroTexture}
                     cards={cards}
                     enemies={selectedEnemies} 
                     onSetSelectedEnemies={onSetSelectedEnemies} 

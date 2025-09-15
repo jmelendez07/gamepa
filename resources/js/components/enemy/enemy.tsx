@@ -34,8 +34,6 @@ export default function Enemy({ enemy, x, y }: IEnemyProps) {
 			});
 	}, []);
 
-
-
 	return (
 		<pixiContainer x={x} y={y}>
 			{sprite && (

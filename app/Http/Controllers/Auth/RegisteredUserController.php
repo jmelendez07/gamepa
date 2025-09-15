@@ -48,6 +48,10 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended(route('gameplay'));
+        if (Auth::user()->hasRole('administrador')) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        return redirect()->intended(route('heroes.options'));
     }
 }

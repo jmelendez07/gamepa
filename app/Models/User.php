@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->sessions()->where('last_activity', '>=', now()->subMinutes(5)->timestamp);
     }
+
+    public function heroes()
+    {
+        return $this->belongsToMany(Hero::class);
+    }
 }
