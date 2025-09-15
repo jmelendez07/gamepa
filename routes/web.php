@@ -8,6 +8,7 @@ use App\Http\Controllers\StepController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\EnemyController;
 use App\Http\Controllers\GameplayController;
+use App\Http\Controllers\HeroController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('pasos', StepController::class)->names('steps');
         Route::resource('opciones', OptionController::class)->names('options');
         Route::resource('enemigos', EnemyController::class)->names('enemies');
+        Route::resource('heroes', HeroController::class)->names('heroes');
     });
 });
 

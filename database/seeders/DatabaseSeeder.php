@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             OptionSeeder::class,
             EnemyTypeSeeder::class,
             EnemySeeder::class,
+            HeroSeeder::class,
         ]);
     }
 }
