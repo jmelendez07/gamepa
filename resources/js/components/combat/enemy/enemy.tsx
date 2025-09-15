@@ -49,17 +49,17 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
         <>
             {enemySprite && enemyTexture && (
                 <>
-                    <pixiSprite 
+                    <pixiSprite
                         interactive={true}
-                        texture={enemySprite.texture} 
-                        x={enemy.combat_position?.x || 0} 
-                        y={enemy.combat_position?.y || 0} 
-                        width={128} 
+                        texture={enemySprite.texture}
+                        x={enemy.combat_position?.x || 0}
+                        y={enemy.combat_position?.y || 0}
+                        width={128}
                         height={128}
                         onPointerOver={handlePointerOver}
                         onPointerOut={handlePointerOut}
                     />
-                    
+
                     {isHovered && (
                         <pixiText
                             text={enemy.name}
@@ -85,7 +85,7 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
                                 g.stroke({ color: 0x000000, width: 1 });
                             }}
                         />
-                        
+
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();
@@ -93,14 +93,14 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
                                 const barWidth = (150 - 4) * healthPercentage;
                                 if (barWidth > 0) {
                                     g.roundRect(2, 2, barWidth, 12, 1);
-                                    g.fill({ color: 0xFF1744 });
-                                    
+                                    g.fill({ color: 0xff1744 });
+
                                     g.roundRect(2, 2, barWidth, 4, 1);
-                                    g.fill({ color: 0xFF5722, alpha: 0.5 });
+                                    g.fill({ color: 0xff5722, alpha: 0.5 });
                                 }
                             }}
                         />
-                        
+
                         <pixiText
                             text={`${enemy.health}/${maxHp}`}
                             anchor={0.5}
