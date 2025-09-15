@@ -31,6 +31,7 @@ export default function Enemy({ enemy, x, y }: IEnemyProps) {
 		Assets.load<Texture>(enemy.spritesheet)
 			.then((text) => {
 				setTexture(text);
+				console.log('Texture loaded:', text);
 			});
 	}, []);
 

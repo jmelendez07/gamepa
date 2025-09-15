@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f3906f196322a778a050e4ddb3acad4f",
+    "content-hash": "6d2ad4550f47d6fe139997833f51eb8c",
     "packages": [
         {
             "name": "brick/math",
@@ -2157,16 +2157,16 @@
         },
         {
             "name": "mongodb/laravel-mongodb",
-            "version": "5.4.3",
+            "version": "5.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mongodb/laravel-mongodb.git",
-                "reference": "60f48e50aadbd848795cd54fb7fa46c976fcb90f"
+                "reference": "c483b99a69ea9916d17719b86e7e5ea2f8b44c8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mongodb/laravel-mongodb/zipball/60f48e50aadbd848795cd54fb7fa46c976fcb90f",
-                "reference": "60f48e50aadbd848795cd54fb7fa46c976fcb90f",
+                "url": "https://api.github.com/repos/mongodb/laravel-mongodb/zipball/c483b99a69ea9916d17719b86e7e5ea2f8b44c8a",
+                "reference": "c483b99a69ea9916d17719b86e7e5ea2f8b44c8a",
                 "shasum": ""
             },
             "require": {
@@ -2227,6 +2227,11 @@
                     "role": "Leader"
                 },
                 {
+                    "name": "Pauline Vos",
+                    "email": "pauline.vos@mongodb.com",
+                    "role": "Maintainer"
+                },
+                {
                     "name": "Jérôme Tamarelle",
                     "email": "jerome.tamarelle@mongodb.com",
                     "role": "Maintainer"
@@ -2255,9 +2260,9 @@
             "support": {
                 "issues": "https://www.mongodb.com/support",
                 "security": "https://www.mongodb.com/security",
-                "source": "https://github.com/mongodb/laravel-mongodb/tree/5.4.3"
+                "source": "https://github.com/mongodb/laravel-mongodb/tree/5.5.0"
             },
-            "time": "2025-07-30T09:00:19+00:00"
+            "time": "2025-08-12T05:06:10+00:00"
         },
         {
             "name": "mongodb/mongodb",
@@ -9659,12 +9664,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
