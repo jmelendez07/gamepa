@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Scout\Searchable;
 use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
@@ -9,6 +10,7 @@ use Laravel\Scout\Attributes\SearchUsingPrefix;
 class Hero extends Model
 {
     use Searchable;
+    use HasFactory;
 
     protected $connection = 'mongodb';
     protected $collection = 'heroes';
@@ -32,5 +34,10 @@ class Hero extends Model
     public function users()
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function cards()
+    {
+        return $this->hasMany(Card::class);
     }
 }

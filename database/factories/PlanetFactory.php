@@ -43,7 +43,7 @@ class PlanetFactory extends Factory
     public function makeExercise1($dificultyId, $planetId)
     {
         $exercise = Exercise::factory()->create([
-            'operation' => '3x + 5',
+            'operation' => "f'(x) = 3x + 5",
             'planet_id' => $planetId,
             'difficulty_id' => $dificultyId
         ]);
@@ -141,7 +141,7 @@ class PlanetFactory extends Factory
     public function makeExercise2($dificultyId, $planetId)
     {
         $exercise = Exercise::factory()->create([
-            'operation' => '2x + 4',
+            'operation' => "f'(x) = 2x + 4",
             'planet_id' => $planetId,
             'difficulty_id' => $dificultyId
         ]);
@@ -239,7 +239,7 @@ class PlanetFactory extends Factory
     public function makeExercise3($dificultyId, $planetId)
     {
         $exercise = Exercise::factory()->create([
-            'operation' => 'x^2',
+            'operation' => "f'(x) = x^2",
             'planet_id' => $planetId,
             'difficulty_id' => $dificultyId
         ]);
@@ -337,7 +337,7 @@ class PlanetFactory extends Factory
     public function makeExercise4($dificultyId, $planetId)
     {
         $exercise = Exercise::factory()->create([
-            'operation' => '2x^2',
+            'operation' => "f'(x) = 2x^2",
             'planet_id' => $planetId,
             'difficulty_id' => $dificultyId
         ]);
