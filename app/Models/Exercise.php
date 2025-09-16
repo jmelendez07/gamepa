@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
 use Laravel\Scout\Searchable;
@@ -9,6 +10,7 @@ use Laravel\Scout\Searchable;
 class Exercise extends Model
 {
     use Searchable;
+    use HasFactory;
 
     protected $connection = 'mongodb';
     protected $collection = 'exercises';
