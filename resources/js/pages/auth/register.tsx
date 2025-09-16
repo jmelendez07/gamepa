@@ -1,6 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle, Crown, Sparkles, Shield, Sword, Eye, EyeOff, User, Mail } from 'lucide-react';
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -20,6 +20,7 @@ type RegisterForm = {
 export default function Register() {
     const { name } = usePage<SharedData>().props;
     const [showPassword, setShowPassword] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
@@ -35,10 +36,31 @@ export default function Register() {
         });
     };
 
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, []);
+
     return (
         <PublicLayout>
             <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-purple-900 relative overflow-hidden">
                 <Head title="Registro" />
+
+                <div 
+                    className="fixed w-4 h-4 bg-purple-400 rounded-full pointer-events-none z-50 mix-blend-difference transition-transform duration-100"
+                    style={{
+                        left: mousePosition.x - 8,
+                        top: mousePosition.y - 8,
+                        transform: `scale(${mousePosition.x > 0 ? 1.2 : 1})`
+                    }}
+                />
                 
                 {/* Elementos decorativos de fondo */}
                 <div className="absolute inset-0">

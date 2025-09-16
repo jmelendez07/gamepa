@@ -9,6 +9,7 @@ use App\Http\Controllers\OptionController;
 use App\Http\Controllers\EnemyController;
 use App\Http\Controllers\GameplayController;
 use App\Http\Controllers\HeroController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,6 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:administrador'])->group(function () {
         Route::get('panel', function () { return Inertia::render('dashboard'); })->name('dashboard');
         Route::resource('users', UserController::class)->names('users');
+        Route::resource('docentes', TeacherController::class)->names('teachers');
+        Route::post('docentes/bulk-destroy', [TeacherController::class, 'bulkDestroy'])->name('teachers.bulk-destroy');
         Route::resource('planetas', PlanetController::class)->names('planets');
         Route::resource('ejercicios', ExerciseController::class)->names('exercises');
         Route::resource('cartas', CardController::class)->names('cards');

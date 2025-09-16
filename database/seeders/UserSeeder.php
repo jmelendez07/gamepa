@@ -20,5 +20,10 @@ class UserSeeder extends Seeder
         foreach ($students as $student) {
             $student->assignRole('estudiante');
         }
+
+        $teachers = User::factory(20)->create();
+        foreach ($teachers as $teacher) {
+            $teacher->assignRole('docente');
+        }
     }
 }
