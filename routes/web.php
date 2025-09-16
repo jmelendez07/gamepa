@@ -10,6 +10,7 @@ use App\Http\Controllers\EnemyController;
 use App\Http\Controllers\GameplayController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware(['check_user_hero'])->group(function () {
             Route::resource('gameplay', GameplayController::class)->names('gameplay');
         });
+    });
+
+    Route::middleware(['role:docente'])->group(function () {
+        Route::resource('salas', RoomController::class)->names('rooms');
     });
 
     Route::middleware(['role:administrador'])->group(function () {

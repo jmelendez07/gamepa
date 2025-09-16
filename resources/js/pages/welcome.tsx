@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
 import Typewriter from '@/components/typewriter';
 import { useDraggable } from '@/hooks/use-draggable';
+import { Roles } from '@/enums/roles';
 
 export default function Welcome() {
     const { auth, name } = usePage<SharedData>().props;
@@ -257,10 +258,10 @@ export default function Welcome() {
                         
                         <div className={`flex items-center space-x-4 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
                             {auth.user ? (
-                                <Link href={route('dashboard')}>
-                                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25">
+                                <Link href={ auth.user.roles.some(r => r.name === Roles.Admin) ? route('dashboard') : (auth.user.roles.some(r => r.name === Roles.Teacher) ? route('rooms.index') : '#') }>
+                                    <Button className="cursor-pointer bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25">
                                         <Shield className="w-4 h-4 mr-2" />
-                                        Dashboard
+                                        Panel
                                     </Button>
                                 </Link>
                             ) : (
