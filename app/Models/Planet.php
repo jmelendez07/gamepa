@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Scout\Searchable;
 use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
@@ -9,6 +10,7 @@ use Laravel\Scout\Attributes\SearchUsingPrefix;
 class Planet extends Model
 {
     use Searchable;
+    use HasFactory;
 
     protected $connection = 'mongodb';
     protected $collection = 'planets';

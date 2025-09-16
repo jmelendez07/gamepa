@@ -85,7 +85,7 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
 
     const attack = () => {
         if (selectedCard && selectedEnemy && heroEnergy > 0) {
-            setHeroEnergy((prevHeroEnergy) => prevHeroEnergy - 1);
+            setHeroEnergy((prevHeroEnergy) => prevHeroEnergy - selectedCard.energy_cost);
             onSetSelectedEnemies(
                 enemies.map((enemy) => {
                     if (enemy.id === selectedEnemy.id) {
@@ -132,7 +132,6 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
     useTick((ticker) => {
 
         if (isAttackingAnimation) {
-            console.log('Attacking animation frame update');
             const keepPlaying = updateHeroAttackSprite('RIGHT', false, false, false, true);
             if (!keepPlaying) {
                 resetHeroAnimation();
@@ -236,11 +235,11 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
             <StolenCardsStack onClick={(value) => setShowStolenCardsModal(value)} cards={stolenCards} />
             <NextTurnButton onClick={nextTurn} />
             <DiscardedCardsStack onClick={(value) => setShowDiscardedCardsModal(value)} cards={discardedCards} />
-            {isAttacking && selectedCard && selectedEnemy && selectedCard.exercises && selectedCard.exercises.length > 0 && (
+            {isAttacking && selectedCard && selectedEnemy && selectedCard.exercise && (
                 <Exercise
                     enemy={selectedEnemy}
                     card={selectedCard}
-                    exercise={selectedCard.exercises[0]}
+                    exercise={selectedCard.exercise}
                     onClose={() => {
                         setIsAttacking(false);
                         setIsTargetAssigned(false);
