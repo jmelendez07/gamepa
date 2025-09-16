@@ -6,7 +6,8 @@ export default interface Card {
     energy_cost: number;
     stats: number;
     type: TypeCard;
-    exercises?: Exercise[];
+    exercise: Exercise;
+    spritesheet: string;
     created_at: string;
 }
 

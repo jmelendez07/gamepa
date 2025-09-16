@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Card;
 use App\Models\Hero;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -12,14 +13,25 @@ class HeroSeeder extends Seeder
     {
         $heroes = [
             ['name' => 'Warrior', 'spritesheet' => asset('assets/default_heroes/hero-1.png'), 'health' => 150],
-            ['name' => 'Mage', 'spritesheet' => asset('assets/default_heroes/hero-2.png'), 'health' => 100],
-            ['name' => 'Rogue', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 120],
-            ['name' => 'Paladin', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 180],
-            ['name' => 'Ranger', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 130],
+            // ['name' => 'Mage', 'spritesheet' => asset('assets/default_heroes/hero-2.png'), 'health' => 100],
+            // ['name' => 'Rogue', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 120],
+            // ['name' => 'Paladin', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 180],
+            // ['name' => 'Ranger', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 130],
         ];
 
         foreach ($heroes as $hero) {
             Hero::create($hero);
+        }
+
+        $warrior = Hero::where('name', 'Warrior')->first();
+        $warriorCards = 8;
+        for ($i = 0; $i < $warriorCards; $i++) {
+            Card::factory()->create([
+                'hero_id' => $warrior->id,
+                'spritesheet' => asset('assets/cards/hero-1/card-hero-1.png'),
+                'energy_cost' => rand(1, 2),
+                'stats' => rand(10, 20)
+            ]);
         }
     }
 }

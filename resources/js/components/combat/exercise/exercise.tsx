@@ -22,13 +22,13 @@ interface IExerciseProps {
 const assetSword = '/assets/sword.png';
 
 export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack }: IExerciseProps) => {
-    const getRandomExercise = (card?: ICard | null) => {
-        if (card && card.exercises && card.exercises.length > 0) {
-            const idx = Math.floor(Math.random() * card.exercises.length);
-            return card.exercises[idx];
-        }
-        return undefined;
-    };
+    // const getRandomExercise = (card?: ICard | null) => {
+    //     if (card && card.exercises && card.exercises.length > 0) {
+    //         const idx = Math.floor(Math.random() * card.exercises.length);
+    //         return card.exercises[idx];
+    //     }
+    //     return undefined;
+    // };
 
     const bgAsset = '/assets/ui/exercise-ui.png';
     const answersAsset = '/assets/ui/answers-ui.png';
@@ -350,7 +350,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             </pixiContainer>
 
             <pixiText
-                text={getRandomExercise(card)?.operation || ''}
+                text={exercise?.operation || ''}
                 x={100}
                 y={50}
                 anchor={0.5}
@@ -442,7 +442,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             return (
                                 <Answer
                                     key={opt.id}
-                                    text={opt.result}
+                                    text={opt.text}
                                     isCorrect={opt.is_correct}
                                     x={xPosition}
                                     y={yPosition}

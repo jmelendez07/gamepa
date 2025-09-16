@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
 use Laravel\Scout\Attributes\SearchUsingPrefix;
 use Laravel\Scout\Searchable;
@@ -9,14 +10,17 @@ use Laravel\Scout\Searchable;
 class Card extends Model
 {
     use Searchable;
+    use HasFactory;
 
     protected $connection = 'mongodb';
     protected $collection = 'cards';
 
     protected $fillable = [
         'name',
+        'spritesheet',
         'energy_cost',
-        'stats'
+        'stats',
+        'hero_id',
     ];
 
     #[SearchUsingPrefix(['energy_cost', 'stats'])]
@@ -37,5 +41,10 @@ class Card extends Model
     public function exercises()
     {
         return $this->belongsToMany(Exercise::class);
+    }
+
+    public function hero()
+    {
+        return $this->belongsTo(Hero::class);
     }
 }
