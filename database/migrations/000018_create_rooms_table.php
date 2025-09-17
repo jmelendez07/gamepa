@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->foreignIdFor(RoomStatus::class, 'status_id')->constrained()->onDelete('cascade');
             $table->foreignIdFor(User::class, 'teacher_id')->constrained()->onDelete('cascade');
+            $table->timestamp('start_at');
+            $table->timestamp('end_at');
             $table->timestamps();
         });
     }

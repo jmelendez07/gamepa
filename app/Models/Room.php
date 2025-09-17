@@ -17,6 +17,9 @@ class Room extends Model
         'pin',
         'name',
         'teacher_id',
+        'status_id',
+        'start_at',
+        'end_at',
     ];
 
     #[SearchUsingPrefix(['name', 'pin'])]
@@ -37,5 +40,10 @@ class Room extends Model
     public function status()
     {
         return $this->belongsTo(RoomStatus::class, 'status_id');
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'room_id');
     }
 }

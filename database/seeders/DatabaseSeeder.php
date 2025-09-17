@@ -25,7 +25,9 @@ class DatabaseSeeder extends Seeder
             EnemySeeder::class,
             HeroSeeder::class,
             RoomStatusSeeder::class,
-            RoomSeeder::class
+            RoomSeeder::class,
+            QuestionSeeder::class,
+            AnswerSeeder::class,
         ]);
     }
 }

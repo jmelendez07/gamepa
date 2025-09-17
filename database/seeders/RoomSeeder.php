@@ -21,7 +21,9 @@ class RoomSeeder extends Seeder
                     'pin' => $indexTeacher . 'A' . $indexStatus . 'B',
                     'name' => 'Sala numero ' . Room::count() + 1,
                     'teacher_id' => $teacher->id,
-                    'status_id' => $status->id
+                    'status_id' => $status->id,
+                    'start_at' => now(),
+                    'end_at' => now()->addHours(1),
                 ]);
             }
         }
