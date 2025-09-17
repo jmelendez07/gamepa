@@ -2,7 +2,7 @@ import { ANIMATION_SPEED } from '@/components/constants/game-world';
 import useEnemyAnimation from '@/components/enemy/useEnemyAnimation';
 import IEnemy from '@/types/enemy';
 import { extend, useTick } from '@pixi/react';
-import { Assets, Container, Sprite, Texture, Graphics, Text } from 'pixi.js';
+import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { useEffect, useState } from 'react';
 
 extend({ Container, Sprite, Graphics, Text });
@@ -12,9 +12,12 @@ interface IEnemyProps {
 }
 
 export const Enemy = ({ enemy }: IEnemyProps) => {
+    const assetSword = '/assets/sword.png';
     const [enemyTexture, setEnemyTexture] = useState<Texture | null>(null);
     const [maxHp, setMaxHp] = useState(enemy.health);
     const [isHovered, setIsHovered] = useState(false);
+    const [swordTexture, setSwordTexture] = useState<Texture | null>(null);
+    const [floatAnimation, setFloatAnimation] = useState(0);
 
     const placeholderTexture = Texture.WHITE;
     const textureToUse = enemyTexture || placeholderTexture;
@@ -31,10 +34,14 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
         Assets.load<Texture>(enemy.spritesheet).then((texture) => {
             setEnemyTexture(texture);
         });
+        Assets.load<Texture>(assetSword).then((texture) => {
+            setSwordTexture(texture);
+        });
     }, [enemy.spritesheet]);
 
-    useTick(() => {
+    useTick((delta) => {
         updateEnemySprite('combatIdle', 'left');
+        setFloatAnimation((prev) => prev + 0.02);
     });
 
     const handlePointerOver = () => {
@@ -44,6 +51,8 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
     const handlePointerOut = () => {
         setIsHovered(false);
     };
+
+    const floatOffset = Math.sin(floatAnimation) * 3;
 
     return (
         <>
@@ -58,6 +67,32 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
                         height={128}
                         onPointerOver={handlePointerOver}
                         onPointerOut={handlePointerOut}
+                    />
+
+                    {swordTexture && (
+                        <pixiSprite
+                            texture={swordTexture}
+                            x={(enemy.combat_position?.x || 0) + 80}
+                            y={(enemy.combat_position?.y || 0) - 50 + floatOffset}
+                            width={40}
+                            height={40}
+                            zIndex={10}
+                        />
+                    )}
+
+                    <pixiText
+                        text={enemy.basic_attack}
+                        anchor={0.5}
+                        x={(enemy.combat_position?.x || 0) + 70}
+                        y={(enemy.combat_position?.y || 0) - 25 + floatOffset}
+                        zIndex={10}
+                        style={{
+                            fontFamily: 'Arial',
+                            fontSize: 20,
+                            fill: 0xffffff,
+                            fontWeight: 'bold',
+                            stroke: { color: 0x000000, width: 2 },
+                        }}
                     />
 
                     {isHovered && (
@@ -119,4 +154,4 @@ export const Enemy = ({ enemy }: IEnemyProps) => {
             )}
         </>
     );
-}
+};

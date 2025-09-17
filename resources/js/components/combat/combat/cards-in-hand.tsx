@@ -1,5 +1,5 @@
-import ICard from "@/types/card";
-import { Card } from "../card/card";
+import ICard from '@/types/card';
+import { Card } from '../card/card';
 
 interface ICardsInHandProps {
     cards: ICard[];
@@ -11,23 +11,51 @@ interface ICardsInHandProps {
     isDisabled: boolean;
 }
 
-export default function CardsInHand({ cards, setIsCardHeldDown, setCardPosition, isTargetAssigned, setIsAttacking, setSelectedCard, isDisabled }: ICardsInHandProps) {
+export default function CardsInHand({
+    cards,
+    setIsCardHeldDown,
+    setCardPosition,
+    isTargetAssigned,
+    setIsAttacking,
+    setSelectedCard,
+    isDisabled,
+}: ICardsInHandProps) {
+    // Calcular espaciado y posición basado en el tamaño de pantalla
+    const getCardLayout = () => {
+        const screenScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const baseSpacing = 240;
+        const baseYOffset = 320;
+        const baseElevation = 40;
+
+        // Ajustar espaciado basado en la pantalla y número de cartas
+        const maxCardsWidth = window.innerWidth * 0.8; // 80% del ancho de pantalla
+        const availableSpacing = maxCardsWidth / cards.length;
+        const cardSpacing = Math.min(baseSpacing * screenScale, availableSpacing);
+
+        return {
+            spacing: cardSpacing,
+            yOffset: baseYOffset * screenScale,
+            elevation: baseElevation * screenScale,
+        };
+    };
+
+    const layout = getCardLayout();
+
     return (
         <>
             {cards.map((card, index) => {
-                const cardSpacing = 240;
-                const totalWidth = cards.length * cardSpacing - 20;
+                const totalWidth = cards.length * layout.spacing - 20;
                 const startX = (window.innerWidth - totalWidth) / 2;
-                const baseYPosition = window.innerHeight - 320;
+                const baseYPosition = window.innerHeight - layout.yOffset;
                 const centerIndex = (cards.length - 1) / 2;
                 const rotationAngle = (index - centerIndex) * 0.15;
                 const isFirstCard = index === 0;
                 const isLastCard = index === cards.length - 1;
                 const isExtremeCard = isFirstCard || isLastCard;
-                const elevationAmount = isExtremeCard ? 0 : -40;
+                const elevationAmount = isExtremeCard ? 0 : -layout.elevation;
 
                 const cardPosition = {
-                    x: startX + index * cardSpacing,
+                    x: startX + index * layout.spacing,
                     y: baseYPosition + elevationAmount,
                 };
 

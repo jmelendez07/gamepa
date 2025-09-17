@@ -30,6 +30,26 @@ export const Card = ({
 }: ICardProps) => {
     const card1Asset = card.spritesheet;
 
+    // Calcular tamaño de carta basado en la pantalla
+    const getCardDimensions = () => {
+        const baseWidth = 200;
+        const baseHeight = 300;
+
+        // Factor de escala basado en el ancho de la pantalla
+        const screenScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const minScale = 0.6; // Escala mínima
+        const maxScale = 1.0; // Escala máxima
+        const scale = Math.max(minScale, Math.min(maxScale, screenScale));
+
+        return {
+            width: baseWidth * scale,
+            height: baseHeight * scale,
+            scale: scale,
+        };
+    };
+
+    const cardDimensions = getCardDimensions();
+
     const [card1Texture, setCard1Texture] = useState<Texture | null>(null);
     const [isPointerDown, setIsPointerDown] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
@@ -41,7 +61,7 @@ export const Card = ({
     const [currentHoverOffset, setCurrentHoverOffset] = useState(0);
     const [currentAlpha, setCurrentAlpha] = useState(0.8);
     const [currentTint, setCurrentTint] = useState(0x808080);
-    const targetHoverOffset = isHovered && !isPointerDown && !isDisabled ? -20 : 0;
+    const targetHoverOffset = isHovered && !isPointerDown && !isDisabled ? -20 * cardDimensions.scale : 0;
     const targetAlpha = isDisabled ? 0.6 : isHovered || isPointerDown ? 1.0 : 0.8;
     const targetTint = isDisabled ? 0xffffff : isHovered || isPointerDown ? 0xffffff : 0x808080;
 
@@ -122,7 +142,10 @@ export const Card = ({
     };
 
     const handlePointerMove = (event: PointerEvent) => {
-        const globalPos = { x: event.clientX - 100, y: event.clientY - 150 };
+        const globalPos = {
+            x: event.clientX - cardDimensions.width / 2,
+            y: event.clientY - cardDimensions.height / 2,
+        };
         setCardPosition(globalPos);
         onCardPositionChange({ x: event.clientX, y: event.clientY });
     };
@@ -157,56 +180,78 @@ export const Card = ({
         }
     }, [isPointerDown]);
 
+    // Calcular posiciones de texto relativas al tamaño de la carta
+    const centerX = currentCardPosition.x + cardDimensions.width / 2;
+    const centerY = currentCardPosition.y + cardDimensions.height / 2;
+
     return (
         <pixiContainer interactive={!isDisabled} onPointerDown={handlePointerDown} cursor={isDisabled ? 'default' : 'pointer'}>
             {card1Texture && (
                 <pixiSprite
-                    width={200}
+                    width={cardDimensions.width}
                     anchor={0.5}
-                    height={300}
+                    height={cardDimensions.height}
                     tint={currentTint}
                     interactive={!isDisabled}
                     alpha={isPointerDown && isTargetAssigned ? 0.2 : currentAlpha}
                     texture={card1Texture}
                     rotation={cardRotation}
-                    x={currentCardPosition.x + 100}
-                    y={currentCardPosition.y + 150}
+                    x={centerX}
+                    y={centerY}
                     onPointerOut={handlePointerOut}
                     onPointerOver={handlePointerOver}
                     filters={isDisabled ? [grayscaleFilter] : []}
                 />
             )}
 
-            <pixiContainer x={currentCardPosition.x + 100} y={currentCardPosition.y + 150} rotation={cardRotation}>
+            {/* Costo de energía - esquina superior izquierda */}
+            <pixiContainer x={centerX} y={centerY} rotation={cardRotation}>
                 <pixiText
                     text={card.energy_cost}
-                    x={-75} // Offset relativo desde el centro de la carta
-                    y={-130} // Offset relativo desde el centro de la carta
+                    x={-cardDimensions.width * 0.37} // Proporcional al ancho
+                    y={-cardDimensions.height * 0.43} // Proporcional al alto
                     anchor={0.5}
                     zIndex={1}
-                    style={{ fontSize: 18, fill: 0xffffff, fontFamily: 'Arial', fontWeight: 'bold' }}
+                    style={{
+                        fontSize: 18 * cardDimensions.scale,
+                        fill: 0xffffff,
+                        fontFamily: 'Arial',
+                        fontWeight: 'bold',
+                    }}
                 />
             </pixiContainer>
 
-            <pixiContainer x={currentCardPosition.x + 100} y={currentCardPosition.y + 150} rotation={cardRotation}>
+            {/* Operación - centro de la carta */}
+            <pixiContainer x={centerX} y={centerY} rotation={cardRotation}>
                 <pixiText
                     text={card.exercise.operation}
-                    x={0} // Centrado horizontalmente
-                    y={80} // Posición cerca de la parte inferior de la carta
+                    x={0}
+                    y={cardDimensions.height * 0.27} // Proporcional al alto
                     anchor={0.5}
                     zIndex={1}
-                    style={{ fontSize: 20, fill: 0xffffff, fontFamily: 'Arial', fontWeight: 'bold' }}
+                    style={{
+                        fontSize: 20 * cardDimensions.scale,
+                        fill: 0xffffff,
+                        fontFamily: 'Arial',
+                        fontWeight: 'bold',
+                    }}
                 />
             </pixiContainer>
 
-            <pixiContainer x={currentCardPosition.x + 100} y={currentCardPosition.y + 150} rotation={cardRotation}>
+            {/* Stats - esquina inferior derecha */}
+            <pixiContainer x={centerX} y={centerY} rotation={cardRotation}>
                 <pixiText
                     text={card.stats}
-                    x={25} // Centrado horizontalmente
-                    y={125} // Posición cerca de la parte inferior de la carta
+                    x={cardDimensions.width * 0.25 - 20} // Proporcional al ancho
+                    y={cardDimensions.height * 0.42} // Proporcional al alto
                     anchor={0.5}
                     zIndex={1}
-                    style={{ fontSize: 20, fill: 0xffffff, fontFamily: 'Arial', fontWeight: 'bold' }}
+                    style={{
+                        fontSize: 20 * cardDimensions.scale,
+                        fill: 0xffffff,
+                        fontFamily: 'Arial',
+                        fontWeight: 'bold',
+                    }}
                 />
             </pixiContainer>
         </pixiContainer>

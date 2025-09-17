@@ -71,6 +71,8 @@ export default function StolenCardsModal({ cards, onClose, isOpen }: IStolenCard
         setHoveredCard(null);
     };
 
+    console.log('Rendering StolenCardsModal with cards:', cards);
+
     return (
         <pixiContainer zIndex={100}>
             <pixiGraphics

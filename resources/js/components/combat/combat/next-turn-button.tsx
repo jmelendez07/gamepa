@@ -1,18 +1,41 @@
-import { useTick } from "@pixi/react";
-import { useState } from "react";
+import { useTick } from '@pixi/react';
+import { useState } from 'react';
 
 interface INextTurnButtonProps {
     onClick?: () => void;
 }
 
 export default function NextTurnButton({ onClick }: INextTurnButtonProps) {
+    // Calcular dimensiones responsivas
+    const getResponsiveDimensions = () => {
+        const screenScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const minScale = 0.6;
+        const maxScale = 1.0;
+        const scale = Math.max(minScale, Math.min(maxScale, screenScale));
+
+        return {
+            scale,
+            buttonWidth: 200 * scale,
+            buttonHeight: 60 * scale,
+            borderRadius: 12 * scale,
+            borderWidth: 2 * scale,
+            fontSize: 20 * scale,
+            strokeWidth: 1 * scale,
+            marginX: 240 * scale,
+            marginY: 100 * scale,
+            shadowOffset: 5 * scale,
+            hoverYOffset: 3 * scale,
+        };
+    };
+
+    const dimensions = getResponsiveDimensions();
     const [isHovered, setIsHovered] = useState(false);
     const [animationProgress, setAnimationProgress] = useState(0);
 
     useTick(() => {
         const target = isHovered ? 1 : 0;
         const speed = 0.1;
-        setAnimationProgress(prev => {
+        setAnimationProgress((prev) => {
             const diff = target - prev;
             if (Math.abs(diff) < 0.01) return target;
             return prev + diff * speed;
@@ -20,32 +43,32 @@ export default function NextTurnButton({ onClick }: INextTurnButtonProps) {
     });
 
     const interpolateColor = (color1: number, color2: number, progress: number) => {
-        const r1 = (color1 >> 16) & 0xFF;
-        const g1 = (color1 >> 8) & 0xFF;
-        const b1 = color1 & 0xFF;
-        
-        const r2 = (color2 >> 16) & 0xFF;
-        const g2 = (color2 >> 8) & 0xFF;
-        const b2 = color2 & 0xFF;
-        
+        const r1 = (color1 >> 16) & 0xff;
+        const g1 = (color1 >> 8) & 0xff;
+        const b1 = color1 & 0xff;
+
+        const r2 = (color2 >> 16) & 0xff;
+        const g2 = (color2 >> 8) & 0xff;
+        const b2 = color2 & 0xff;
+
         const r = Math.round(r1 + (r2 - r1) * progress);
         const g = Math.round(g1 + (g2 - g1) * progress);
         const b = Math.round(b1 + (b2 - b1) * progress);
-        
+
         return (r << 16) | (g << 8) | b;
     };
 
-    const backgroundColor = interpolateColor(0x2c2c2c, 0xFFD700, animationProgress);
-    const borderColor = interpolateColor(0x444444, 0xDAA520, animationProgress);
-    const strokeColor = interpolateColor(0x000000, 0xDAA520, animationProgress);
-    
-    const yOffset = animationProgress * 3;
+    const backgroundColor = interpolateColor(0x2c2c2c, 0xffd700, animationProgress);
+    const borderColor = interpolateColor(0x444444, 0xdaa520, animationProgress);
+    const strokeColor = interpolateColor(0x000000, 0xdaa520, animationProgress);
+
+    const yOffset = animationProgress * dimensions.hoverYOffset;
     const shadowAlpha = (1 - animationProgress) * 0.3;
 
     return (
-        <pixiContainer 
-            x={window.innerWidth - 240} 
-            y={window.innerHeight - 100 + yOffset} 
+        <pixiContainer
+            x={window.innerWidth - dimensions.marginX}
+            y={window.innerHeight - dimensions.marginY + yOffset}
             interactive={true}
             zIndex={10}
             eventMode="static"
@@ -57,28 +80,36 @@ export default function NextTurnButton({ onClick }: INextTurnButtonProps) {
             <pixiGraphics
                 draw={(g) => {
                     g.clear();
-                    
+
+                    // Sombra del botón
                     if (shadowAlpha > 0.01) {
-                        g.roundRect(5, 5, 200, 60, 12);
+                        g.roundRect(
+                            dimensions.shadowOffset,
+                            dimensions.shadowOffset,
+                            dimensions.buttonWidth,
+                            dimensions.buttonHeight,
+                            dimensions.borderRadius,
+                        );
                         g.fill({ color: 0x000000, alpha: shadowAlpha });
                     }
-                    
-                    g.roundRect(0, 0, 200, 60, 12);
+
+                    // Fondo del botón
+                    g.roundRect(0, 0, dimensions.buttonWidth, dimensions.buttonHeight, dimensions.borderRadius);
                     g.fill({ color: backgroundColor });
-                    g.stroke({ color: borderColor, width: 2 });
+                    g.stroke({ color: borderColor, width: dimensions.borderWidth });
                 }}
             />
             <pixiText
                 text="Terminar Turno"
                 anchor={0.5}
-                x={100}
-                y={30}
+                x={dimensions.buttonWidth / 2}
+                y={dimensions.buttonHeight / 2}
                 style={{
                     fontFamily: 'Arial',
-                    fontSize: 20,
+                    fontSize: dimensions.fontSize,
                     fill: 0xffffff,
                     fontWeight: '600',
-                    stroke: { color: strokeColor, width: 1 },
+                    stroke: { color: strokeColor, width: dimensions.strokeWidth },
                 }}
             />
         </pixiContainer>
