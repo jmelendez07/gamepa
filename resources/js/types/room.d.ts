@@ -1,3 +1,5 @@
+import Question from "./question";
+
 export default interface Room {
     id: string;
     pin: string;
@@ -5,6 +7,9 @@ export default interface Room {
     status: RoomStatus;
     created_at: string;
     updated_at?: string;
+    started_at: string;
+    ended_at: string;
+    questions: Question[];
 }
 
 export interface RoomStatus {

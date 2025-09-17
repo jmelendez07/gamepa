@@ -15,6 +15,10 @@ class Answer extends Model
         'question_id'
     ];
 
+    protected $casts = [
+        'is_correct' => 'boolean',
+    ];
+
     public function question()
     {
         return $this->belongsTo(Question::class, 'question_id');

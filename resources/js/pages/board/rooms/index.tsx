@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Head, usePage, router } from "@inertiajs/react";
+import { Head, usePage, router, Link } from "@inertiajs/react";
 import {
     Plus,
     Play,
@@ -13,7 +13,7 @@ import {
     Copy,
     Check,
     Users,
-    GripVertical
+    Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,7 @@ import { RoomStatuses } from "@/enums/room-statuses";
 import { AnimatePresence, motion, usePresenceData } from "motion/react";
 import SortableList, { SortableItem } from 'react-easy-sort';
 import { arrayMoveImmutable } from 'array-move';
+import Typewriter from "@/components/typewriter";
 
 interface IRoomsIndexProps {
     rooms: Room[];
@@ -125,7 +126,11 @@ export default function RoomsIndex({ rooms }: IRoomsIndexProps) {
                         <div className="flex items-center space-x-3 transition-all duration-1000">
                             <Crown className="w-10 h-10 text-purple-300 animate-pulse" />
                             <h1 className="text-2xl md:text-3xl font-bold text-white">
-                                Hola {auth.user?.name}
+                                Hola{" "}
+                                <Typewriter
+                                    text={auth.user?.name}
+                                    speed={50}
+                                />
                             </h1>
                         </div>
                         
@@ -400,7 +405,7 @@ const SimpleRoomCard = ({ room, onStart }: SimpleRoomCardProps) => {
                     </div>
                 </div>
 
-                <div className="w-full">
+                <div className="w-full grid grid-cols-[1fr_auto] gap-3 items-center z-1">
                     <Button
                         onClick={(e) => {
                             e.preventDefault(); // ✅ Prevenir interferencia con drag
@@ -412,6 +417,9 @@ const SimpleRoomCard = ({ room, onStart }: SimpleRoomCardProps) => {
                         <Play className="w-4 h-4 mr-2" />
                         {room.status.name === RoomStatuses.ACTIVE ? 'Continuar' : (room.status.name === RoomStatuses.DRAFT ? 'Iniciar' : 'Ver Resultados')}
                     </Button>
+                    <Link href={route('rooms.show', room.id)} className="text-purple-200 hover:underline hover:bg-white/20 size-8 grid place-items-center place-content-center transition-all duration-300 rounded-md">
+                        <Settings className="size-5" />
+                    </Link>
                 </div>
             </div>
         </div>

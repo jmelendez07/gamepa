@@ -13,22 +13,22 @@ class QuestionSeeder extends Seeder
         $rooms = Room::all();
         $questions = [
             [
-                'question_text' => 'What is the capital of France?',
+                'text' => 'What is the capital of France?',
             ],
             [
-                'question_text' => 'What is 2 + 2?',
+                'text' => 'What is 2 + 2?',
             ],
             [
-                'question_text' => 'What is the largest planet in our solar system?',
+                'text' => 'What is the largest planet in our solar system?',
             ],
             [
-                'question_text' => 'Who wrote "To Kill a Mockingbird"?',
+                'text' => 'Who wrote "To Kill a Mockingbird"?',
             ],
             [
-                'question_text' => 'What is the derivative of sin(x)?',
+                'text' => 'What is the derivative of sin(x)?',
             ],
             [
-                'question_text' => 'What is the chemical symbol for gold?',
+                'text' => 'What is the chemical symbol for gold?',
             ],
         ];
 

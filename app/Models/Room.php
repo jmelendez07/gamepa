@@ -46,4 +46,13 @@ class Room extends Model
     {
         return $this->hasMany(Question::class, 'room_id');
     }
+
+    public static function generateUniquePin(): string
+    {
+        do {
+            $pin = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+        } while (self::where('pin', $pin)->exists());
+
+        return $pin;
+    }
 }
