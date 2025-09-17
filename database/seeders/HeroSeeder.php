@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Card;
 use App\Models\Hero;
+use App\Models\TypeCard;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -25,12 +26,14 @@ class HeroSeeder extends Seeder
 
         $warrior = Hero::where('name', 'Warrior')->first();
         $warriorCards = 8;
+        $types = TypeCard::where('name', 'Ataque')->first();
         for ($i = 0; $i < $warriorCards; $i++) {
             Card::factory()->create([
                 'hero_id' => $warrior->id,
                 'spritesheet' => asset('assets/cards/hero-1/card-hero-1.png'),
                 'energy_cost' => rand(1, 2),
-                'stats' => rand(10, 20)
+                'stats' => rand(10, 20),
+                'type_card_id' => $types->id,
             ]);
         }
     }
