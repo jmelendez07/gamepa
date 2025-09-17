@@ -1,5 +1,5 @@
-import Card from "@/types/card";
-import { useTick } from "@pixi/react";
+import Card from '@/types/card';
+import { useTick } from '@pixi/react';
 import { useCallback, useState } from 'react';
 
 interface IStolenCardsStackProps {
@@ -8,68 +8,104 @@ interface IStolenCardsStackProps {
 }
 
 export default function StolenCardsStack({ cards, onClick }: IStolenCardsStackProps) {
+    // Calcular dimensiones responsivas
+    const getResponsiveDimensions = () => {
+        const screenScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const minScale = 0.6;
+        const maxScale = 1.0;
+        const scale = Math.max(minScale, Math.min(maxScale, screenScale));
+
+        return {
+            scale,
+            stackSize: 50 * scale,
+            stackLayers: 4,
+            layerOffsetX: 4 * scale,
+            layerOffsetY: -4 * scale,
+            shadowOffset: 2 * scale,
+            borderRadius: 4 * scale,
+            innerBorderRadius: 2 * scale,
+            borderWidth: 2 * scale,
+            innerBorderWidth: 1 * scale,
+            lineSpacing: 7 * scale,
+            lineStartX: 10 * scale,
+            lineEndX: 42 * scale,
+            lineStartY: 18 * scale,
+            containerX: 155 * scale,
+            containerY: window.innerHeight - 210 * scale,
+            tooltipX: 160 * scale,
+            tooltipY: 20 * scale,
+            tooltipFontSize: 14 * scale,
+            countX: 28 * scale,
+            countY: 0 * scale,
+            countFontSize: 24 * scale,
+            floatMultiplier: 3 * scale,
+        };
+    };
+
+    const dimensions = getResponsiveDimensions();
     const [isHovered, setIsHovered] = useState(false);
     const [floatAnimation, setFloatAnimation] = useState(0);
-    
 
-    const drawCardStack = useCallback((g: any) => {
-        g.clear();
+    const drawCardStack = useCallback(
+        (g: any) => {
+            g.clear();
 
-        let stackLayers = 4;
-        
-        for (let i = 0; i < stackLayers; i++) {
-            const offsetX = i * 4;
-            const offsetY = -i * 4;
-            
-            g.beginFill(0x000000, 0.3);
-            g.drawRoundedRect(52 + offsetX, 52 + offsetY, 50, 50, 4);
-            g.endFill();
-            
-            g.beginFill(0x2a2a2a);
-            g.lineStyle(2, 0x1a1a1a, 1);
-            g.drawRoundedRect(50 + offsetX, 50 + offsetY, 50, 50, 4);
-            g.endFill();
-            
-            g.lineStyle(1, 0x404040, 1);
-            g.drawRoundedRect(52 + offsetX, 52 + offsetY, 46, 46, 2);
-            
-            g.lineStyle(1, 0x555555, 0.8);
-            g.moveTo(60 + offsetX, 68 + offsetY);
-            g.lineTo(92 + offsetX, 68 + offsetY);
-            g.moveTo(60 + offsetX, 75 + offsetY);
-            g.lineTo(92 + offsetX, 75 + offsetY);
-            g.moveTo(60 + offsetX, 82 + offsetY);
-            g.lineTo(92 + offsetX, 82 + offsetY);
-        }
-    }, [cards.length]);
+            for (let i = 0; i < dimensions.stackLayers; i++) {
+                const offsetX = i * dimensions.layerOffsetX;
+                const offsetY = i * dimensions.layerOffsetY;
+
+                // Cambiar de beginFill/endFill a fill()
+                g.roundRect(
+                    dimensions.shadowOffset + offsetX,
+                    dimensions.shadowOffset + offsetY,
+                    dimensions.stackSize,
+                    dimensions.stackSize,
+                    dimensions.borderRadius,
+                );
+                g.fill({ color: 0x000000, alpha: 0.3 });
+
+                // Cambiar de beginFill/lineStyle/endFill a fill() y stroke()
+                g.roundRect(offsetX, offsetY, dimensions.stackSize, dimensions.stackSize, dimensions.borderRadius);
+                g.fill({ color: 0x2a2a2a });
+                g.stroke({ color: 0x1a1a1a, width: dimensions.borderWidth });
+
+                // Para las líneas, usar moveTo/lineTo y luego stroke()
+                g.moveTo(dimensions.lineStartX + offsetX, dimensions.lineStartY + offsetY);
+                g.lineTo(dimensions.lineEndX + offsetX, dimensions.lineStartY + offsetY);
+                g.stroke({ color: 0x555555, width: dimensions.innerBorderWidth, alpha: 0.8 });
+            }
+        },
+        [cards.length, dimensions],
+    );
 
     useTick((ticker) => {
-        setFloatAnimation(prev => prev + 0.02);
+        setFloatAnimation((prev) => prev + 0.02);
     });
 
-    const floatOffset = Math.sin(floatAnimation) * 3;
+    const floatOffset = Math.sin(floatAnimation) * dimensions.floatMultiplier;
 
     return (
-        <pixiContainer 
+        <pixiContainer
             cursor="pointer"
             interactive={true}
-            x={155} 
-            y={window.innerHeight - 210 + floatOffset}
+            x={dimensions.containerX + 45}
+            y={dimensions.containerY + floatOffset + 35}
             onPointerOver={() => setIsHovered(true)}
             onPointerOut={() => setIsHovered(false)}
             onClick={() => onClick(true)}
         >
             <pixiGraphics draw={drawCardStack} />
 
+            {/* Tooltip al hacer hover */}
             {isHovered && (
                 <pixiText
                     text="Mostrar cartas robadas"
-                    x={160}
-                    y={20}
+                    x={dimensions.tooltipX}
+                    y={dimensions.tooltipY}
                     anchor={{ x: 1, y: 0.5 }}
                     style={{
                         fontFamily: 'Arial, sans-serif',
-                        fontSize: 14,
+                        fontSize: dimensions.tooltipFontSize,
                         fill: '#ffffff',
                         stroke: '#000000',
                         dropShadow: true,
@@ -77,13 +113,15 @@ export default function StolenCardsStack({ cards, onClick }: IStolenCardsStackPr
                 />
             )}
 
+            {/* Contador de cartas */}
             <pixiText
                 text={`${cards.length}`}
-                x={78}
-                y={50}
+                x={dimensions.countX + 10}
+                y={dimensions.countY + 10}
+                anchor={0.5}
                 style={{
                     fontFamily: 'Arial, sans-serif',
-                    fontSize: 24,
+                    fontSize: dimensions.countFontSize,
                     fill: '#ffffff',
                     stroke: '#000000',
                     dropShadow: true,
