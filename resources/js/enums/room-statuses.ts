@@ -1,5 +1,6 @@
 export enum RoomStatuses {
-    Active = 'En vivo',
-    Draft = 'Borrador',
-    Completed = 'Completada'
+    ALL = 'Todos',
+    ACTIVE = 'En vivo',
+    DRAFT = 'Borrador',
+    COMPLETED = 'Completada'
 }
