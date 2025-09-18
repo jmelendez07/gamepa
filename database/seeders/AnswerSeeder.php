@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Answer;
 use App\Models\Question;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -10,6 +11,7 @@ class AnswerSeeder extends Seeder
 {
     public function run(): void
     {
+        $questions = Question::all();
         $answers = [
             [
                 'answer_text' => 'Paris',
@@ -73,14 +75,22 @@ class AnswerSeeder extends Seeder
             ],
         ];
 
-        foreach ($answers as $answer) {
-            $question = Question::where('text', $answer['question_text'])->first();
-            if ($question) {
-                $question->answers()->create([
-                    'text' => $answer['answer_text'],
-                    'is_correct' => $answer['is_correct'],
-                ]);
+        foreach ($questions as $question) {
+            foreach ($answers as $answer) {
+                if ($answer['question_text'] !== $question->text) {
+                    continue;
+                }
+
+                if ($question) {
+                    Answer::create([
+                        'text' => $answer['answer_text'],
+                        'is_correct' => $answer['is_correct'],
+                        'question_id' => $question->_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
-        }
+        }   
     }
 }

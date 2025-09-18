@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Question;
 use App\Models\Room;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -34,7 +35,12 @@ class QuestionSeeder extends Seeder
 
         foreach ($rooms as $room) {
             foreach ($questions as $question) {
-                $room->questions()->create($question);
+                Question::create([
+                    'text' => $question['text'],
+                    'room_id' => $room->_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
         }
     }

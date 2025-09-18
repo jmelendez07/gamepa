@@ -93,7 +93,6 @@ class RoomController extends Controller
 
             return redirect()->route('rooms.show', $room->_id)->with('success', "Sala '{$room->name}' creada exitosamente con {$questionsCreated} preguntas.");
         } catch (\Exception $e) {
-            Log::error('Error al crear sala: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Error al crear la sala. Inténtalo de nuevo.'])->withInput();
         }
     }

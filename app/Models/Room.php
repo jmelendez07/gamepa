@@ -22,8 +22,8 @@ class Room extends Model
         'end_at',
     ];
 
-    #[SearchUsingPrefix(['name', 'pin'])]
-    public function toSearchableArray()
+    #[SearchUsingPrefix(['pin', 'name'])]
+    public function toSearchableArray(): array
     {
         return [
             'id' => $this->id,
@@ -34,25 +34,25 @@ class Room extends Model
 
     public function teacher()
     {
-        return $this->belongsTo(User::class, 'teacher_id');
+        return $this->belongsTo(User::class);
     }
 
     public function status()
     {
-        return $this->belongsTo(RoomStatus::class, 'status_id');
+        return $this->belongsTo(RoomStatus::class);
     }
 
     public function questions()
     {
-        return $this->hasMany(Question::class, 'room_id');
+        return $this->hasMany(Question::class);
     }
 
-    public static function generateUniquePin(): string
-    {
-        do {
-            $pin = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-        } while (self::where('pin', $pin)->exists());
+    // public static function generateUniquePin(): string
+    // {
+    //     do {
+    //         $pin = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+    //     } while (self::where('pin', $pin)->exists());
 
-        return $pin;
-    }
+    //     return $pin;
+    // }
 }

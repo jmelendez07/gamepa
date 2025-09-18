@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use app\models\RoomStatus;
+use App\Models\RoomStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
