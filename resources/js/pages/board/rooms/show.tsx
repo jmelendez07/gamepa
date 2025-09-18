@@ -1,39 +1,38 @@
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { motion, AnimatePresence, usePresenceData } from "framer-motion";
+import QRCode from "react-qr-code";
 import {
     ArrowLeft,
     Crown,
     Users,
     Play,
-    Pause,
-    Square,
     Edit3,
     Trash2,
     Copy,
-    Share2,
     Settings,
     Target,
-    Timer,
     CheckCircle,
     AlertCircle,
-    Eye,
-    Gamepad2,
     Zap,
-    BarChart3,
     Calendar,
-    Clock,
     RefreshCw,
     Plus,
-    LayoutDashboard,
     ChartNoAxesCombined,
-    MessageCircleQuestion
+    MessageCircleQuestion,
+    QrCode,
+    Download,
+    Smartphone,
+    Maximize
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Room from "@/types/room";
 import { RoomStatuses } from "@/enums/room-statuses";
 import PublicLayout from "@/layouts/public-layout";
+import DeleteRoomModal from "@/components/board/rooms/delete-room-modal";
+import QrRoomModal from "@/components/board/rooms/qr-room-modal";
+import QRCodeGenerator from 'qrcode';
 
 interface IRoomsShowProps {
     room: Room;
@@ -46,11 +45,14 @@ const tabs = [
 ];
 
 export default function RoomsShow({ room }: IRoomsShowProps) {
-    console.log(room);
     const [activeTab, setActiveTab] = useState<'overview' | 'questions' | 'settings'>('overview');
     const [direction, setDirection] = useState<1 | -1>(1);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [copiedPin, setCopiedPin] = useState(false);
+    const [copiedUrl, setCopiedUrl] = useState(false);
+    const [showQRModal, setShowQRModal] = useState(false);
+
+    const studentAccessUrl = route('rooms.join', { pin: room.pin });
 
     const handleStartRoom = () => {
         console.log('Iniciando sala...');
@@ -60,10 +62,6 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
         router.visit(route('rooms.edit', room.id));
     };
 
-    const handleDeleteRoom = () => {
-        router.delete(route('rooms.destroy', room.id));
-    };
-
     const copyPin = async () => {
         try {
             await navigator.clipboard.writeText(room.pin);
@@ -71,6 +69,37 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
             setTimeout(() => setCopiedPin(false), 2000);
         } catch (err) {
             console.error('Error al copiar PIN:', err);
+        }
+    };
+
+    const copyUrl = async () => {
+        try {
+            await navigator.clipboard.writeText(studentAccessUrl);
+            setCopiedUrl(true);
+            setTimeout(() => setCopiedUrl(false), 2000);
+        } catch (err) {
+            console.error('Error al copiar URL:', err);
+        }
+    };
+
+    const downloadQR = async () => {
+        try {
+            const qrCodeDataUrl = await QRCodeGenerator.toDataURL(studentAccessUrl, {
+                type: 'image/png',
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                },
+                width: 1024
+            });
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.download = `qr-sala-${room.pin}.png`;
+            downloadLink.href = qrCodeDataUrl;
+            downloadLink.click();
+        } catch (err) {
+            console.error('Error al descargar QR:', err);
         }
     };
 
@@ -151,8 +180,16 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                             <div className="flex items-center space-x-3">
                                 <Button
                                     variant="outline"
+                                    onClick={() => setShowQRModal(true)}
+                                    className="cursor-pointer !border-purple-400/50 text-purple-200 bg-black/20 hover:!bg-black/30 hover:!text-white hover:!border-purple-400/70 rounded-xl"
+                                >
+                                    <QrCode className="w-4 h-4 mr-0.5" />
+                                    QR Code
+                                </Button>
+                                <Button
+                                    variant="outline"
                                     onClick={copyPin}
-                                    className="cursor-pointer !border-purple-400/50 text-purple-200 hover:bg-purple-800/50 rounded-xl"
+                                    className="cursor-pointer !border-purple-400/50 text-purple-200 bg-black/20 hover:!bg-black/30 hover:!text-white hover:!border-purple-400/70 rounded-xl"
                                 >
                                     <Copy className="w-4 h-4 mr-0.5" />
                                     {copiedPin ? 'Copiado!' : 'Copiar PIN'}
@@ -160,7 +197,7 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                                 <Button
                                     variant="outline"
                                     onClick={handleEditRoom}
-                                    className="cursor-pointer !border-purple-400/50 text-purple-200 hover:bg-purple-800/50 rounded-xl"
+                                    className="cursor-pointer !border-purple-400/50 text-purple-200 bg-black/20 hover:!bg-black/30 hover:!text-white hover:!border-purple-400/70 rounded-xl"
                                 >
                                     <Edit3 className="w-4 h-4 mr-0.5" />
                                     Editar
@@ -242,32 +279,67 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                                         </div>
                                     </div>
 
-                                    <div className="bg-gradient-to-r from-purple-600/20 to-purple-700/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
-                                        <div className="text-center">
-                                            <h2 className="text-2xl font-bold text-white mb-4">PIN de la Sala</h2>
-                                            <div className="bg-white/10 rounded-2xl p-6 inline-block">
-                                                <p className="text-7xl tracking-[0.2em] text-center font-mono font-bold text-purple-100 mb-2">
-                                                    {room.pin}
-                                                </p>
-                                                <p className="text-purple-200 text-sm">
-                                                    Los estudiantes usarán este PIN para unirse
-                                                </p>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        <div className="bg-gradient-to-r grid grid-cols-1 grid-rows-1 place-content-center place-items-center from-purple-600/20 to-purple-700/20 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
+                                            <div className="text-center">
+                                                <h2 className="text-2xl font-bold text-white mb-4">PIN de Acceso</h2>
+                                                <div className="bg-white/10 rounded-2xl p-6">
+                                                    <p className="text-6xl tracking-[0.3em] text-center font-mono font-bold text-purple-100 mb-2">
+                                                        {room.pin}
+                                                    </p>
+                                                    <p className="text-purple-200 text-sm">
+                                                        Los estudiantes escriben este PIN
+                                                    </p>
+                                                </div>
+                                                <div className="mt-6 flex justify-center space-x-3">
+                                                    <Button
+                                                        onClick={copyPin}
+                                                        className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white rounded-xl"
+                                                    >
+                                                        <Copy className="w-4 h-4 mr-0.5" />
+                                                        {copiedPin ? 'Copiado!' : 'Copiar PIN'}
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="mt-6 flex justify-center space-x-4">
-                                                <Button
-                                                    onClick={copyPin}
-                                                    className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white rounded-xl"
-                                                >
-                                                    <Copy className="w-4 h-4 mr-0.5" />
-                                                    Copiar PIN
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    className="cursor-pointer !border-purple-400/50 text-purple-200 hover:bg-purple-800/50 rounded-xl"
-                                                >
-                                                    <Share2 className="w-4 h-4 mr-0.5" />
-                                                    Compartir Sala
-                                                </Button>
+                                        </div>
+
+                                        <div className="bg-gradient-to-r from-indigo-600/20 to-indigo-700/20 backdrop-blur-sm rounded-2xl p-8 border border-indigo-500/30">
+                                            <div className="grid grid-cols-1 place-content-center place-items-center">
+                                                <h2 className="text-2xl inline-flex items-center font-bold text-white mb-4">
+                                                    <QrCode className="w-7 h-7 inline mr-2" />
+                                                    Código QR
+                                                </h2>
+                                                <div className="bg-white/10 rounded-2xl p-6 inline-block">
+                                                    <div className="bg-white rounded-xl p-4 grid place-content-center place-items-center">
+                                                        <QRCode
+                                                            id="qr-code"
+                                                            value={studentAccessUrl}
+                                                            size={200}
+                                                            level="H"
+                                                        />
+                                                    </div>
+                                                    <p className="text-purple-200 text-sm mt-3">
+                                                        <Smartphone className="w-4 h-4 inline mr-1" />
+                                                        Escanea para acceder directamente
+                                                    </p>
+                                                </div>
+                                                <div className="mt-6 flex justify-center space-x-3">
+                                                    <Button
+                                                        onClick={() => setShowQRModal(true)}
+                                                        className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl"
+                                                    >
+                                                        <Maximize className="w-4 h-4 mr-0.5" />
+                                                        Ver Grande
+                                                    </Button>
+                                                    <Button
+                                                        onClick={downloadQR}
+                                                        variant="outline"
+                                                        className="cursor-pointer !border-black/10 !text-indigo-200 bg-black/30 hover:bg-black/50 rounded-xl"
+                                                    >
+                                                        <Download className="w-4 h-4 mr-0.5" />
+                                                        Descargar
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -414,6 +486,23 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                                                     </div>
                                                 </div>
                                                 <div>
+                                                    <label className="text-purple-200 text-sm">URL de Acceso</label>
+                                                    <div className="flex items-center space-x-1">
+                                                        <p className="text-white text-sm font-mono truncate">{studentAccessUrl}</p>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={copyUrl}
+                                                            className="cursor-pointer size-8 text-purple-300 hover:text-white"
+                                                        >
+                                                            <Copy className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
+                                                    {copiedUrl && (
+                                                        <p className="text-green-400 text-xs mt-1">✓ URL copiada</p>
+                                                    )}
+                                                </div>
+                                                <div>
                                                     <label className="text-purple-200 text-sm">Estado</label>
                                                     <div className="flex items-center space-x-2">
                                                         <div className={`w-2 h-2 rounded-full ${getStatusColor(room.status.name)}`}></div>
@@ -439,7 +528,7 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                                                 <Button
                                                     variant="outline"
                                                     className="
-                                                        cursor-pointer w-full rounded-xl justify-center h-20 !border-blue-500/20 text-white !bg-blue-400/20 hover:!bg-blue-600/20
+                                                        cursor-pointer w-full rounded-xl justify-center h-20 !border-blue-500/20 !text-white !bg-blue-400/20 hover:!bg-blue-600/20
                                                         text-lg transition-all duration-200
                                                     "
                                                 >
@@ -450,7 +539,7 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                                                     variant="outline"
                                                     onClick={() => setShowDeleteModal(true)}
                                                     className="
-                                                        cursor-pointer w-full rounded-xl justify-center h-20 !border-red-500/20 text-white !bg-red-400/20 hover:!bg-red-600/20
+                                                        cursor-pointer w-full rounded-xl justify-center h-20 !border-red-500/20 !text-white !bg-red-400/20 hover:!bg-red-600/20
                                                         text-lg transition-all duration-200
                                                     "
                                                 >
@@ -489,46 +578,16 @@ export default function RoomsShow({ room }: IRoomsShowProps) {
                 </div>
             </div>
 
-            <AnimatePresence>
-                {showDeleteModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-purple-800 border border-purple-500/50 rounded-2xl p-6 max-w-md w-full"
-                        >
-                            <div className="text-center">
-                                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-2">Eliminar Sala</h3>
-                                <p className="text-gray-300 mb-6">
-                                    ¿Estás seguro de que quieres eliminar "<strong>{room.name}</strong>"? 
-                                    Esta acción no se puede deshacer.
-                                </p>
-                                <div className="flex space-x-3">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setShowDeleteModal(false)}
-                                        className="cursor-pointer flex-1 !border-purple-300/20 text-gray-300 hover:bg-gray-800"
-                                    >
-                                        Cancelar
-                                    </Button>
-                                    <Button
-                                        onClick={() => {
-                                            handleDeleteRoom();
-                                            setShowDeleteModal(false);
-                                        }}
-                                        className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white"
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-2" />
-                                        Eliminar
-                                    </Button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+            <DeleteRoomModal setShowDeleteModal={(value) => setShowDeleteModal(value)} showDeleteModal={showDeleteModal} room={room} />
+            <QrRoomModal 
+                room={room}
+                copyUrl={copyUrl}
+                downloadQR={downloadQR}
+                copiedUrl={copiedUrl}
+                showQRModal={showQRModal}
+                studentAccessUrl={studentAccessUrl}
+                setShowQRModal={(value) => setShowQRModal(value)} 
+            />
         </PublicLayout>
     );
 }
@@ -553,4 +612,4 @@ function PresenceDataAnimation ({ children }: { children: React.ReactNode }) {
             {children}
         </motion.div>
     );
-} 
+}

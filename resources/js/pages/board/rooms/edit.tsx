@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Head, useForm, usePage } from "@inertiajs/react";
+import { Head, useForm, usePage, router } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus,
@@ -19,20 +19,30 @@ import {
     RefreshCw,
     MessageCircleQuestion,
     X,
-    AlertTriangle
+    AlertTriangle,
+    Save,
+    ArrowLeft,
+    CloudUpload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import Room from "@/types/room";
 import PublicLayout from "@/layouts/public-layout";
 
-interface CreateRoomForm {
+interface IRoomsEditProps {
+    room: Room;
+}
+
+interface EditRoomForm {
     name: string;
     pin: string;
     questions: {
+        id?: string;
         text: string;
         answers: {
+            id?: string;
             text: string;
             is_correct: boolean;
         }[];
@@ -45,11 +55,11 @@ interface FormErrors {
     [key: string]: string;
 }
 
-export default function RoomsCreate() {
-    const [currentStep, setCurrentStep] = useState(1);
+export default function RoomsEdit({ room }: IRoomsEditProps) {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [previewMode, setPreviewMode] = useState(false);
     const [showErrorAlert, setShowErrorAlert] = useState(false);
+    const [copiedPin, setCopiedPin] = useState(false);
     
     // Obtener errores de la página con tipo específico
     const { errors, flash } = usePage().props as { 
@@ -57,44 +67,32 @@ export default function RoomsCreate() {
         flash?: { success?: string; error?: string; };
         [key: string]: any;
     };
-    
-    // Generar PIN de 6 dígitos
-    const generatePin = () => {
-        return Math.floor(100000 + Math.random() * 900000).toString();
-    };
-    
-    const [roomPin, setRoomPin] = useState(generatePin());
-    const [copiedPin, setCopiedPin] = useState(false);
-    
+
     // Función para copiar PIN al clipboard
     const copyPin = async () => {
         try {
-            await navigator.clipboard.writeText(roomPin);
+            await navigator.clipboard.writeText(room.pin);
             setCopiedPin(true);
             setTimeout(() => setCopiedPin(false), 2000);
         } catch (err) {
             console.error('Error al copiar PIN:', err);
         }
     };
-    
-    const { data, setData, post, processing, errors: formErrors, clearErrors } = useForm<CreateRoomForm>({
-        name: '',
-        pin: roomPin,
-        questions: [{
-            text: '',
-            answers: [
-                { text: '', is_correct: false },
-                { text: '', is_correct: false },
-                { text: '', is_correct: false },
-                { text: '', is_correct: false }
-            ]
-        }]
-    } as CreateRoomForm);
 
-    // Actualizar PIN en el formulario cuando cambie
-    useEffect(() => {
-        setData({ ...data, pin: roomPin });
-    }, [roomPin]);
+    // Inicializar formulario con datos de la sala existente
+    const { data, setData, put, processing, errors: formErrors, clearErrors } = useForm<EditRoomForm>({
+        name: room.name,
+        pin: room.pin,
+        questions: room.questions?.map(question => ({
+            id: question.id,
+            text: question.text,
+            answers: question.answers?.map(answer => ({
+                id: answer.id,
+                text: answer.text,
+                is_correct: answer.is_correct
+            })) || []
+        })) || []
+    } as EditRoomForm);
 
     // Mostrar alerta de error cuando hay errores
     useEffect(() => {
@@ -181,13 +179,14 @@ export default function RoomsCreate() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setShowErrorAlert(false);
-        post(route('rooms.store'), {
+        put(route('rooms.update', room.id), {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
     const validateCurrentQuestion = () => {
+        if (!data.questions[currentQuestionIndex]) return false;
         const question = data.questions[currentQuestionIndex];
         const hasText = question.text.trim() !== '';
         const hasAllAnswers = question.answers.every(answer => answer.text.trim() !== '');
@@ -195,7 +194,7 @@ export default function RoomsCreate() {
         return hasText && hasAllAnswers && hasCorrectAnswer;
     };
 
-    const canCreateRoom = () => {
+    const canUpdateRoom = () => {
         return data.name.trim() !== '' && data.questions.every((_, index) => {
             const question = data.questions[index];
             const hasText = question.text.trim() !== '';
@@ -207,14 +206,12 @@ export default function RoomsCreate() {
 
     const currentQuestion = data.questions[currentQuestionIndex];
 
-    // Función para obtener el error de un campo específico - CORREGIDA
+    // Función para obtener el error de un campo específico
     const getFieldError = (fieldName: string): string | undefined => {
-        // Primero buscar en errores del servidor (de usePage)
         if (errors && errors[fieldName]) {
             return errors[fieldName];
         }
         
-        // Luego buscar en errores del formulario (de useForm) con casting seguro
         const formErrorsObj = formErrors as FormErrors;
         if (formErrorsObj && formErrorsObj[fieldName]) {
             return formErrorsObj[fieldName];
@@ -234,7 +231,7 @@ export default function RoomsCreate() {
 
     return (
         <PublicLayout>
-            <Head title="Crear Nueva Sala" />
+            <Head title={`Editar ${room.name}`} />
             
             <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -257,7 +254,7 @@ export default function RoomsCreate() {
                                     <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                                     <div className="flex-1">
                                         <h3 className="text-red-100 font-semibold text-sm mb-1">
-                                            Error al crear la sala
+                                            Error al actualizar la sala
                                         </h3>
                                         <div className="text-red-200 text-sm space-y-1">
                                             {errors.error && <p>{errors.error}</p>}
@@ -306,19 +303,19 @@ export default function RoomsCreate() {
                             <div className="flex items-center space-x-4">
                                 <Button
                                     variant="ghost"
-                                    onClick={() => window.history.back()}
+                                    onClick={() => router.visit(route('rooms.show', room.id))}
                                     className="cursor-pointer text-purple-200 gap-0.5 hover:text-white hover:bg-purple-800/50 rounded-xl"
                                 >
-                                    <ChevronLeft className="w-5 h-5 mr-0.5" />
-                                    Volver
+                                    <ArrowLeft className="w-5 h-5 mr-0.5" />
+                                    Volver a la Sala
                                 </Button>
                                 <div className="flex items-center space-x-3">
                                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                        <Crown className="w-6 h-6 text-white" />
+                                        <Edit3 className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
-                                        <h1 className="text-2xl font-bold text-white">Crear Nueva Sala</h1>
-                                        <p className="text-purple-200 text-sm">Diseña tu aventura matemática épica</p>
+                                        <h1 className="text-2xl font-bold text-white">Editar Sala</h1>
+                                        <p className="text-purple-200 text-sm">Modifica tu aventura matemática</p>
                                     </div>
                                 </div>
                             </div>
@@ -334,11 +331,11 @@ export default function RoomsCreate() {
                                 </Button>
                                 <Button
                                     onClick={handleSubmit}
-                                    disabled={!canCreateRoom() || processing}
+                                    disabled={!canUpdateRoom() || processing}
                                     className="cursor-pointer bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg hover:shadow-purple-500/25 transition-all duration-300 disabled:opacity-50"
                                 >
-                                    <Plus className="w-4 h-4 mr-0.5" />
-                                    {processing ? 'Creando...' : 'Crear Sala'}
+                                    <CloudUpload className="w-4 h-4 mr-0.5" />
+                                    {processing ? 'Guardando...' : 'Guardar Cambios'}
                                 </Button>
                             </div>
                         </div>
@@ -384,7 +381,7 @@ export default function RoomsCreate() {
                                 <div className="space-y-6">
                                     {data.questions.map((question, qIndex) => (
                                         <motion.div
-                                            key={qIndex}
+                                            key={question.id || qIndex}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: qIndex * 0.1 }}
@@ -401,7 +398,7 @@ export default function RoomsCreate() {
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                         {question.answers.map((answer, aIndex) => (
                                                             <div
-                                                                key={aIndex}
+                                                                key={answer.id || aIndex}
                                                                 className={`p-4 rounded-xl border-2 transition-all duration-300 ${
                                                                     answer.is_correct
                                                                         ? 'bg-green-500/20 border-green-500 text-green-100'
@@ -445,7 +442,7 @@ export default function RoomsCreate() {
                                         </div>
                                         
                                         <div className="space-y-4">
-                                            {/* PIN de la Sala */}
+                                            {/* PIN de la Sala - Solo lectura */}
                                             <div>
                                                 <Label className="text-purple-200 font-medium">
                                                     PIN de la Sala
@@ -453,39 +450,26 @@ export default function RoomsCreate() {
                                                 <div className="mt-2 flex items-center justify-between">
                                                     <div className="flex items-center space-x-3">
                                                         <div className="text-2xl font-bold text-white tracking-wider">
-                                                            {roomPin}
+                                                            {room.pin}
                                                         </div>
                                                         <span className="text-purple-300 text-sm">
-                                                            (Autogenerado)
+                                                            (No modificable)
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center space-x-0">
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={copyPin}
-                                                            className="cursor-pointer text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-lg h-8 w-8 p-0"
-                                                            title="Copiar PIN"
-                                                        >
-                                                            <Copy className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => setRoomPin(generatePin())}
-                                                            className="cursor-pointer text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-lg h-8 w-8 p-0"
-                                                            title="Regenerar PIN"
-                                                        >
-                                                            <RefreshCw className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={copyPin}
+                                                        className="cursor-pointer text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-lg h-8 w-8 p-0"
+                                                        title="Copiar PIN"
+                                                    >
+                                                        <Copy className="w-4 h-4" />
+                                                    </Button>
                                                 </div>
-                                                {getFieldError('pin') && (
-                                                    <p className="text-red-400 text-sm mt-1 flex items-center space-x-1">
-                                                        <AlertCircle className="w-3 h-3" />
-                                                        <span>{getFieldError('pin')}</span>
+                                                {copiedPin && (
+                                                    <p className="text-green-400 text-sm mt-1">
+                                                        ✓ PIN copiado al portapapeles
                                                     </p>
                                                 )}
                                             </div>
@@ -536,7 +520,7 @@ export default function RoomsCreate() {
                                         <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto overflow-x-hidden">
                                             {data.questions.map((question, index) => (
                                                 <div
-                                                    key={index}
+                                                    key={question.id || index}
                                                     className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
                                                         currentQuestionIndex === index
                                                             ? 'bg-purple-600/30 border-purple-400'
@@ -609,176 +593,178 @@ export default function RoomsCreate() {
                                 {/* Panel derecho - Editor de pregunta actual */}
                                 <div className="lg:col-span-2">
                                     <AnimatePresence initial={false} mode="wait">
-                                        <motion.div
-                                            key={currentQuestionIndex}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            className="bg-white/15 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/30 h-full"
-                                        >
-                                            <div className="flex items-center justify-between mb-8">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                                        getFieldError(`questions.${currentQuestionIndex}.text`) || 
-                                                        getFieldError(`questions.${currentQuestionIndex}.answers`) ? 
-                                                        'bg-red-600' : 'bg-purple-600'
-                                                    }`}>
-                                                        <span className="text-white font-bold">{currentQuestionIndex + 1}</span>
+                                        {currentQuestion && (
+                                            <motion.div
+                                                key={currentQuestionIndex}
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                                className="bg-white/15 backdrop-blur-sm rounded-2xl p-8 border border-purple-300/30 h-full"
+                                            >
+                                                <div className="flex items-center justify-between mb-8">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                                            getFieldError(`questions.${currentQuestionIndex}.text`) || 
+                                                            getFieldError(`questions.${currentQuestionIndex}.answers`) ? 
+                                                            'bg-red-600' : 'bg-purple-600'
+                                                        }`}>
+                                                            <span className="text-white font-bold">{currentQuestionIndex + 1}</span>
+                                                        </div>
+                                                        <h2 className="text-2xl font-bold text-white">
+                                                            Pregunta {currentQuestionIndex + 1}
+                                                        </h2>
                                                     </div>
-                                                    <h2 className="text-2xl font-bold text-white">
-                                                        Pregunta {currentQuestionIndex + 1}
-                                                    </h2>
-                                                </div>
-                                                
-                                                <div className="flex items-center space-x-0">
-                                                    <Button
-                                                        variant="ghost"
-                                                        onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                                                        disabled={currentQuestionIndex === 0}
-                                                        className="cursor-pointer hover:bg-transparent text-purple-300 hover:text-white disabled:opacity-50"
-                                                    >
-                                                        <ChevronLeft className="size-5" />
-                                                    </Button>
-                                                    <div className="inline-flex items-center gap-2 text-purple-200 text-sm">
-                                                        <span>{currentQuestionIndex + 1}</span>
-                                                        de
-                                                        <span>{data.questions.length}</span>
-                                                    </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        onClick={() => setCurrentQuestionIndex(Math.min(data.questions.length - 1, currentQuestionIndex + 1))}
-                                                        disabled={currentQuestionIndex === data.questions.length - 1}
-                                                        className="cursor-pointer hover:bg-transparent text-purple-300 hover:text-white disabled:opacity-50"
-                                                    >
-                                                        <ChevronRight className="size-5" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-6">
-                                                {/* Texto de la pregunta */}
-                                                <div>
-                                                    <Label className="text-purple-200 font-medium flex items-center space-x-0.5">
-                                                        <Edit3 className="w-4 h-4" />
-                                                        <span>Pregunta</span>
-                                                    </Label>
-                                                    <Textarea
-                                                        value={currentQuestion.text}
-                                                        onChange={(e) => updateQuestion(currentQuestionIndex, 'text', e.target.value)}
-                                                        placeholder="Escribe tu pregunta aquí..."
-                                                        rows={4}
-                                                        className={`mt-2 !ring-0 !ring-offset-0 border-2 bg-purple-900/50 text-white !placeholder-purple-300 focus:border-purple-400 rounded-xl resize-none ${
-                                                            getFieldError(`questions.${currentQuestionIndex}.text`) ? 
-                                                            'border-red-500 focus:border-red-400' : 'border-purple-600/50'
-                                                        }`}
-                                                    />
-                                                    {getFieldError(`questions.${currentQuestionIndex}.text`) && (
-                                                        <p className="text-red-400 text-sm mt-1 flex items-center space-x-1">
-                                                            <AlertCircle className="w-3 h-3" />
-                                                            <span>{getFieldError(`questions.${currentQuestionIndex}.text`)}</span>
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                {/* Respuestas */}
-                                                <div>
-                                                    <Label className="text-purple-200 font-medium flex items-center space-x-0.5 mb-4">
-                                                        <Zap className="w-4 h-4" />
-                                                        <span>Respuestas (marca la correcta presionando A, B, C, D)</span>
-                                                    </Label>
                                                     
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        {currentQuestion.answers.map((answer, answerIndex) => (
-                                                            <motion.div
-                                                                key={answerIndex}
-                                                                initial={{ opacity: 0, y: 10 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                transition={{ delay: answerIndex * 0.1 }}
-                                                                className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
-                                                                    answer.is_correct
-                                                                        ? 'bg-green-500/20 border-green-500'
-                                                                        : getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) ?
-                                                                        'bg-red-500/20 border-red-500' :
-                                                                        'bg-purple-800/30 border-purple-600/50'
-                                                                }`}
-                                                            >
-                                                                <div className="flex items-center space-x-3 mb-3">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => updateAnswer(currentQuestionIndex, answerIndex, 'is_correct', !answer.is_correct)}
-                                                                        className={`cursor-pointer w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                                                                            answer.is_correct
-                                                                                ? 'bg-green-500 text-white'
-                                                                                : 'bg-purple-600 text-white hover:bg-purple-500'
-                                                                        }`}
-                                                                    >
-                                                                        {String.fromCharCode(65 + answerIndex)}
-                                                                    </button>
-                                                                    {answer.is_correct && (
-                                                                        <CheckCircle className="w-4 h-4 text-green-400" />
-                                                                    )}
-                                                                    {getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) && (
-                                                                        <AlertCircle className="w-4 h-4 text-red-400" />
-                                                                    )}
-                                                                </div>
-                                                                
-                                                                <Input
-                                                                    value={answer.text}
-                                                                    onChange={(e) => updateAnswer(currentQuestionIndex, answerIndex, 'text', e.target.value)}
-                                                                    placeholder={`Respuesta ${String.fromCharCode(65 + answerIndex)}`}
-                                                                    className={`bg-transparent !text-lg border-none text-white !placeholder-purple-300 !ring-0 focus:ring-0 ${
-                                                                        answer.is_correct ? 'text-green-100' : 
-                                                                        getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) ? 
-                                                                        'text-red-100' : 'text-purple-100'
-                                                                    }`}
-                                                                />
-                                                                {getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) && (
-                                                                    <p className="text-red-400 text-xs mt-1">
-                                                                        {getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`)}
-                                                                    </p>
-                                                                )}
-                                                            </motion.div>
-                                                        ))}
+                                                    <div className="flex items-center space-x-0">
+                                                        <Button
+                                                            variant="ghost"
+                                                            onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                                                            disabled={currentQuestionIndex === 0}
+                                                            className="cursor-pointer hover:bg-transparent text-purple-300 hover:text-white disabled:opacity-50"
+                                                        >
+                                                            <ChevronLeft className="size-5" />
+                                                        </Button>
+                                                        <div className="inline-flex items-center gap-2 text-purple-200 text-sm">
+                                                            <span>{currentQuestionIndex + 1}</span>
+                                                            de
+                                                            <span>{data.questions.length}</span>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            onClick={() => setCurrentQuestionIndex(Math.min(data.questions.length - 1, currentQuestionIndex + 1))}
+                                                            disabled={currentQuestionIndex === data.questions.length - 1}
+                                                            className="cursor-pointer hover:bg-transparent text-purple-300 hover:text-white disabled:opacity-50"
+                                                        >
+                                                            <ChevronRight className="size-5" />
+                                                        </Button>
                                                     </div>
-                                                    {getFieldError(`questions.${currentQuestionIndex}.answers`) && (
-                                                        <p className="text-red-400 text-sm mt-3 flex items-center space-x-1">
-                                                            <AlertCircle className="w-3 h-3" />
-                                                            <span>{getFieldError(`questions.${currentQuestionIndex}.answers`)}</span>
-                                                        </p>
-                                                    )}
                                                 </div>
 
-                                                {/* Validación */}
-                                                <div className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
-                                                    getFieldError(`questions.${currentQuestionIndex}.text`) || 
-                                                    getFieldError(`questions.${currentQuestionIndex}.answers`) ?
-                                                    'bg-red-800/30 border-red-600/50' : 
-                                                    validateCurrentQuestion() ?
-                                                    'bg-green-800/30 border-green-600/50' :
-                                                    'bg-purple-800/30 border-purple-600/50'
-                                                }`}>
-                                                    {getFieldError(`questions.${currentQuestionIndex}.text`) || 
-                                                     getFieldError(`questions.${currentQuestionIndex}.answers`) ? (
-                                                        <div className="flex items-center space-x-2 text-red-400">
-                                                            <AlertCircle className="w-5 h-5" />
-                                                            <span className="font-medium">Esta pregunta tiene errores que debes corregir</span>
+                                                <div className="space-y-6">
+                                                    {/* Texto de la pregunta */}
+                                                    <div>
+                                                        <Label className="text-purple-200 font-medium flex items-center space-x-0.5">
+                                                            <Edit3 className="w-4 h-4" />
+                                                            <span>Pregunta</span>
+                                                        </Label>
+                                                        <Textarea
+                                                            value={currentQuestion.text}
+                                                            onChange={(e) => updateQuestion(currentQuestionIndex, 'text', e.target.value)}
+                                                            placeholder="Escribe tu pregunta aquí..."
+                                                            rows={4}
+                                                            className={`mt-2 !ring-0 !ring-offset-0 border-2 bg-purple-900/50 text-white !placeholder-purple-300 focus:border-purple-400 rounded-xl resize-none ${
+                                                                getFieldError(`questions.${currentQuestionIndex}.text`) ? 
+                                                                'border-red-500 focus:border-red-400' : 'border-purple-600/50'
+                                                            }`}
+                                                        />
+                                                        {getFieldError(`questions.${currentQuestionIndex}.text`) && (
+                                                            <p className="text-red-400 text-sm mt-1 flex items-center space-x-1">
+                                                                <AlertCircle className="w-3 h-3" />
+                                                                <span>{getFieldError(`questions.${currentQuestionIndex}.text`)}</span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Respuestas */}
+                                                    <div>
+                                                        <Label className="text-purple-200 font-medium flex items-center space-x-0.5 mb-4">
+                                                            <Zap className="w-4 h-4" />
+                                                            <span>Respuestas (marca la correcta presionando A, B, C, D)</span>
+                                                        </Label>
+                                                        
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {currentQuestion.answers.map((answer, answerIndex) => (
+                                                                <motion.div
+                                                                    key={answer.id || answerIndex}
+                                                                    initial={{ opacity: 0, y: 10 }}
+                                                                    animate={{ opacity: 1, y: 0 }}
+                                                                    transition={{ delay: answerIndex * 0.1 }}
+                                                                    className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
+                                                                        answer.is_correct
+                                                                            ? 'bg-green-500/20 border-green-500'
+                                                                            : getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) ?
+                                                                            'bg-red-500/20 border-red-500' :
+                                                                            'bg-purple-800/30 border-purple-600/50'
+                                                                    }`}
+                                                                >
+                                                                    <div className="flex items-center space-x-3 mb-3">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => updateAnswer(currentQuestionIndex, answerIndex, 'is_correct', !answer.is_correct)}
+                                                                            className={`cursor-pointer w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                                                                                answer.is_correct
+                                                                                    ? 'bg-green-500 text-white'
+                                                                                    : 'bg-purple-600 text-white hover:bg-purple-500'
+                                                                            }`}
+                                                                        >
+                                                                            {String.fromCharCode(65 + answerIndex)}
+                                                                        </button>
+                                                                        {answer.is_correct && (
+                                                                            <CheckCircle className="w-4 h-4 text-green-400" />
+                                                                        )}
+                                                                        {getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) && (
+                                                                            <AlertCircle className="w-4 h-4 text-red-400" />
+                                                                        )}
+                                                                    </div>
+                                                                    
+                                                                    <Input
+                                                                        value={answer.text}
+                                                                        onChange={(e) => updateAnswer(currentQuestionIndex, answerIndex, 'text', e.target.value)}
+                                                                        placeholder={`Respuesta ${String.fromCharCode(65 + answerIndex)}`}
+                                                                        className={`bg-transparent !text-lg border-none text-white !placeholder-purple-300 !ring-0 focus:ring-0 ${
+                                                                            answer.is_correct ? 'text-green-100' : 
+                                                                            getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) ? 
+                                                                            'text-red-100' : 'text-purple-100'
+                                                                        }`}
+                                                                    />
+                                                                    {getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`) && (
+                                                                        <p className="text-red-400 text-xs mt-1">
+                                                                            {getFieldError(`questions.${currentQuestionIndex}.answers.${answerIndex}.text`)}
+                                                                        </p>
+                                                                    )}
+                                                                </motion.div>
+                                                            ))}
                                                         </div>
-                                                    ) : validateCurrentQuestion() ? (
-                                                        <div className="flex items-center space-x-2 text-green-400">
-                                                            <CheckCircle className="w-5 h-5" />
-                                                            <span className="font-medium">Pregunta completada correctamente</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center space-x-2 text-yellow-400">
-                                                            <AlertCircle className="w-5 h-5" />
-                                                            <span className="font-medium">
-                                                                Completa la pregunta, todas las respuestas y marca la correcta
-                                                            </span>
-                                                        </div>
-                                                    )}
+                                                        {getFieldError(`questions.${currentQuestionIndex}.answers`) && (
+                                                            <p className="text-red-400 text-sm mt-3 flex items-center space-x-1">
+                                                                <AlertCircle className="w-3 h-3" />
+                                                                <span>{getFieldError(`questions.${currentQuestionIndex}.answers`)}</span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Validación */}
+                                                    <div className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                                                        getFieldError(`questions.${currentQuestionIndex}.text`) || 
+                                                        getFieldError(`questions.${currentQuestionIndex}.answers`) ?
+                                                        'bg-red-800/30 border-red-600/50' : 
+                                                        validateCurrentQuestion() ?
+                                                        'bg-green-800/30 border-green-600/50' :
+                                                        'bg-purple-800/30 border-purple-600/50'
+                                                    }`}>
+                                                        {getFieldError(`questions.${currentQuestionIndex}.text`) || 
+                                                         getFieldError(`questions.${currentQuestionIndex}.answers`) ? (
+                                                            <div className="flex items-center space-x-2 text-red-400">
+                                                                <AlertCircle className="w-5 h-5" />
+                                                                <span className="font-medium">Esta pregunta tiene errores que debes corregir</span>
+                                                            </div>
+                                                        ) : validateCurrentQuestion() ? (
+                                                            <div className="flex items-center space-x-2 text-green-400">
+                                                                <CheckCircle className="w-5 h-5" />
+                                                                <span className="font-medium">Pregunta completada correctamente</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center space-x-2 text-yellow-400">
+                                                                <AlertCircle className="w-5 h-5" />
+                                                                <span className="font-medium">
+                                                                    Completa la pregunta, todas las respuestas y marca la correcta
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </motion.div>
+                                            </motion.div>
+                                        )}
                                     </AnimatePresence>
                                 </div>
                             </motion.div>

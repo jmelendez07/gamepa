@@ -408,7 +408,7 @@ const SimpleRoomCard = ({ room, onStart }: SimpleRoomCardProps) => {
                 <div className="w-full grid grid-cols-[1fr_auto] gap-3 items-center z-1">
                     <Button
                         onClick={(e) => {
-                            e.preventDefault(); // ✅ Prevenir interferencia con drag
+                            e.preventDefault();
                             e.stopPropagation();
                             onStart(room);
                         }}
@@ -417,9 +417,17 @@ const SimpleRoomCard = ({ room, onStart }: SimpleRoomCardProps) => {
                         <Play className="w-4 h-4 mr-2" />
                         {room.status.name === RoomStatuses.ACTIVE ? 'Continuar' : (room.status.name === RoomStatuses.DRAFT ? 'Iniciar' : 'Ver Resultados')}
                     </Button>
-                    <Link href={route('rooms.show', room.id)} className="text-purple-200 hover:underline hover:bg-white/20 size-8 grid place-items-center place-content-center transition-all duration-300 rounded-md">
+                    <Button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+
+                            router.visit(route('rooms.show', room.id));
+                        }}
+                        className="cursor-pointer bg-transparent text-purple-200 hover:underline hover:bg-white/20 size-8 grid place-items-center place-content-center transition-all duration-300 rounded-md"
+                    >
                         <Settings className="size-5" />
-                    </Link>
+                    </Button>
                 </div>
             </div>
         </div>

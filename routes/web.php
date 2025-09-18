@@ -30,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('salas', RoomController::class)->names('rooms');
     });
 
+    Route::middleware(['role:docente,estudiante'])->group(function () {
+        Route::get('salas/jugar/{pin}', [RoomController::class, 'join'])->name('rooms.join');
+    });
+
     Route::middleware(['role:administrador'])->group(function () {
         Route::get('panel', function () { return Inertia::render('dashboard'); })->name('dashboard');
         Route::resource('users', UserController::class)->names('users');
