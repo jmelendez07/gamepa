@@ -1,6 +1,6 @@
 import ICard from "@/types/card";
-import { FederatedPointerEvent, TextStyle } from 'pixi.js';
-import { useState, useRef } from 'react';
+import { Assets, FederatedPointerEvent, TextStyle, Texture } from 'pixi.js';
+import { useState, useRef, useEffect } from 'react';
 import { useTick } from '@pixi/react';
 
 interface IDiscardedCardsModalProps {
@@ -15,6 +15,7 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
     const cardPositions = useRef<{[key: string]: number}>({});
     const [, forceUpdate] = useState({});
+    const [cardsTexture, setCardsTexture] = useState<{[key: string]: Texture}>({});
 
     const getCardTypeColor = (typeName: string): number => {
         const typeColors: { [key: string]: number } = {
@@ -29,17 +30,42 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
         return typeColors[typeName] || typeColors.default;
     };
 
-    const cardWidth = 300;
-    const cardHeight = 450;
-    const padding = 80;
-    const cardsPerRow = Math.floor((window.innerWidth - 100) / (cardWidth + padding));
+    // Lógica responsive similar a stolen-cards-modal
+    const getCardLayout = () => {
+        const screenScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const baseCardWidth = 300;
+        const baseCardHeight = 450;
+        const basePadding = 80;
+        const baseTopOffset = 120;
+
+        // Escalar dimensiones según el tamaño de pantalla
+        const cardWidth = baseCardWidth * screenScale;
+        const cardHeight = baseCardHeight * screenScale;
+        const padding = basePadding * screenScale;
+        const topOffset = baseTopOffset * screenScale;
+
+        // Calcular cartas por fila basado en el ancho disponible
+        const availableWidth = window.innerWidth * 0.9; // 90% del ancho de pantalla
+        const cardsPerRow = Math.max(1, Math.floor(availableWidth / (cardWidth + padding)));
+
+        return {
+            cardWidth,
+            cardHeight,
+            padding,
+            topOffset,
+            cardsPerRow,
+            screenScale,
+        };
+    };
+
+    const layout = getCardLayout();
 
     // Animación suave usando useTick
     useTick(() => {
         let hasChanges = false;
 
         cards.forEach(card => {
-            const targetOffset = hoveredCard === card.id ? -15 : 0;
+            const targetOffset = hoveredCard === card.id ? -15 * layout.screenScale : 0;
             const currentOffset = cardPositions.current[card.id] || 0;
             
             if (Math.abs(currentOffset - targetOffset) > 0.1) {
@@ -71,6 +97,28 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
         setHoveredCard(null);
     };
 
+    useEffect(() => {
+        const loadTextures = async () => {
+            try {
+                // Cargar cada textura individualmente para asegurar el tipo correcto
+                const texturePromises = cards.map(card => Assets.load<Texture>(card.spritesheet));
+                const loadedTextures = await Promise.all(texturePromises);
+                
+                // Crear el objeto de texturas
+                const texturesMap: {[key: string]: Texture} = {};
+                cards.forEach((card, index) => {
+                    texturesMap[card.id] = loadedTextures[index];
+                });
+                
+                setCardsTexture(texturesMap);
+            } catch (error) {
+                console.error('Error loading card textures:', error);
+            }
+        };
+
+        loadTextures();
+    }, [cards]);
+
     return (
         <pixiContainer zIndex={100}>
             <pixiGraphics
@@ -84,15 +132,15 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
             <pixiText
                 text="CARTAS DESCARTADAS"
                 x={window.innerWidth / 2}
-                y={30}
+                y={30 * layout.screenScale}
                 anchor={0.5}
                 style={new TextStyle({
                     fontFamily: 'monospace',
-                    fontSize: 36,
+                    fontSize: 36 * layout.screenScale,
                     fill: '#e8e3d3',
-                    stroke: { color: '#2c1810', width: 3 },
+                    stroke: { color: '#2c1810', width: 3 * layout.screenScale },
                     dropShadow: {
-                        distance: 2,
+                        distance: 2 * layout.screenScale,
                         color: '#000000',
                         alpha: 1
                     }
@@ -100,23 +148,29 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
             />
 
             {/* Botón cerrar */}
-            <pixiContainer x={0} y={window.innerHeight - 175} onPointerDown={() => onClose(false)} cursor="pointer" interactive={true}>
+            <pixiContainer 
+                x={0} 
+                y={window.innerHeight - (175 * layout.screenScale)} 
+                onPointerDown={() => onClose(false)} 
+                cursor="pointer" 
+                interactive={true}
+            >
                 <pixiGraphics
                     draw={(g) => {
                         g.clear();
-                        g.roundRect(0, 0, 200, 60, 4);
+                        g.roundRect(0, 0, 200 * layout.screenScale, 60 * layout.screenScale, 4 * layout.screenScale);
                         g.fill(0xFC8065);
-                        g.stroke({ color: 0x654321, width: 2 });
+                        g.stroke({ color: 0x654321, width: 2 * layout.screenScale });
                     }}
                 />
                 <pixiText
                     text="Salir"
-                    x={100}
-                    y={30}
+                    x={100 * layout.screenScale}
+                    y={30 * layout.screenScale}
                     anchor={0.5}
                     style={new TextStyle({
                         fontFamily: 'monospace',
-                        fontSize: 24,
+                        fontSize: 24 * layout.screenScale,
                         fill: '#e8e3d3',
                         fontWeight: 'bold',
                     })}
@@ -126,10 +180,16 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
             {/* Contenedor de cartas */}
             <pixiContainer>
                 {cards.map((card, index) => {
-                    const row = Math.floor(index / cardsPerRow);
-                    const col = index % cardsPerRow;
-                    const baseX = 50 + col * (cardWidth + padding);
-                    const baseY = 120 + row * (cardHeight + padding);
+                    const row = Math.floor(index / layout.cardsPerRow);
+                    const col = index % layout.cardsPerRow;
+                    
+                    // Centrar las cartas en cada fila
+                    const cardsInThisRow = Math.min(layout.cardsPerRow, cards.length - row * layout.cardsPerRow);
+                    const totalRowWidth = cardsInThisRow * layout.cardWidth + (cardsInThisRow - 1) * layout.padding;
+                    const rowStartX = (window.innerWidth - totalRowWidth) / 2;
+                    
+                    const baseX = rowStartX + col * (layout.cardWidth + layout.padding);
+                    const baseY = layout.topOffset + row * (layout.cardHeight + layout.padding);
                     const yOffset = cardPositions.current[card.id] || 0;
                     const isHovered = hoveredCard === card.id;
                     
@@ -144,51 +204,38 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
                             onPointerOver={() => handleCardHover(card.id)}
                             onPointerOut={handleCardOut}
                         >
-                            {/* Fondo de la carta */}
-                            <pixiGraphics
-                                draw={(g) => {
-                                    const cardColor = getCardTypeColor(card.type.name);
-                                    g.clear();
-                                    g.roundRect(0, 0, cardWidth, cardHeight, 8);
-                                    g.fill(cardColor);
-                                    g.stroke({ color: 0x2c1810, width: 3 });
-                                }}
-                            />
+                            {cardsTexture[card.id] && (
+                                <pixiSprite
+                                    texture={cardsTexture[card.id]}
+                                    width={layout.cardWidth}
+                                    height={layout.cardHeight}
+                                />
+                            )}
 
                             <pixiText
                                 text={card.name}
-                                x={cardWidth / 2}
-                                y={15}
+                                x={layout.cardWidth / 2}
+                                y={15 * layout.screenScale}
                                 anchor={0.5}
                                 style={new TextStyle({
                                     fontFamily: 'monospace',
-                                    fontSize: 20,
+                                    fontSize: 20 * layout.screenScale,
                                     fill: '#e8e3d3',
-                                    stroke: { color: '#000000', width: 1 },
+                                    stroke: { color: '#000000', width: 1 * layout.screenScale },
                                     wordWrap: true,
-                                    wordWrapWidth: cardWidth - 20,
+                                    wordWrapWidth: layout.cardWidth - (20 * layout.screenScale),
                                     align: 'center',
                                 })}
                             />
 
-                            <pixiGraphics
-                                x={25}
-                                y={25}
-                                draw={(g) => {
-                                    g.clear();
-                                    g.circle(0, 0, 20);
-                                    g.fill(0x4169e1);
-                                    g.stroke({ color: 0x1e3a8a, width: 2 });
-                                }}
-                            />
                             <pixiText
                                 text={card.energy_cost.toString()}
-                                x={25}
-                                y={25}
+                                x={25 * layout.screenScale}
+                                y={25 * layout.screenScale}
                                 anchor={0.5}
                                 style={new TextStyle({
                                     fontFamily: 'monospace',
-                                    fontSize: 20,
+                                    fontSize: 20 * layout.screenScale,
                                     fill: '#ffffff',
                                     fontWeight: 'bold',
                                 })}
@@ -197,14 +244,14 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
                             {card.stats > 0 && (
                                 <pixiText
                                     text={card.stats.toString()}
-                                    x={cardWidth / 2}
-                                    y={cardHeight - 70}
+                                    x={layout.cardWidth / 2}
+                                    y={layout.cardHeight - (70 * layout.screenScale)}
                                     anchor={0.5}
                                     style={new TextStyle({
                                         fontFamily: 'monospace',
-                                        fontSize: 37,
+                                        fontSize: 37 * layout.screenScale,
                                         fill: '#ffdc00',
-                                        stroke: { color: '#8b4513', width: 1 },
+                                        stroke: { color: '#8b4513', width: 1 * layout.screenScale },
                                         fontWeight: 'bold',
                                     })}
                                 />
@@ -212,12 +259,12 @@ export default function DiscardedCardsModal({ cards, onClose, isOpen }: IDiscard
 
                             <pixiText
                                 text={card.type.name}
-                                x={cardWidth / 2}
-                                y={cardHeight - 40}
+                                x={layout.cardWidth / 2}
+                                y={layout.cardHeight - (40 * layout.screenScale)}
                                 anchor={0.5}
                                 style={new TextStyle({
                                     fontFamily: 'monospace',
-                                    fontSize: 20,
+                                    fontSize: 20 * layout.screenScale,
                                     fill: '#b8b8b8',
                                     fontStyle: 'italic',
                                 })}
