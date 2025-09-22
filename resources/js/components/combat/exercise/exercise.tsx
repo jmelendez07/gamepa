@@ -1,12 +1,12 @@
+import ICard from '@/types/card';
+import IEnemy from '@/types/enemy';
+import IExercise, { Option } from '@/types/exercise';
 import { extend } from '@pixi/react';
 import * as PIXI from 'pixi.js';
 import { Assets, Container, Graphics, Point, Sprite, Text, Texture } from 'pixi.js';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Answer } from './answer';
 import { Tricks } from './tricks';
-import IEnemy from '@/types/enemy';
-import ICard from '@/types/card';
-import IExercise from '@/types/exercise';
 
 extend({ Container, Sprite, Text, Graphics, Point });
 
@@ -22,14 +22,6 @@ interface IExerciseProps {
 const assetSword = '/assets/sword.png';
 
 export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack }: IExerciseProps) => {
-    // const getRandomExercise = (card?: ICard | null) => {
-    //     if (card && card.exercises && card.exercises.length > 0) {
-    //         const idx = Math.floor(Math.random() * card.exercises.length);
-    //         return card.exercises[idx];
-    //     }
-    //     return undefined;
-    // };
-
     const bgAsset = '/assets/ui/exercise-ui.png';
     const answersAsset = '/assets/ui/answers-ui.png';
     const [swordTexture, setSwordTexture] = useState<Texture | null>(null);
@@ -43,6 +35,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const [currentStep, setCurrentStep] = useState(0);
     const [scrollOffset, setScrollOffset] = useState(0);
     const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
+    const [selectedWrongOption, setSelectedWrongOption] = useState<Option | null>(null);
 
     const width = window.innerWidth * 0.5;
     const height = window.innerHeight * 0.8;
@@ -57,6 +50,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const answersGraphicsRef = useRef<Graphics>(null);
     const draggingAnswerRef = useRef<Container | null>(null);
     const exerciseContainerRef = useRef<Container>(null);
+    const tricksRef = useRef<{ triggerClose: () => void } | null>(null);
 
     // Cálculo para visibilidad de flechas
     const topBoundary = 80;
@@ -78,7 +72,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const [cardBaseStat] = useState<number | null>(card ? card.stats : null);
 
     const handleAnswerDragEnd = useCallback(
-        (answerContainer: Container | null, answerValue: { text: string; isCorrect: boolean }) => {
+        (answerContainer: Container | null, selectedOption: Option) => {
             if (answerContainer && answerTargetRef.current && answersGraphicsRef.current) {
                 const answerBounds = answerContainer.getBounds();
 
@@ -102,10 +96,10 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
 
                     if (isOverTargetArea) {
                         console.log('Answer dropped in the exercise area!');
-                        console.log('Selected answer:', answerValue);
-                        setPlayerAnswers((prev) => [...prev, { text: answerValue.text, isCorrect: answerValue.isCorrect }]);
+                        console.log('Selected answer:', selectedOption);
+                        setPlayerAnswers((prev) => [...prev, { text: selectedOption.text, isCorrect: selectedOption.is_correct }]);
 
-                        if (answerValue.isCorrect) {
+                        if (selectedOption.is_correct) {
                             const nextStep = currentStep + 1;
                             setCurrentStep(nextStep);
 
@@ -120,6 +114,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             }
                         } else {
                             console.log('Wrong answer, try again.');
+                            setSelectedWrongOption(selectedOption);
                             setIsShowingTricks(true);
                             const newDamage = updateAttackStat(card);
                             if (newDamage) {
@@ -307,6 +302,16 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
         };
     }, []);
 
+    const handleTricksToggle = () => {
+        if (isShowingTricks) {
+            // Si está mostrando trucos, activar la animación de cierre
+            tricksRef.current?.triggerClose();
+        } else {
+            // Si no está mostrando trucos, mostrarlos
+            setIsShowingTricks(true);
+        }
+    };
+
     return (
         <pixiContainer
             ref={exerciseContainerRef}
@@ -315,6 +320,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             onWheel={handleWheelOnExerciseArea}
             interactive={true}
             sortableChildren={true}
+            zIndex={2}
         >
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
 
@@ -335,10 +341,24 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                 }}
             />
 
-            <pixiContainer zIndex={10} x={width - 150} y={35.5}>
+            <pixiContainer zIndex={10} x={(width / 5) * 4} y={35.5}>
+                <pixiText
+                    text={'?'}
+                    x={0}
+                    y={0}
+                    cursor="pointer"
+                    interactive={true}
+                    onClick={handleTricksToggle}
+                    zIndex={10}
+                    style={{
+                        fontSize: 28,
+                        fill: 0xffffff,
+                        fontFamily: 'Arial',
+                    }}
+                />
                 <pixiText
                     text={card?.stats}
-                    x={0}
+                    x={30}
                     y={0}
                     style={{
                         fontSize: 28,
@@ -346,7 +366,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                         fontFamily: 'Arial',
                     }}
                 />
-                {swordTexture && <pixiSprite texture={swordTexture} x={30} y={0} width={45} height={30} />}
+                {swordTexture && <pixiSprite texture={swordTexture} x={60} y={0} width={45} height={30} />}
             </pixiContainer>
 
             <pixiText
@@ -442,8 +462,9 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                             return (
                                 <Answer
                                     key={opt.id}
-                                    text={opt.text}
-                                    isCorrect={opt.is_correct}
+                                    // text={opt.text}
+                                    // isCorrect={opt.is_correct}
+                                    option={opt}
                                     x={xPosition}
                                     y={yPosition}
                                     width={answerWidth}
@@ -479,7 +500,9 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                     }}
                 />
             )}
-            {isShowingTricks && <Tricks onClose={() => setIsShowingTricks(false)} />}
+            {isShowingTricks && (
+                <Tricks ref={tricksRef} onClose={() => setIsShowingTricks(false)} exercise={exercise} selectedOption={selectedWrongOption} />
+            )}
         </pixiContainer>
     );
 };

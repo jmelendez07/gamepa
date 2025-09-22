@@ -1,18 +1,21 @@
+import Exercise, { Option } from '@/types/exercise';
 import { extend } from '@pixi/react';
 import { Assets, Container, Point, Sprite, Text, Texture } from 'pixi.js';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 
 extend({ Container, Sprite, Text });
 
 interface TricksProps {
     onClose?: () => void;
+    exercise: Exercise;
+    selectedOption?: Option | null; // ← Cambiar de Option a Option | null
 }
 
 function easeOutCubic(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
 
-export const Tricks = ({ onClose }: TricksProps) => {
+export const Tricks = forwardRef<{ triggerClose: () => void }, TricksProps>(({ onClose, exercise, selectedOption }, ref) => {
     const assetBg = '/assets/ui/tricks-ui.png';
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
     const containerRef = useRef<Container>(null);
@@ -129,17 +132,13 @@ export const Tricks = ({ onClose }: TricksProps) => {
         });
     };
 
+    useImperativeHandle(ref, () => ({
+        triggerClose: handleClose,
+    }));
+
     return (
-        <pixiContainer ref={containerRef} zIndex={9999} interactive={true}>
-            {bgTexture && (
-                <pixiSprite
-                    texture={bgTexture}
-                    x={0}
-                    y={window.innerHeight / 3 - 100}
-                    width={window.innerWidth}
-                    height={panelHeight}
-                />
-            )}
+        <pixiContainer ref={containerRef} zIndex={3} interactive={true}>
+            {bgTexture && <pixiSprite texture={bgTexture} x={0} y={window.innerHeight / 3 - 100} width={window.innerWidth} height={panelHeight} />}
 
             <pixiText
                 text="↓"
@@ -156,6 +155,33 @@ export const Tricks = ({ onClose }: TricksProps) => {
                     fontWeight: 'bold',
                 }}
             />
+
+            <pixiText
+                text={selectedOption ? `La opcion "${selectedOption.text}" es incorrecta:` : 'Select an option to see tricks.'}
+                x={20}
+                y={window.innerHeight / 3 - 60}
+                style={{
+                    fontSize: 24,
+                    fill: 0xffffff,
+                    fontFamily: 'Arial',
+                    fontWeight: 'bold',
+                }}
+            />
+
+            <pixiText
+                text={
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+                }
+                x={20}
+                y={window.innerHeight / 3 - 20}
+                style={{
+                    fontSize: 18,
+                    fill: 0xffffff,
+                    fontFamily: 'Arial',
+                    wordWrap: true,
+                    wordWrapWidth: window.innerWidth - 40,
+                }}
+            />
         </pixiContainer>
     );
-};
+});
