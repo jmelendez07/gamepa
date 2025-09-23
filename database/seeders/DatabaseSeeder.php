@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             DificultySeeder::class,
             GalaxySeeder::class,
             PlanetSeeder::class,
+            StageSeeder::class,
             // ExerciseSeeder::class,
             // StepSeeder::class,
             // OptionSeeder::class,
