@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Galaxy;
+use App\Models\Planet;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,20 +9,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('planets', function (Blueprint $table) {
+        Schema::create('stages', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->integer('number');
             $table->string('image_url');
             $table->string('image_public_id');
-            $table->foreignIdFor(Galaxy::class)->constrained()->onDelete('set null')->nullable();
-            $table->string('description')->nullable();
+            $table->foreignIdFor(Planet::class)->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('planets');
+        Schema::dropIfExists('stages');
     }
 };

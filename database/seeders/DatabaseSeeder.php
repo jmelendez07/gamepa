@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +16,7 @@ class DatabaseSeeder extends Seeder
             TypeCardSeeder::class,
             // CardSeeder::class,
             DificultySeeder::class,
+            GalaxySeeder::class,
             PlanetSeeder::class,
             // ExerciseSeeder::class,
             // StepSeeder::class,

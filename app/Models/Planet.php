@@ -17,6 +17,10 @@ class Planet extends Model
 
     protected $fillable = [
         'name',
+        'number',
+        'image_url',
+        'image_public_id',
+        'galaxy_id',
         'description',
     ];
 
@@ -30,8 +34,18 @@ class Planet extends Model
         ];
     }
 
+    public function galaxy()
+    {
+        return $this->belongsTo(Galaxy::class);
+    }
+
     public function exercises()
     {
         return $this->hasMany(Exercise::class);
+    }
+
+    public function stages()
+    {
+        return $this->hasMany(Stage::class);
     }
 }

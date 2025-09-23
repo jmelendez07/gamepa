@@ -7,6 +7,7 @@ use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\StepController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\EnemyController;
+use App\Http\Controllers\GalaxyController;
 use App\Http\Controllers\GameplayController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\TeacherController;
@@ -39,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class)->names('users');
         Route::resource('docentes', TeacherController::class)->names('teachers');
         Route::post('docentes/bulk-destroy', [TeacherController::class, 'bulkDestroy'])->name('teachers.bulk-destroy');
+        Route::resource('galaxias', GalaxyController::class)->names('galaxies');
         Route::resource('planetas', PlanetController::class)->names('planets');
         Route::resource('ejercicios', ExerciseController::class)->names('exercises');
         Route::resource('cartas', CardController::class)->names('cards');

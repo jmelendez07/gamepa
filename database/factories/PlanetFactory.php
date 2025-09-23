@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Dificulty;
 use App\Models\Exercise;
+use App\Models\Galaxy;
 use App\Models\Option;
 use App\Models\Step;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,6 +29,7 @@ class PlanetFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function ($planet) {
+            $planet->galaxy()->associate(Galaxy::firstOrFail());
             $easy= Dificulty::where('name','Fácil')->first();
             $medium= Dificulty::where('name','Media')->first();
             $hard= Dificulty::where('name','Difícil')->first();
