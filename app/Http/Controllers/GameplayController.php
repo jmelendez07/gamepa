@@ -14,14 +14,21 @@ class GameplayController extends Controller
 {
     public function index()
     {
-        $enemies = Enemy::raw(function ($collection) {
+        $randomEnemies = Enemy::raw(function ($collection) {
             return $collection->aggregate([
-                ['$sample' => ['size' => 6]]
+                ['$sample' => ['size' => 6]],
+                ['$project' => ['_id' => 1]],
             ]);
         });
 
+        $enemyIds = [];
+        foreach ($randomEnemies as $enemy) {
+            $enemyIds[] = $enemy->_id ?? $enemy['_id'];
+        }
+
+        $enemies = Enemy::with('type')->whereIn('_id', $enemyIds)->get();
+
         $skip = mt_rand(0, max(0, Card::count() - 8));
-        // $cards = Card::with(['exercises.steps.options', 'type'])->skip($skip)->take(8)->get();
 
         $easy = Dificulty::where('name', 'Fácil')->first()->id;
 

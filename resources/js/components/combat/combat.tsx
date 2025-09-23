@@ -1,5 +1,6 @@
 import ICard from '@/types/card';
 import IEnemy from '@/types/enemy';
+import Hero from '@/types/hero';
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useCallback, useEffect, useState } from 'react';
@@ -14,7 +15,6 @@ import StolenCardsStack from './combat/stolen-cards-stack';
 import { Enemy } from './enemy/enemy';
 import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
-import Hero from '@/types/hero';
 
 extend({ Sprite, Container, Graphics });
 
@@ -24,7 +24,7 @@ interface ICombatProps {
     enemies: IEnemy[];
     cards: ICard[];
     onSetSelectedEnemies: (enemies: IEnemy[]) => void;
-    finish: (isFinished: boolean) => void;
+    finish: (isFinished: boolean, xpGained: number) => void;
     lose: () => void;
 }
 
@@ -57,6 +57,7 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
     const [showDiscardedCardsModal, setShowDiscardedCardsModal] = useState(false);
     const [showStolenCardsModal, setShowStolenCardsModal] = useState(false);
     const [isAttackingAnimation, setIsAttackingAnimation] = useState(false);
+    const [xpGained, setXpGained] = useState(0);
 
     const {
         sprite: heroSprite,
@@ -91,6 +92,10 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
                     if (enemy.id === selectedEnemy.id) {
                         resetHeroAnimation();
                         setIsAttackingAnimation(true);
+                        if (enemy.health - selectedCard.stats <= 0) {
+                            setXpGained((prev) => prev + (enemy.type?.reward_xp || 0));
+                            console.log('Total XP gained:', xpGained + (enemy.type?.reward_xp || 0));
+                        }
                         return { ...enemy, health: enemy.health - selectedCard.stats };
                     } else {
                         return enemy;
@@ -130,7 +135,6 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
     };
 
     useTick((ticker) => {
-
         if (isAttackingAnimation) {
             const keepPlaying = updateHeroAttackSprite('RIGHT', false, false, false, true);
             if (!keepPlaying) {
@@ -174,7 +178,7 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
 
     useEffect(() => {
         if (enemies.every((enemy) => enemy.health <= 0)) {
-            finish(true);
+            finish(true, xpGained);
         } else if (heroHealth <= 0) {
             lose();
         }

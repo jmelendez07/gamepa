@@ -22,7 +22,7 @@ export interface Step {
 
 export interface Option {
     id: string;
-    text: string;
+    result: string;
     is_correct: boolean;
     step_id: string;
 }

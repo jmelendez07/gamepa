@@ -34,7 +34,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
     const [answerSelectedPosition, setAnswerSelectedPosition] = useState<{ x: number; y: number } | null>(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [scrollOffset, setScrollOffset] = useState(0);
-    const [playerAnswers, setPlayerAnswers] = useState<{ text: string; isCorrect: boolean }[]>([]);
+    const [playerAnswers, setPlayerAnswers] = useState<{ result: string; is_correct: boolean }[]>([]);
     const [selectedWrongOption, setSelectedWrongOption] = useState<Option | null>(null);
 
     const width = window.innerWidth * 0.5;
@@ -97,7 +97,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                     if (isOverTargetArea) {
                         console.log('Answer dropped in the exercise area!');
                         console.log('Selected answer:', selectedOption);
-                        setPlayerAnswers((prev) => [...prev, { text: selectedOption.text, isCorrect: selectedOption.is_correct }]);
+                        setPlayerAnswers((prev) => [...prev, { result: selectedOption.result, is_correct: selectedOption.is_correct }]);
 
                         if (selectedOption.is_correct) {
                             const nextStep = currentStep + 1;
@@ -430,11 +430,11 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
                                     g.clear();
                                     g.roundRect(26, answerY, width - 55, answerHeight);
                                     g.fill({ color: 0x000000, alpha: 0.01 });
-                                    g.stroke({ color: step.isCorrect ? 0x00ff00 : 0xff0000, width: 2 });
+                                    g.stroke({ color: step.is_correct ? 0x00ff00 : 0xff0000, width: 2 });
                                 }}
                             />
                             <pixiText
-                                text={step.text}
+                                text={step.result}
                                 x={100}
                                 y={answerY + answerHeight / 2}
                                 anchor={0.5}

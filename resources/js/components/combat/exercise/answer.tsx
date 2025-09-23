@@ -17,7 +17,7 @@ interface IAnswerProps {
     onDragMove?: (event: FederatedPointerEvent) => void;
     onIsDraggingChange?: (isDragging: boolean) => void;
     onAnswerPositionChange?: (position: { x: number; y: number }) => void;
-    onChoosingAnswer?: (answer: { text: string; isCorrect: boolean }) => void;
+    onChoosingAnswer?: (answer: { result: string; is_correct: boolean }) => void;
 }
 
 export const Answer = ({
@@ -60,11 +60,11 @@ export const Answer = ({
 
         if (wasDragged.current) {
             // Lógica para cuando se suelta después de arrastrar
-            console.log('Drag ended for:', option.text);
+            console.log('Drag ended for:', option.result);
             onDragEnd?.(answerContainerRef.current, option);
         } else {
             // Lógica para un click (sin arrastre)
-            console.log('Clicked:', option.text);
+            console.log('Clicked:', option.result);
             setIsClicked((prev) => !prev);
         }
 
@@ -118,7 +118,7 @@ export const Answer = ({
             />
             <pixiText
                 interactive={false}
-                text={option.text}
+                text={option.result}
                 x={(width - 10) / 2}
                 y={height / 2}
                 anchor={0.5}

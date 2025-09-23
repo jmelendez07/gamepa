@@ -48,7 +48,6 @@ class CardController extends Controller
     public function show($cardId)
     {
         $card = Card::with(['type', 'exercises.difficulty', 'exercises.planet', 'exercises.steps'])->findOrFail($cardId);
-        dd($card);
         $exercises = Exercise::with(['difficulty', 'planet', 'steps'])->orderBy('updated_at', 'desc')->get();
         $types = TypeCard::all();
 

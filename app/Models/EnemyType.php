@@ -15,6 +15,7 @@ class EnemyType extends Model
 
     protected $fillable = [
         'name',
+        'reward_xp'
     ];
 
     #[SearchUsingPrefix(['name'])]
@@ -23,6 +24,12 @@ class EnemyType extends Model
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'reward_xp' => $this->reward_xp,
         ];
+    }
+
+    public function enemies()
+    {
+        return $this->hasMany(Enemy::class, 'enemy_type_id');
     }
 }

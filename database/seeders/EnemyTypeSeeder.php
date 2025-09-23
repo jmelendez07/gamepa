@@ -17,6 +17,13 @@ class EnemyTypeSeeder extends Seeder
                 ['name' => $type], 
                 [
                     'name' => $type,
+                    'reward_xp' => match($type) {
+                        'Minion' => 10,
+                        'Normal' => 20,
+                        'Elite' => 50,
+                        'Boss' => 100,
+                        default => 0,
+                    },
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]

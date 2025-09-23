@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -43,6 +44,13 @@ class RegisteredUserController extends Controller
         ]);
 
         $user->assignRole('estudiante');
+
+        Profile::create([
+            'user_id' => $user->id,
+            'level' => 1,
+            'avatar_url' => asset('assets/default-user-avatar.png'),
+            'progress_bar' => 0
+        ]);
 
         event(new Registered($user));
 
