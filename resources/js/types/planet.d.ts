@@ -7,4 +7,14 @@ export default interface Planet {
     galaxy: Galaxy;
     image_url: string;
     image_public_id: string;
+    stages: Stage[];
+}
+
+export interface Stage {
+    id: string;
+    name: string;
+    number: number;
+    planet_id?: string;
+    image_url: string;
+    image_public_id: string;
 }

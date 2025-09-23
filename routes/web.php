@@ -12,6 +12,7 @@ use App\Http\Controllers\GameplayController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\StageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('opciones', OptionController::class)->names('options');
         Route::resource('enemigos', EnemyController::class)->names('enemies');
         Route::resource('heroes', HeroController::class)->names('heroes');
+        Route::resource('lugares', StageController::class)->names('stages');
     });
 });
 
