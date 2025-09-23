@@ -1,9 +1,11 @@
+import { Option } from '@/types/exercise';
 import { Container, FederatedPointerEvent } from 'pixi.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface IAnswerProps {
-    text: string;
-    isCorrect: boolean;
+    // text: string;
+    // isCorrect: boolean;
+    option: Option;
     x: number;
     y: number;
     width: number;
@@ -11,7 +13,7 @@ interface IAnswerProps {
     containerX: number;
     containerY: number;
     onDragStart?: (ref: Container | null) => void;
-    onDragEnd?: (ref: Container | null, answerValue: { text: string; isCorrect: boolean }) => void;
+    onDragEnd?: (ref: Container | null, option: Option) => void;
     onDragMove?: (event: FederatedPointerEvent) => void;
     onIsDraggingChange?: (isDragging: boolean) => void;
     onAnswerPositionChange?: (position: { x: number; y: number }) => void;
@@ -19,8 +21,9 @@ interface IAnswerProps {
 }
 
 export const Answer = ({
-    text,
-    isCorrect,
+    // text,
+    // isCorrect,
+    option,
     x,
     y,
     width,
@@ -57,17 +60,17 @@ export const Answer = ({
 
         if (wasDragged.current) {
             // Lógica para cuando se suelta después de arrastrar
-            console.log('Drag ended for:', text);
-            onDragEnd?.(answerContainerRef.current, { text, isCorrect });
+            console.log('Drag ended for:', option.text);
+            onDragEnd?.(answerContainerRef.current, option);
         } else {
             // Lógica para un click (sin arrastre)
-            console.log('Clicked:', text);
+            console.log('Clicked:', option.text);
             setIsClicked((prev) => !prev);
         }
 
         setIsDragging(false);
         setAnswerPosition({ x: originalPosition.current.x, y: originalPosition.current.y });
-    }, [handlePointerMove, onDragEnd, text]); // Añadimos onDragEnd y text
+    }, [handlePointerMove, onDragEnd, option]); // ← Cambiar dependencias
 
     const handlePointerDown = (event: FederatedPointerEvent) => {
         // Prevenir comportamiento de drag-and-drop nativo del navegador
@@ -115,7 +118,7 @@ export const Answer = ({
             />
             <pixiText
                 interactive={false}
-                text={text}
+                text={option.text}
                 x={(width - 10) / 2}
                 y={height / 2}
                 anchor={0.5}
