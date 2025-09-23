@@ -45,9 +45,10 @@ class PlanetSeeder extends Seeder
 
         foreach($galaxies as $galaxy) {
             foreach ($planets as $planet) {
-                $galaxy->planets()->create([
+                Planet::factory()->create([
                     ...$planet,
                     'number' => Planet::max('number') + 1,
+                    'galaxy_id' => $galaxy->id
                 ]);
             }
         }

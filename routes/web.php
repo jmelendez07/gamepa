@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::middleware(['check_user_hero'])->group(function () {
             Route::resource('gameplay', GameplayController::class)->names('gameplay');
+            Route::get('gameplay/galaxia/{galaxyId}', [GameplayController::class, 'galaxy'])->name('gameplay.galaxy');
         });
     });
 
