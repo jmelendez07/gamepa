@@ -13,6 +13,7 @@ use App\Http\Controllers\HeroController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\StageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::middleware(['check_user_hero'])->group(function () {
             Route::resource('gameplay', GameplayController::class)->names('gameplay');
+            Route::get('gameplay/galaxia/{galaxyId}', [GameplayController::class, 'galaxy'])->name('gameplay.galaxy');
+            Route::get('gameplay/lugar/{stageId}', [GameplayController::class, 'stage'])->name('gameplay.stage');
         });
     });
 
@@ -59,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('opciones', OptionController::class)->names('options');
         Route::resource('enemigos', EnemyController::class)->names('enemies');
         Route::resource('heroes', HeroController::class)->names('heroes');
+        Route::resource('lugares', StageController::class)->names('stages');
     });
 });
 

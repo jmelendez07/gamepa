@@ -2,16 +2,31 @@
 
 namespace Database\Seeders;
 
+use App\Models\Planet;
+use App\Models\Stage;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class StageSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        $planets = Planet::orderBy('number')->get();
+        $stages = [
+            [
+                'name' => 'Ciudad', 
+                'image_url' => 'https://res.cloudinary.com/dvibz13t8/image/upload/v1758664494/bg-gamepa-test_bzm76a.png',
+                'image_public_id' => 'bg-gamepa-test_bzm76a'
+            ]
+        ];
+
+        foreach ($planets as $planet) {
+            foreach ($stages as $stage) {
+                $planet->stages()->create([
+                    ...$stage,
+                    'number' => Stage::max('number') + 1,
+                ]);
+            } 
+        } 
     }
 }

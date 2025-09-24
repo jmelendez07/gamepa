@@ -153,6 +153,26 @@ export default function PlanetsIndex({ planets, galaxies }: IPlanetsIndexProps) 
                                 key={planet.id}
                                 className="relative bg-purple-50 hover:bg-purple-100 grid grid-cols-1 grid-rows-[1fr_auto] rounded-xl hover:shadow-lg transition-shadow duration-200 p-6 border border-purple-200"
                             >
+                                {/* Galaxia en la esquina superior izquierda */}
+                                {planet.galaxy && (
+                                    <div className="absolute top-3 left-3 z-10 flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm border border-purple-200/50">
+                                        <div className="size-6 rounded-full overflow-hidden border border-purple-300 bg-white flex items-center justify-center">
+                                            {planet.galaxy.image_url ? (
+                                                <img
+                                                    src={planet.galaxy.image_url}
+                                                    alt={planet.galaxy.name}
+                                                    className="object-cover w-full h-full"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 rounded-full"></div>
+                                            )}
+                                        </div>
+                                        <span className="text-xs font-medium text-purple-700 truncate max-w-20">
+                                            {planet.galaxy.name}
+                                        </span>
+                                    </div>
+                                )}
+
                                 <div className="mb-4 flex flex-col items-center">
                                     <div className="size-36 rounded-full overflow-hidden border-4 border-purple-300 bg-white mb-3 flex items-center justify-center">
                                         {planet.image_url ? (
@@ -168,7 +188,7 @@ export default function PlanetsIndex({ planets, galaxies }: IPlanetsIndexProps) 
                                         )}
                                     </div>
                                     <h3 className="text-xl font-semibold text-purple-800 text-center">
-                                        {planet.name}
+                                        {planet.name} # {planet.number}
                                     </h3>
                                     <p className="text-purple-700 text-sm leading-relaxed text-center">
                                         {planet.description}

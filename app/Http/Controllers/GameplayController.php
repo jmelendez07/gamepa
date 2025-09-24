@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Enemy;
-use App\Models\Card;
 use App\Models\Dificulty;
 use App\Models\Exercise;
-use Illuminate\Http\Request;
+use App\Models\Galaxy;
+use App\Models\Stage;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,15 +21,6 @@ class GameplayController extends Controller
             ]);
         });
 
-        $enemyIds = [];
-        foreach ($randomEnemies as $enemy) {
-            $enemyIds[] = $enemy->_id ?? $enemy['_id'];
-        }
-
-        $enemies = Enemy::with('type')->whereIn('_id', $enemyIds)->get();
-
-        $skip = mt_rand(0, max(0, Card::count() - 8));
-
         $easy = Dificulty::where('name', 'Fácil')->first()->id;
 
         $hero = Auth::user()->heroes()->first();
@@ -37,15 +28,35 @@ class GameplayController extends Controller
         $heroCards = $hero->cards()->with('type')->get();
 
         $cards = [];
+        
         foreach ($heroCards as $card) {
             $card->exercise = $this->randomExercise($easy);
             $cards[] = $card;
         }
 
-        return Inertia::render('gameplay', [
-            'enemies' => $enemies,
-            'cards' => $cards,
-            'hero' => $hero
+        $galaxy = Galaxy::firstOrFail();
+
+        return redirect()->route('gameplay.galaxy', $galaxy->id);
+    }
+
+    public function galaxy($galaxyId)
+    {
+        $galaxy = Galaxy::with(['planets.stages'])->findOrFail($galaxyId);
+        
+        return Inertia::render('gameplay/galaxies/show', [
+            'galaxy' => $galaxy
+        ]);
+    }
+
+    public function stage($stageId)
+    {
+        $stage = Stage::findOrFail($stageId);
+
+        return Inertia::render('gameplay/stages/show', [
+            'stage' => $stage
+            // 'enemies' => $enemies,
+            // 'cards' => $cards,
+            // 'hero' => $hero
         ]);
     }
 
@@ -54,7 +65,7 @@ class GameplayController extends Controller
         $exercises = Exercise::with('steps.options')
             ->where('difficulty_id', $difficultyId)
             ->get();
-
+        
         return $exercises->random();
     }
 }
