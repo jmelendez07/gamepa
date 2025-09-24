@@ -157,7 +157,7 @@ export const Tricks = forwardRef<{ triggerClose: () => void }, TricksProps>(({ o
             />
 
             <pixiText
-                text={selectedOption ? `La opcion "${selectedOption.text}" es incorrecta:` : 'Select an option to see tricks.'}
+                text={selectedOption ? `La opcion "${selectedOption.result}" es incorrecta:` : 'Select an option to see tricks.'}
                 x={20}
                 y={window.innerHeight / 3 - 60}
                 style={{

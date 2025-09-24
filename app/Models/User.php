@@ -83,4 +83,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Hero::class);
     }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
 }

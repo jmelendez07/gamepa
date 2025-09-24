@@ -14,9 +14,10 @@ class GameplayController extends Controller
 {
     public function index()
     {
-        $enemies = Enemy::raw(function ($collection) {
+        $randomEnemies = Enemy::raw(function ($collection) {
             return $collection->aggregate([
-                ['$sample' => ['size' => 6]]
+                ['$sample' => ['size' => 6]],
+                ['$project' => ['_id' => 1]],
             ]);
         });
 

@@ -10,13 +10,16 @@ use App\Http\Controllers\EnemyController;
 use App\Http\Controllers\GalaxyController;
 use App\Http\Controllers\GameplayController;
 use App\Http\Controllers\HeroController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\StageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () { return Inertia::render('welcome'); })->name('home');
+Route::get('/', function () {
+    return Inertia::render('welcome');
+})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:estudiante'])->group(function () {
@@ -30,6 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
+    Route::post('profile/update-xp', [ProfileController::class, 'updateXp'])->name('profile.update-xp');
+
     Route::middleware(['role:docente'])->group(function () {
         Route::resource('salas', RoomController::class)->names('rooms');
     });
@@ -39,7 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware(['role:administrador'])->group(function () {
-        Route::get('panel', function () { return Inertia::render('dashboard'); })->name('dashboard');
+        Route::get('panel', function () {
+            return Inertia::render('dashboard');
+        })->name('dashboard');
         Route::resource('users', UserController::class)->names('users');
         Route::resource('docentes', TeacherController::class)->names('teachers');
         Route::post('docentes/bulk-destroy', [TeacherController::class, 'bulkDestroy'])->name('teachers.bulk-destroy');
@@ -59,5 +66,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
