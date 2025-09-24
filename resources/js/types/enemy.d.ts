@@ -24,4 +24,5 @@ export default interface Enemy {
 export interface EnemyType {
     id: string;
     name: string;
+    reward_xp: number;
 }

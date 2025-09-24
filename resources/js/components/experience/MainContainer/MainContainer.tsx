@@ -7,6 +7,7 @@ import { StageGame } from '@/components/stages/stageGame';
 import Card from '@/types/card';
 import IEnemy from '@/types/enemy';
 import IHero from '@/types/hero';
+import { router, usePage } from '@inertiajs/react';
 import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
@@ -30,119 +31,192 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, childre
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [inCombat, setInCombat] = useState(false);
     const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
+    const [totalXpGained, setTotalXpGained] = useState(0);
+
+    // Agregar estado local para el perfil del usuario
+    const { auth } = usePage().props;
+
+    const [userProfile, setUserProfile] = useState(auth.user?.profile || null);
+    const [currentUserXp, setCurrentUserXp] = useState(auth.user?.profile?.total_xp || 0);
+
 
     const updateHeroPosition = useCallback((x: number, y: number) => {
         setHeroPosition({ x: Math.floor(x / TILE_SIZE), y: Math.floor(y / TILE_SIZE) });
     }, []);
 
-    const generateRandomPosition = useCallback(() => ({
-        x: Math.floor(Math.random() * (750 - 20 + 1)) + 20,
-        y: Math.floor(Math.random() * (470 - 30 + 1)) + 30
-    }), []);
+    const generateRandomPosition = useCallback(
+        () => ({
+            x: Math.floor(Math.random() * (750 - 20 + 1)) + 20,
+            y: Math.floor(Math.random() * (470 - 30 + 1)) + 30,
+        }),
+        [],
+    );
 
     const generateRandomMapPosition = useCallback((index: number) => {
-        const baseX = window.innerWidth * 0.7;
-        const baseY = window.innerHeight * 0.4;
-        const maxY = window.innerHeight * 0.5;
-        
-        const spacing = 190;
+        // Área horizontal: mitad de la pantalla (centrada)
+        const baseX = window.innerWidth * 0.5;
+
+        // Área vertical: segundo cuadrante (1/3 a 2/3 de la altura)
+        const minY = window.innerHeight * (1 / 3); // Inicio del segundo cuadrante
+        const maxY = window.innerHeight * (2 / 3); // Final del segundo cuadrante
+        const baseY = minY + (maxY - minY) * 0.3; // Posición base dentro del cuadrante
+
+        const spacing = 120; // Reducido para ajustarse al área más pequeña
         const enemiesPerRow = 3;
-        
+
         const row = Math.floor(index / enemiesPerRow);
         const col = index % enemiesPerRow;
 
-        const randomOffsetX = (Math.random() - 0.5) * 50; // ±25px de variación horizontal
-        const randomOffsetY = (Math.random() - 0.5) * 70; // ±35px de variación vertical
+        const randomOffsetX = (Math.random() - 0.5) * 30;
+        const randomOffsetY = (Math.random() - 0.5) * 40;
 
-        const calculatedY = baseY + (row * spacing) + randomOffsetY;
+        const calculatedY = baseY + row * spacing + randomOffsetY;
 
         return {
-            x: baseX + (col * spacing) + randomOffsetX,
-            y: Math.min(calculatedY, maxY)
+            x: Math.max(150, Math.min(baseX + col * spacing + randomOffsetX, window.innerWidth - 150)),
+            y: Math.max(minY, Math.min(calculatedY, maxY - 50)), // Mantener dentro del segundo cuadrante
         };
     }, []);
 
     useEffect(() => {
         let cancelled = false;
 
-        Assets.load<Texture>(bgAsset)
-            .then((tex) => {
-                if (!cancelled) {
-                    setBgTexture(tex);
-                }
-            });
+        Assets.load<Texture>(bgAsset).then((tex) => {
+            if (!cancelled) {
+                setBgTexture(tex);
+            }
+        });
 
-        Assets.load<Texture>(hero.spritesheet)
-            .then((tex) => {
-                if (!cancelled) {
-                    setHeroTexture(tex);
-                }
-            });
+        Assets.load<Texture>(hero.spritesheet).then((tex) => {
+            if (!cancelled) {
+                setHeroTexture(tex);
+            }
+        });
+
+        console.log('User Info:', auth.user);
 
         return () => {
             cancelled = true;
         };
     }, []);
 
-    const checkCollisionWithArea = useCallback((heroPos: { x: number; y: number }, enemyPos: { x: number; y: number }, threshold: number) => 
-        {
-            const dx = Math.abs(heroPos.x - (enemyPos.x / TILE_SIZE));
-            const dy = Math.abs(heroPos.y - (enemyPos.y / TILE_SIZE));
-            return dx <= threshold && dy <= threshold;
-        },
-        []
-    );
+    const checkCollisionWithArea = useCallback((heroPos: { x: number; y: number }, enemyPos: { x: number; y: number }, threshold: number) => {
+        const dx = Math.abs(heroPos.x - enemyPos.x / TILE_SIZE);
+        const dy = Math.abs(heroPos.y - enemyPos.y / TILE_SIZE);
+        return dx <= threshold && dy <= threshold;
+    }, []);
 
-    const finish = (value: boolean) => {
+    const finish = (value: boolean, xpFromCombat: number) => {
         if (value && selectedEnemies) {
-            setEnemies(enemies => enemies.filter(enemy => !selectedEnemies.some(selectedEnemy => selectedEnemy.id === enemy.id)));
+            setEnemies((enemies) => enemies.filter((enemy) => !selectedEnemies.some((selectedEnemy) => selectedEnemy.id === enemy.id)));
             setSelectedEnemies([]);
         }
+        const newTotalXp = totalXpGained + xpFromCombat;
+        setTotalXpGained(newTotalXp);
+        updateUserProfileLevel(newTotalXp);
+        console.log('Total XP Gained:', newTotalXp);
         setInCombat(!value);
-    }
+    };
 
     const loseCombat = () => {
         setInCombat(false);
         setSelectedEnemies([]);
         updateHeroPosition(0, 0);
         position.current = { x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y };
-    }
+    };
 
     const onSetSelectedEnemies = (e: IEnemy[]) => {
         setSelectedEnemies(e);
-    }
+    };
 
+    const updateUserProfileLevel = async (newTotalXp: number) => {
+        try {
+            // Actualizar estado local inmediatamente para la UI
+            const newTotalUserXp = currentUserXp + newTotalXp;
+            setCurrentUserXp(newTotalUserXp);
+
+            await router.post(
+                'profile/update-xp',
+                {
+                    total_xp: newTotalXp,
+                },
+                {
+                    onSuccess: (page) => {
+                        console.log('Profile level updated successfully:', page);
+
+                        // Si el servidor devuelve el perfil actualizado, usarlo
+                        if (page.props.updatedProfile) {
+                            setUserProfile(page.props.updatedProfile);
+                            setCurrentUserXp(page.props.updatedProfile.total_xp);
+                        }
+                    },
+                    onError: (errors) => {
+                        console.error('Error updating user profile level:', errors);
+                        // Revertir el estado local en caso de error
+                        setCurrentUserXp(currentUserXp);
+                    },
+                    preserveState: true,
+                    preserveScroll: true,
+                },
+            );
+        } catch (error) {
+            console.error('Error updating user profile level:', error);
+            // Revertir el estado local en caso de error
+            setCurrentUserXp(currentUserXp);
+        }
+    };
+
+    // Función para obtener el nivel actual basado en XP
+    const getCurrentLevel = useCallback(() => {
+        // Si tienes los niveles disponibles, puedes calcular el nivel actual
+        // Por ahora, devuelve el nivel del perfil o el del auth
+        return userProfile?.level || auth.user?.profile?.level || null;
+    }, [userProfile, auth.user]);
+
+    // Log del estado actualizado
     useEffect(() => {
-        enemies.forEach(enemy => {
+        console.log('Current User XP:', currentUserXp);
+        console.log('Current User Level:', getCurrentLevel());
+        console.log('User Profile:', userProfile);
+    }, [currentUserXp, userProfile]);
+
+    const checkCombatArea = useCallback(() => {
+        enemies.forEach((enemy) => {
             if (enemy.map_position && checkCollisionWithArea(heroPosition, enemy.map_position, 1)) {
                 setInCombat(true);
-                
-                const nearbyEnemies = enemies.filter(nearbyEnemy => {
+
+                const nearbyEnemies = enemies.filter((nearbyEnemy) => {
                     if (!nearbyEnemy.map_position || !enemy.map_position || nearbyEnemy.id === enemy.id) return false;
-                    
+
                     const distance = Math.sqrt(
-                        Math.pow(enemy.map_position.x - nearbyEnemy.map_position.x, 2) + 
-                        Math.pow(enemy.map_position.y - nearbyEnemy.map_position.y, 2)
+                        Math.pow(enemy.map_position.x - nearbyEnemy.map_position.x, 2) +
+                            Math.pow(enemy.map_position.y - nearbyEnemy.map_position.y, 2),
                     );
-                    
+
                     return distance <= 100;
                 });
-                
+
                 const enemiesInCombat = [enemy, ...nearbyEnemies];
                 setSelectedEnemies(enemiesInCombat);
             }
         });
-    }, [heroPosition, enemies.length]);
+    }, [heroPosition, enemies]);
 
     useEffect(() => {
         if (enemies.length > 0) {
-            setEnemies(enemies => enemies.map((enemy, index) => ({
-                ...enemy,
-                map_position: enemy.map_position ? enemy.map_position : generateRandomPosition(),
-                combat_position: enemy.combat_position ? enemy.combat_position : generateRandomMapPosition(index)
-            })));
+            setEnemies((enemies) =>
+                enemies.map((enemy, index) => ({
+                    ...enemy,
+                    map_position: enemy.map_position ? enemy.map_position : generateRandomPosition(),
+                    combat_position: enemy.combat_position ? enemy.combat_position : generateRandomMapPosition(index),
+                })),
+            );
         }
     }, [enemies.length, generateRandomPosition]);
+
+    useEffect(() => {
+        checkCombatArea();
+    }, [checkCombatArea]);
 
     return (
         <pixiContainer>
@@ -150,21 +224,39 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, childre
             {children}
             <Camera canvasSize={canvasSize} heroPosition={heroPosition}>
                 <StageGame />
-                {enemies.map(enemy => (
+                {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
                 {heroTexture && <Hero position={position} texture={heroTexture} onMove={updateHeroPosition} />}
             </Camera>
-            {(inCombat && heroTexture) && (
-                <Combat 
+            {inCombat && heroTexture && (
+                <Combat
                     hero={hero}
                     heroTexture={heroTexture}
                     cards={cards}
-                    enemies={selectedEnemies} 
-                    onSetSelectedEnemies={onSetSelectedEnemies} 
-                    finish={finish} 
+                    enemies={selectedEnemies}
+                    onSetSelectedEnemies={onSetSelectedEnemies}
+                    finish={finish}
                     lose={loseCombat}
                 />
+            )}
+            {!inCombat && (
+                <>
+                    <pixiText
+                        text={'Nivel: ' + (getCurrentLevel()?.order || 1)}
+                        x={10}
+                        y={10}
+                        zIndex={100}
+                        style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                    />
+                    <pixiText
+                        text={'XP: ' + currentUserXp}
+                        x={125}
+                        y={10}
+                        zIndex={100}
+                        style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                    />
+                </>
             )}
         </pixiContainer>
     );

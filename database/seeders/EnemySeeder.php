@@ -18,26 +18,26 @@ class EnemySeeder extends Seeder
         $enemies = [
             [
                 'name' => 'Goblin',
-                'health' => 50,
+                'health' => 10,
                 'basic_attack' => 10,
                 'spritesheet' => asset('assets/default_enemies/enemy-1.png'),
             ],
             [
                 'name' => 'Orc',
-                'health' => 80,
+                'health' => 10,
                 'basic_attack' => 15,
                 'spritesheet' => asset('assets/default_enemies/enemy-2.png'),
             ],
             [
                 'name' => 'Troll',
-                'health' => 120,
+                'health' => 10,
                 'basic_attack' => 20,
                 'spritesheet' => asset('assets/default_enemies/enemy-3.png'),
             ],
             [
                 'name' => 'Dragon',
-                'health' => 300,
-                'basic_attack' => 50,
+                'health' => 10,
+                'basic_attack' => 25,
                 'spritesheet' => asset('assets/default_enemies/enemy-4.png'),
             ],
         ];
