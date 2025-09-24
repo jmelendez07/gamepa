@@ -16,6 +16,7 @@ export interface Stage {
     name: string;
     number: number;
     planet_id?: string;
+    galaxy_id?: string;
     image_url: string;
     image_public_id: string;
 }

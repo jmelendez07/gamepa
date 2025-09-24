@@ -50,12 +50,27 @@ class GameplayController extends Controller
     public function stage($stageId)
     {
         $stage = Stage::findOrFail($stageId);
+        $hero = Auth::user()->heroes()->with(['cards.type'])->firstOrFail();
+        $easy = Dificulty::where('name', 'Fácil')->firstOrFail()->id;
 
+        $enemies = Enemy::raw(function ($collection) {
+            return $collection->aggregate([
+                ['$sample' => ['size' => 6]]
+            ]);
+        });
+
+        $cards = [];
+
+        foreach ($hero->cards as $card) {
+            $card->exercise = $this->randomExercise($easy);
+            $cards[] = $card;
+        }
+        
         return Inertia::render('gameplay/stages/show', [
-            'stage' => $stage
-            // 'enemies' => $enemies,
-            // 'cards' => $cards,
-            // 'hero' => $hero
+            'stage' => $stage,
+            'enemies' => $enemies,
+            'cards' => $cards,
+            'hero' => $hero
         ]);
     }
 

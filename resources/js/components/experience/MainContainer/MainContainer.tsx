@@ -2,11 +2,13 @@ import { Camera } from '@/components/camera/camera';
 import { Combat } from '@/components/combat/combat';
 import { DEFAULT_HERO_POSITION_X, DEFAULT_HERO_POSITION_Y, TILE_SIZE } from '@/components/constants/game-world';
 import Enemy from '@/components/enemy/enemy';
+import GameplayMenu from '@/components/gameplay/menu';
 import { Hero } from '@/components/Hero/hero';
 import { StageGame } from '@/components/stages/stageGame';
 import Card from '@/types/card';
 import IEnemy from '@/types/enemy';
 import IHero from '@/types/hero';
+import { Stage } from '@/types/planet';
 import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
@@ -18,11 +20,12 @@ interface IMainContainerProps {
     defaultEnemies: IEnemy[];
     cards: Card[];
     hero: IHero;
+    stage: Stage;
 }
 
 const bgAsset = '/assets/bg-galaxy.png';
 
-export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, children }: PropsWithChildren<IMainContainerProps>) => {
+export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -146,10 +149,11 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, childre
 
     return (
         <pixiContainer>
+            <GameplayMenu canvasSize={canvasSize} />
             {bgTexture && <pixiSprite texture={bgTexture} width={canvasSize.width} height={canvasSize.height} />}
             {children}
             <Camera canvasSize={canvasSize} heroPosition={heroPosition}>
-                <StageGame />
+                <StageGame stage={stage} />
                 {enemies.map(enemy => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}

@@ -2,18 +2,21 @@ import { extend } from "@pixi/react";
 import { Assets, Sprite, Texture } from "pixi.js";
 import { useEffect, useState } from "react";
 import { GAME_HEIGHT, GAME_WIDTH, OFFSET_X, OFFSET_Y } from "../constants/game-world";
+import { Stage } from "@/types/planet";
 
 extend({ Sprite });
 
-export const StageGame = () => {
+interface IStageGameProps {
+    stage: Stage;
+}
 
-    const spriteImage = '/assets/bg-gamepa-test.png';
+export const StageGame = ({ stage }: IStageGameProps) => {
 
     const [stageTexture, setStageTexture] = useState<Texture | null>(null);
 
     useEffect(() => {
         let cancelled = false;
-        Assets.load<Texture>(spriteImage)
+        Assets.load<Texture>(stage.image_url)
             .then((tex) => {
                 if (!cancelled) setStageTexture(tex);
             })

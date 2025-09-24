@@ -56,8 +56,6 @@ export default function Planet({
         let nextY = pos.y;
 
         if (transitionStage === "enter" && targetX !== undefined && targetY !== undefined && targetScale !== undefined) {
-            console.log('En el primero');
-            
             // Animar hacia el centro y escala grande
             nextScale += (targetScale - nextScale) * 0.15;
             nextX += (targetX - nextX) * 0.15;
@@ -73,7 +71,6 @@ export default function Planet({
                 onTransitionEnd();
             }
         } else if (transitionStage === "exit" && targetX !== undefined && targetY !== undefined) {
-            console.log('En el segundo');
             // Animar hacia posición y escala original
             nextScale += (baseScale - nextScale) * 0.15;
             nextX += (targetX - nextX) * 0.15;

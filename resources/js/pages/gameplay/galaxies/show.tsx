@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Galaxy from "@/types/galaxy";
 import { Application, extend } from '@pixi/react';
 import { calculateCanvasSize } from '@/components/helpers/common';
@@ -75,6 +75,7 @@ export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
     const [transitionStage, setTransitionStage] = useState<"enter" | "exit" | undefined>(undefined);
     const [stageTextures, setStageTextures] = useState<{[key: string]: Texture}>({});
     const [showStages, setShowStages] = useState(false);
+    const [appReady, setAppReady] = useState(false);
 
     const updateCanvasSize = useCallback(() => {
         setCanvasSize(calculateCanvasSize());
@@ -82,10 +83,18 @@ export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
 
     useEffect(() => {
         setIsClient(true);
+        
+        const timer = setTimeout(() => {
+            setAppReady(true);
+        }, 100);
+
         window.addEventListener('resize', updateCanvasSize);
         
         if (galaxy.image_url) {
-            Assets.load<Texture>(galaxy.image_url).then(setBgTexture);
+            Assets.load<Texture>(galaxy.image_url)
+                .then(texture => {
+                    setBgTexture(texture);
+                });
         }
 
         galaxy.planets.forEach(planet => {
@@ -100,11 +109,11 @@ export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
         });
 
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('resize', updateCanvasSize);
         };
     }, [updateCanvasSize, galaxy]);
 
-    // Carga las texturas de los stages del planeta seleccionado
     useEffect(() => {
         if (selectedPlanet && selectedPlanet.stages) {
             selectedPlanet.stages.forEach(stage => {
@@ -136,12 +145,12 @@ export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
     const handlePlanetClick = useCallback((planet: IPlanet) => {
         setSelectedPlanet(planet);
         setTransitionStage("enter");
-        setShowStages(false); // Oculta stages al iniciar transición
+        setShowStages(false);
     }, []);
 
     const handleExit = useCallback(() => {
         setTransitionStage("exit");
-        setShowStages(false); // Oculta stages al iniciar transición de salida
+        setShowStages(false);
     }, []);
 
     const drawDashedLine = useCallback((g: Graphics, fromX: number, fromY: number, toX: number, toY: number) => {
@@ -172,148 +181,153 @@ export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
         }
     }, []);
 
-    return (isClient && (
-        <Application 
-            width={canvasSize.width} 
-            height={canvasSize.height}
-            antialias={true}
-        >
-            <pixiContainer>
-                {bgTexture && (
-                    <pixiSprite 
-                        texture={bgTexture}
-                        width={canvasSize.width}
-                        height={canvasSize.height}
-                        alpha={0.4}
-                    />
-                )}
-
-                {!selectedPlanet && (
-                    <>
-                        <pixiText 
-                            text="Gameplay: Fases de cada temática"
-                            style={titleStyle}
-                            x={canvasSize.width / 2}
-                            y={50}
-                            anchor={0.5}
-                        />
-
-                        <pixiText 
-                            text={galaxy.name}
-                            style={galaxyNameStyle}
-                            x={canvasSize.width / 2}
-                            y={110}
-                            anchor={0.5}
-                        />
-
-                        {connections.map((connection, index) => {
-                            const fromPlanet = sortedPlanets[connection.from];
-                            const toPlanet = sortedPlanets[connection.to];
-                            if (!fromPlanet || !toPlanet) return null;
-                            const fromPos = planetPositions[connection.from];
-                            const toPos = planetPositions[connection.to];
-                            return (
-                                <pixiGraphics
-                                    key={`connection-${index}`}
-                                    draw={(g: Graphics) => drawDashedLine(
-                                        g,
-                                        fromPos.x * canvasSize.width,
-                                        fromPos.y * canvasSize.height,
-                                        toPos.x * canvasSize.width,
-                                        toPos.y * canvasSize.height
-                                    )}
-                                />
-                            );
-                        })}
-
-                        {sortedPlanets.slice(0, 4).map((planet, index) => {
-                            const position = planetPositions[index];
-                            const x = position.x * canvasSize.width;
-                            const y = position.y * canvasSize.height;
-                            return (
-                                <Planet
-                                    handleOnClick={handlePlanetClick}
-                                    key={planet.id}
-                                    planet={planet}
-                                    x={x}
-                                    y={y}
-                                    planetTextures={planetTextures}
-                                />
-                            );
-                        })}
-                    </>
-                )}
-
-                {selectedPlanet && planetTextures[selectedPlanet.id] && (() => {
-                    const texture = planetTextures[selectedPlanet.id];
-                    const expandedScale = (canvasSize.height / 1.5) / texture.height;
-                    const targetX = canvasSize.width / 2;
-                    const targetY = canvasSize.height / 2;
-                    const index = sortedPlanets.findIndex(p => p.id === selectedPlanet.id);
-                    const initialPos = planetPositions[index];
-                    const initialX = initialPos.x * canvasSize.width;
-                    const initialY = initialPos.y * canvasSize.height;
-
-                    // Genera posiciones aleatorias para los stages
-                    const radius = (texture.height * expandedScale) / 2 - 80;
-                    const stagePositions = selectedPlanet.stages.map((stage, idx) => {
-                        const angle = Math.random() * Math.PI * 2;
-                        return {
-                            x: targetX + Math.cos(angle) * (Math.random() * radius * 0.8),
-                            y: targetY + Math.sin(angle) * (Math.random() * radius * 0.8),
-                            stage
-                        };
-                    });
-
-                    return (
-                        <>
-                            <Planet
-                                planet={selectedPlanet}
-                                x={transitionStage === "exit" ? targetX : initialX}
-                                y={transitionStage === "exit" ? targetY : initialY}
-                                planetTextures={planetTextures}
-                                handleOnClick={() => {}}
-                                transitionStage={transitionStage}
-                                targetX={transitionStage === "exit" ? initialX : targetX}
-                                targetY={transitionStage === "exit" ? initialY : targetY}
-                                targetScale={transitionStage === "exit" ? 1 : expandedScale}
-                                onTransitionEnd={handleTransitionEnd}
+    return (
+        <>
+            {(isClient && appReady) && (
+                <Application 
+                    width={canvasSize.width} 
+                    height={canvasSize.height}
+                    antialias={true}
+                    resizeTo={window}
+                    autoDensity={true}
+                >
+                    <pixiContainer>
+                        {bgTexture && (
+                            <pixiSprite 
+                                texture={bgTexture}
+                                width={canvasSize.width}
+                                height={canvasSize.height}
+                                alpha={0.4}
                             />
-                            {showStages && transitionStage !== "exit" && (
-                                <>  
-                                    <pixiText 
-                                        text={selectedPlanet.name}
-                                        style={planetNameStyle}
-                                        x={canvasSize.width / 2}
-                                        y={60}
-                                        anchor={0.5}
+                        )}
+
+                        {!selectedPlanet && (
+                            <>
+                                <pixiText 
+                                    text="Gameplay: Fases de cada temática"
+                                    style={titleStyle}
+                                    x={canvasSize.width / 2}
+                                    y={50}
+                                    anchor={0.5}
+                                />
+
+                                <pixiText 
+                                    text={galaxy.name}
+                                    style={galaxyNameStyle}
+                                    x={canvasSize.width / 2}
+                                    y={110}
+                                    anchor={0.5}
+                                />
+
+                                {connections.map((connection, index) => {
+                                    const fromPlanet = sortedPlanets[connection.from];
+                                    const toPlanet = sortedPlanets[connection.to];
+                                    if (!fromPlanet || !toPlanet) return null;
+                                    const fromPos = planetPositions[connection.from];
+                                    const toPos = planetPositions[connection.to];
+                                    return (
+                                        <pixiGraphics
+                                            key={`connection-${index}`}
+                                            draw={(g: Graphics) => drawDashedLine(
+                                                g,
+                                                fromPos.x * canvasSize.width,
+                                                fromPos.y * canvasSize.height,
+                                                toPos.x * canvasSize.width,
+                                                toPos.y * canvasSize.height
+                                            )}
+                                        />
+                                    );
+                                })}
+
+                                {sortedPlanets.slice(0, 4).map((planet, index) => {
+                                    const position = planetPositions[index];
+                                    const x = position.x * canvasSize.width;
+                                    const y = position.y * canvasSize.height;
+                                    return (
+                                        <Planet
+                                            handleOnClick={handlePlanetClick}
+                                            key={planet.id}
+                                            planet={planet}
+                                            x={x}
+                                            y={y}
+                                            planetTextures={planetTextures}
+                                        />
+                                    );
+                                })}
+                            </>
+                        )}
+
+                        {selectedPlanet && planetTextures[selectedPlanet.id] && (() => {
+                            const texture = planetTextures[selectedPlanet.id];
+                            const expandedScale = (canvasSize.height / 1.5) / texture.height;
+                            const targetX = canvasSize.width / 2;
+                            const targetY = canvasSize.height / 2;
+                            const index = sortedPlanets.findIndex(p => p.id === selectedPlanet.id);
+                            const initialPos = planetPositions[index];
+                            const initialX = initialPos.x * canvasSize.width;
+                            const initialY = initialPos.y * canvasSize.height;
+
+                            const radius = (texture.height * expandedScale) / 2 - 80;
+                            const stagePositions = selectedPlanet.stages.map((stage, idx) => {
+                                const angle = Math.random() * Math.PI * 2;
+                                return {
+                                    x: targetX + Math.cos(angle) * (Math.random() * radius * 0.8),
+                                    y: targetY + Math.sin(angle) * (Math.random() * radius * 0.8),
+                                    stage
+                                };
+                            });
+
+                            return (
+                                <>
+                                    <Planet
+                                        planet={selectedPlanet}
+                                        x={transitionStage === "exit" ? targetX : initialX}
+                                        y={transitionStage === "exit" ? targetY : initialY}
+                                        planetTextures={planetTextures}
+                                        handleOnClick={() => {}}
+                                        transitionStage={transitionStage}
+                                        targetX={transitionStage === "exit" ? initialX : targetX}
+                                        targetY={transitionStage === "exit" ? initialY : targetY}
+                                        targetScale={transitionStage === "exit" ? 1 : expandedScale}
+                                        onTransitionEnd={handleTransitionEnd}
                                     />
-                                    {stagePositions.map(({ x, y, stage }) => (
-                                        <Stage key={stage.id} stage={stage} x={x} y={y} stageTextures={stageTextures} />
-                                    ))}
-                                    <pixiText 
-                                        text={selectedPlanet.description}
-                                        style={planetDescriptionStyle}
-                                        x={canvasSize.width / 2}
-                                        y={130}
-                                        anchor={0.5}
-                                    />
-                                    <pixiText
-                                        text="Salir"
-                                        style={exitStyle}
-                                        x={canvasSize.width - 50}
-                                        y={30}
-                                        anchor={0.5}
-                                        interactive={true}
-                                        cursor="pointer"
-                                        onClick={handleExit}
-                                    />
+                                    {showStages && transitionStage !== "exit" && (
+                                        <>  
+                                            <pixiText 
+                                                text={selectedPlanet.name}
+                                                style={planetNameStyle}
+                                                x={canvasSize.width / 2}
+                                                y={60}
+                                                anchor={0.5}
+                                            />
+                                            {stagePositions.map(({ x, y, stage }) => (
+                                                <Stage key={stage.id} stage={stage} x={x} y={y} stageTextures={stageTextures} />
+                                            ))}
+                                            <pixiText 
+                                                text={selectedPlanet.description}
+                                                style={planetDescriptionStyle}
+                                                x={canvasSize.width / 2}
+                                                y={130}
+                                                anchor={0.5}
+                                            />
+                                            <pixiText
+                                                text="Salir"
+                                                style={exitStyle}
+                                                x={canvasSize.width - 50}
+                                                y={30}
+                                                anchor={0.5}
+                                                interactive={true}
+                                                cursor="pointer"
+                                                onClick={handleExit}
+                                            />
+                                        </>
+                                    )}
                                 </>
-                            )}
-                        </>
-                    );
-                })()}
-            </pixiContainer>
-        </Application>         
-    ));
+                            );
+                        })()}
+                    </pixiContainer>
+                </Application>         
+            )}
+        </>
+    );
 }

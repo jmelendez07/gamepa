@@ -1,6 +1,7 @@
 import { Stage as IStage } from "@/types/planet";
+import { router } from "@inertiajs/react";
 import { Graphics, Texture } from "pixi.js";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface IStageProps {
     stage: IStage;
@@ -19,8 +20,12 @@ export default function Stage({ stage, x, y, stageTextures }: IStageProps) {
         }
     }, [stageTextures[stage.id]]);
 
+    const handleClick = useCallback(() => {
+        router.visit(route('gameplay.stage', { stageId: stage.id }));
+    }, [stage.id]);
+
     return (
-        <pixiContainer interactive={true} cursor="pointer" key={stage.id} x={x} y={y}>
+        <pixiContainer interactive={true} onClick={handleClick} cursor="pointer" key={stage.id} x={x} y={y}>
             <pixiGraphics
                 draw={g => {
                     g.clear();
