@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Level;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -45,11 +46,14 @@ class RegisteredUserController extends Controller
 
         $user->assignRole('estudiante');
 
+        $levelOneId = Level::where('order', 1)->first()->id;
+
         Profile::create([
             'user_id' => $user->id,
-            'level' => 1,
+            'level_id' => $levelOneId,
             'avatar_url' => asset('assets/default-user-avatar.png'),
-            'progress_bar' => 0
+            'progress_bar' => 0,
+            'total_xp' => 0,
         ]);
 
         event(new Registered($user));

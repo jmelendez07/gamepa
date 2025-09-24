@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Level;
 use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -61,5 +63,37 @@ class ProfileController extends Controller
     public function destroy(Profile $profile)
     {
         //
+    }
+
+    public function updateXp(Request $request)
+    {
+        $request->validate([
+            'total_xp' => 'required|integer|min:0',
+        ]);
+
+        $profile = Profile::where('user_id', Auth::id())->first();
+
+        if (!$profile) {
+            return back()->withErrors(['error' => 'Profile not found']);
+        }
+
+        $profile->total_xp += $request->input('total_xp');
+
+        $newLevel = Level::where('xp_required', '<=', $profile->total_xp)
+            ->orderBy('xp_required', 'desc')
+            ->first();
+
+        if ($newLevel) {
+            $profile->level_id = $newLevel->id;
+        }
+
+        $profile->save();
+        $profile->load('level');
+
+        // Devolver los datos actualizados sin redireccionar
+        return back()->with([
+            'message' => 'Experience updated successfully',
+            'updatedProfile' => $profile,
+        ]);
     }
 }

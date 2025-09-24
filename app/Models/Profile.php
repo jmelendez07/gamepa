@@ -14,9 +14,10 @@ class Profile extends Model
 
     protected $fillable = [
         'user_id',
-        'level',
+        'level_id',
         'avatar_url',
-        'progress_bar'
+        'progress_bar',
+        'total_xp'
     ];
 
     #[SearchUsingPrefix(['user_id'])]
@@ -34,5 +35,10 @@ class Profile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
     }
 }

@@ -320,7 +320,7 @@ export const Exercise = ({ enemy, card, exercise, onClose, onIsAttacking, attack
             onWheel={handleWheelOnExerciseArea}
             interactive={true}
             sortableChildren={true}
-            zIndex={2}
+            zIndex={10}
         >
             {bgTexture && <pixiSprite texture={bgTexture} width={width} height={height} />}
 
