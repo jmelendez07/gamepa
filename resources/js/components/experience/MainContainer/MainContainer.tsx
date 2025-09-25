@@ -5,12 +5,13 @@ import Enemy from '@/components/enemy/enemy';
 import GameplayMenu from '@/components/gameplay/menu';
 import { Hero } from '@/components/Hero/hero';
 import { StageGame } from '@/components/stages/stageGame';
-import { type SharedData } from '@/types';
+import { UserProfile, type SharedData } from '@/types';
 import Card from '@/types/card';
 import IEnemy from '@/types/enemy';
 import IHero from '@/types/hero';
 import { Stage } from '@/types/planet';
 import { router, usePage } from '@inertiajs/react';
+import type { Page as InertiaPage } from '@inertiajs/core'; // was Page as InertiaPageProps
 import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
@@ -40,8 +41,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
     // Agregar estado local para el perfil del usuario
     const { auth } = usePage<SharedData>().props;
 
-    const [userProfile, setUserProfile] = useState(auth.user?.profile || null);
-    const [currentUserXp, setCurrentUserXp] = useState(auth.user?.profile?.total_xp || 0);
+    const [userProfile, setUserProfile] = useState<UserProfile | undefined>(auth.user?.profile ?? undefined);
+    const [currentUserXp, setCurrentUserXp] = useState<number>(auth.user?.profile?.total_xp ?? 0);
 
 
     const updateHeroPosition = useCallback((x: number, y: number) => {
@@ -49,9 +50,11 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
     }, []);
 
     const generateRandomPosition = useCallback(
-        () => ({
-            x: Math.floor(Math.random() * (750 - 20 + 1)) + 20,
-            y: Math.floor(Math.random() * (470 - 30 + 1)) + 30,
+        (index: number) => ({
+            // x: Math.floor(Math.random() * (750 - 20 + 1)) + 20,
+            // y: Math.floor(Math.random() * (470 - 30 + 1)) + 30,
+            x: 200 + index * 200,
+            y: 200
         }),
         [],
     );
@@ -97,8 +100,6 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
             }
         });
 
-        console.log('User Info:', auth.user);
-
         return () => {
             cancelled = true;
         };
@@ -136,27 +137,23 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
     const updateUserProfileLevel = async (newTotalXp: number) => {
         try {
             // Actualizar estado local inmediatamente para la UI
-            const newTotalUserXp = currentUserXp + newTotalXp;
+            const newTotalUserXp = (currentUserXp ?? 0) + newTotalXp;
             setCurrentUserXp(newTotalUserXp);
 
             await router.post(
-                'profile/update-xp',
+                '/profile/update-xp',
+                { total_xp: newTotalXp },
                 {
-                    total_xp: newTotalXp,
-                },
-                {
-                    onSuccess: (page) => {
-                        console.log('Profile level updated successfully:', page);
-
-                        // Si el servidor devuelve el perfil actualizado, usarlo
-                        if (page.props.updatedProfile) {
-                            setUserProfile(page.props.updatedProfile);
-                            setCurrentUserXp(page.props.updatedProfile.total_xp);
+                    onSuccess: (page: InertiaPage) => {
+                        const updatedUser = page.props.auth.user;
+                        if (updatedUser?.profile) {
+                            console.log('Updated Profile from server:', updatedUser);
+                            setUserProfile(updatedUser.profile); // <- perfil, no user
+                            setCurrentUserXp(updatedUser.profile.total_xp);
                         }
                     },
                     onError: (errors) => {
                         console.error('Error updating user profile level:', errors);
-                        // Revertir el estado local en caso de error
                         setCurrentUserXp(currentUserXp);
                     },
                     preserveState: true,
@@ -165,24 +162,14 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
             );
         } catch (error) {
             console.error('Error updating user profile level:', error);
-            // Revertir el estado local en caso de error
             setCurrentUserXp(currentUserXp);
         }
     };
 
     // Función para obtener el nivel actual basado en XP
     const getCurrentLevel = useCallback(() => {
-        // Si tienes los niveles disponibles, puedes calcular el nivel actual
-        // Por ahora, devuelve el nivel del perfil o el del auth
         return userProfile?.level || auth.user?.profile?.level || null;
     }, [userProfile, auth.user]);
-
-    // Log del estado actualizado
-    useEffect(() => {
-        console.log('Current User XP:', currentUserXp);
-        console.log('Current User Level:', getCurrentLevel());
-        console.log('User Profile:', userProfile);
-    }, [currentUserXp, userProfile]);
 
     const checkCombatArea = useCallback(() => {
         enemies.forEach((enemy) => {
@@ -211,7 +198,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
             setEnemies((enemies) =>
                 enemies.map((enemy, index) => ({
                     ...enemy,
-                    map_position: enemy.map_position ? enemy.map_position : generateRandomPosition(),
+                    map_position: enemy.map_position ? enemy.map_position : generateRandomPosition(index),
                     combat_position: enemy.combat_position ? enemy.combat_position : generateRandomMapPosition(index),
                 })),
             );

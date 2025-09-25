@@ -16,12 +16,12 @@ class EnemySeeder extends Seeder
         $planets = Planet::all();
 
         $enemies = [
-            [
-                'name' => 'Goblin',
-                'health' => 10,
-                'basic_attack' => 10,
-                'spritesheet' => asset('assets/default_enemies/enemy-1.png'),
-            ],
+            // [
+            //     'name' => 'Goblin',
+            //     'health' => 10,
+            //     'basic_attack' => 10,
+            //     'spritesheet' => asset('assets/default_enemies/enemy-1.png'),
+            // ],
             [
                 'name' => 'Orc',
                 'health' => 10,

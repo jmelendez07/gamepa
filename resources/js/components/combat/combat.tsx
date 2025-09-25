@@ -93,8 +93,9 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
                         resetHeroAnimation();
                         setIsAttackingAnimation(true);
                         if (enemy.health - selectedCard.stats <= 0) {
+                            console.log('enemy', enemy);
                             setXpGained((prev) => prev + (enemy.type?.reward_xp || 0));
-                            console.log('Total XP gained:', xpGained + (enemy.type?.reward_xp || 0));
+                            console.log('Total XP gained:', xpGained + (enemy.type?.reward_xp));
                         }
                         return { ...enemy, health: enemy.health - selectedCard.stats };
                     } else {

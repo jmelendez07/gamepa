@@ -54,11 +54,19 @@ class GameplayController extends Controller
         $hero = Auth::user()->heroes()->with(['cards.type'])->firstOrFail();
         $easy = Dificulty::where('name', 'Fácil')->firstOrFail()->id;
 
-        $enemies = Enemy::raw(function ($collection) {
-            return $collection->aggregate([
-                ['$sample' => ['size' => 6]]
-            ]);
-        });
+        $enemies = [];
+
+        $orcEnemy = Enemy::with('type')->where('name', 'Orc')->first();
+        if ($orcEnemy) {
+            $enemies[] = $orcEnemy;
+        }
+
+        $DragonEnemy = Enemy::with('type')->where('name', 'Dragon')->first();
+        if ($DragonEnemy) {
+            $enemies[] = $DragonEnemy;
+        }
+
+        // $enemies = Enemy::with('type')->limit(2)->get();
 
         $cards = [];
 
