@@ -2,6 +2,7 @@ import IPlanet from "@/types/planet";
 import { Texture } from "pixi.js";
 import React, { useEffect, useState } from "react";
 import { useTick } from "@pixi/react";
+import { ColorMatrixFilter } from "pixi.js";
 
 interface IPlanetProps {
     planet: IPlanet;
@@ -14,6 +15,7 @@ interface IPlanetProps {
     targetY?: number;
     targetScale?: number;
     onTransitionEnd?: () => void;
+    locked?: boolean;
 }
 
 export default function Planet({
@@ -26,6 +28,7 @@ export default function Planet({
     targetX,
     targetY,
     targetScale,
+    locked = false,
     onTransitionEnd
 }: IPlanetProps) {
     const [hovered, setHovered] = useState(false);
@@ -33,7 +36,6 @@ export default function Planet({
     const [scale, setScale] = useState(1);
 
     useEffect(() => {
-        // Reinicia escala y posición solo cuando no hay transición
         if (!transitionStage) {
             if (planetTextures[planet.id]) {
                 const texture = planetTextures[planet.id];
@@ -100,16 +102,25 @@ export default function Planet({
         <pixiContainer
             x={pos.x}
             y={pos.y}
-            interactive={!transitionStage}
-            cursor={!transitionStage ? "pointer" : undefined}
-            onClick={() => !transitionStage && handleOnClick(planet)}
-            onMouseOver={() => !transitionStage && setHovered(true)}
-            onMouseOut={() => !transitionStage && setHovered(false)}
+            interactive={!transitionStage && !locked}
+            cursor={!transitionStage && !locked ? "pointer" : undefined}
+            onClick={() => !transitionStage && !locked && handleOnClick(planet)}
+            onMouseOver={() => !transitionStage && !locked && setHovered(true)}
+            onMouseOut={() => !transitionStage && !locked && setHovered(false)}
         >
             {planetTextures[planet.id] && (() => {
                 const texture = planetTextures[planet.id];
                 const texWidth = texture.width;
                 const texHeight = texture.height;
+
+                // Filtro escala de grises si está bloqueado
+                const filters = locked
+                    ? [(() => { 
+                        const f = new ColorMatrixFilter(); 
+                        f.greyscale(0.3, false); 
+                        return f; 
+                    })()]
+                    : undefined;
 
                 return (
                     <pixiSprite
@@ -118,6 +129,7 @@ export default function Planet({
                         width={texWidth}
                         height={texHeight}
                         scale={scale}
+                        filters={filters}
                     />
                 );
             })()}

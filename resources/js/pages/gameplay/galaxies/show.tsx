@@ -11,6 +11,7 @@ extend({ Container, Sprite, Text, Graphics });
 
 interface IGalaxiesShowProps {
     galaxy: Galaxy;
+    unlocked_planets: IPlanet[];
 }
 
 const planetPositions = [
@@ -66,7 +67,7 @@ const exitStyle = new TextStyle({
     align: 'center',
 });
 
-export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
+export default function GalaxiesShow({ galaxy, unlocked_planets }: IGalaxiesShowProps) {
     const [isClient, setIsClient] = useState(false);
     const [canvasSize, setCanvasSize] = useState(calculateCanvasSize());
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -251,6 +252,7 @@ export default function GalaxiesShow({ galaxy }: IGalaxiesShowProps) {
                                             x={x}
                                             y={y}
                                             planetTextures={planetTextures}
+                                            locked={unlocked_planets.some(up => up.id !== planet.id)}
                                         />
                                     );
                                 })}

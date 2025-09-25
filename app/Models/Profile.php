@@ -41,4 +41,9 @@ class Profile extends Model
     {
         return $this->belongsTo(Level::class);
     }
+
+    public function unlockedPlanets() 
+    {
+        return $this->belongsToMany(Planet::class);
+    }
 }

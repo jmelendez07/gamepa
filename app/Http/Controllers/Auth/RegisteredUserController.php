@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Level;
+use App\Models\Planet;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -48,13 +49,16 @@ class RegisteredUserController extends Controller
 
         $levelOneId = Level::where('order', 1)->first()->id;
 
-        Profile::create([
+        $profile = Profile::create([
             'user_id' => $user->id,
             'level_id' => $levelOneId,
             'avatar_url' => asset('assets/default-user-avatar.png'),
             'progress_bar' => 0,
             'total_xp' => 0,
         ]);
+
+        $firstPlanet = Planet::orderBy('number', 'asc')->firstOrFail();
+        $profile->unlockedPlanets()->attach($firstPlanet->id);
 
         event(new Registered($user));
 

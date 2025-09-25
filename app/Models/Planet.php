@@ -48,4 +48,9 @@ class Planet extends Model
     {
         return $this->hasMany(Stage::class);
     }
+
+    public function profiles()
+    {
+        return $this->belongsToMany(Profile::class);
+    }
 }
