@@ -135,49 +135,48 @@ export default function Welcome() {
     return (
         <PublicLayout>
             <Head title={`${name} - Aventuras Matemáticas Épicas`}>
-                <meta name="description" content={`Únete a ${name} y vive aventuras épicas mientras resuelves problemas matemáticos en un mundo pixelart único`} />
+                <meta
+                    name="description"
+                    content={`Únete a ${name} y vive aventuras épicas mientras resuelves problemas matemáticos en un mundo pixelart único`}
+                />
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
             </Head>
 
-            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 relative overflow-hidden">
+            <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800">
                 {/* Cursor personalizado con efecto */}
-                <div 
-                    className="fixed w-4 h-4 bg-purple-400 rounded-full pointer-events-none z-50 mix-blend-difference transition-transform duration-100"
+                <div
+                    className="pointer-events-none fixed z-50 h-4 w-4 rounded-full bg-purple-400 mix-blend-difference transition-transform duration-100"
                     style={{
                         left: mousePosition.x - 8,
                         top: mousePosition.y - 8,
-                        transform: `scale(${mousePosition.x > 0 ? 1.2 : 1})`
+                        transform: `scale(${mousePosition.x > 0 ? 1.2 : 1})`,
                     }}
                 />
 
                 {/* Elementos decorativos animados */}
                 <div className="absolute inset-0 overflow-hidden">
                     {/* ✅ Zap draggable (reemplaza el elemento estático) */}
-                    <div 
+                    <div
                         ref={zapDrag.dragRef}
-                        className={`absolute text-purple-300/20 transition-all duration-300 cursor-grab active:cursor-grabbing z-30 ${
-                            zapDrag.isDragging ? 'scale-110 text-purple-300/40' : 'hover:text-purple-300/30 hover:scale-105'
+                        className={`absolute z-30 cursor-grab text-purple-300/20 transition-all duration-300 active:cursor-grabbing ${
+                            zapDrag.isDragging ? 'scale-110 text-purple-300/40' : 'hover:scale-105 hover:text-purple-300/30'
                         }`}
-                        style={{ 
+                        style={{
                             left: zapDrag.position.x - 64, // Centrar elemento (w-32 = 128px / 2)
                             top: zapDrag.position.y - 64,
-                            transform: `rotate(${
-                                zapDrag.isDragging ? scrollY * 0.05 : scrollY * 0.05
-                            }deg)`,
-                            transition: zapDrag.isDragging ? 'none' : 'transform 1000ms'
+                            transform: `rotate(${zapDrag.isDragging ? scrollY * 0.05 : scrollY * 0.05}deg)`,
+                            transition: zapDrag.isDragging ? 'none' : 'transform 1000ms',
                         }}
                         onMouseDown={zapDrag.handleMouseDown}
                         onTouchStart={zapDrag.handleTouchStart}
                     >
-                        <Zap className={`w-32 h-32 transition-all ${
-                            zapDrag.isDragging ? 'animate-none duration-300' : 'animate-pulse'
-                        }`} />
-                        
+                        <Zap className={`h-32 w-32 transition-all ${zapDrag.isDragging ? 'animate-none duration-300' : 'animate-pulse'}`} />
+
                         {/* Indicador de que es draggable */}
                         {!zapDrag.isDragging && (
-                            <div className="absolute -inset-2 border-2 border-dashed border-purple-300/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300">
-                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-purple-300 whitespace-nowrap bg-black/50 px-2 py-1 rounded">
+                            <div className="absolute -inset-2 rounded-lg border-2 border-dashed border-purple-300/20 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-black/50 px-2 py-1 text-xs whitespace-nowrap text-purple-300">
                                     Arrastra el rayo ⚡
                                 </div>
                             </div>
@@ -185,27 +184,25 @@ export default function Welcome() {
                     </div>
 
                     {/* ✅ Espada draggable (ya existente) */}
-                    <div 
+                    <div
                         ref={swordDrag.dragRef}
-                        className={`absolute text-indigo-400/20 transition-all duration-300 cursor-grab active:cursor-grabbing z-30 ${
-                            swordDrag.isDragging ? 'scale-110 text-indigo-400/40' : 'hover:text-indigo-400/30 hover:scale-105'
+                        className={`absolute z-30 cursor-grab text-indigo-400/20 transition-all duration-300 active:cursor-grabbing ${
+                            swordDrag.isDragging ? 'scale-110 text-indigo-400/40' : 'hover:scale-105 hover:text-indigo-400/30'
                         }`}
-                        style={{ 
+                        style={{
                             left: swordDrag.position.x - 56,
                             top: swordDrag.position.y - 56,
                             transform: `rotate(${swordDrag.isDragging ? 45 + scrollY * 0.03 : 45 - scrollY * 0.03}deg)`,
-                            transition: swordDrag.isDragging ? 'none' : 'transform 1000ms'
+                            transition: swordDrag.isDragging ? 'none' : 'transform 1000ms',
                         }}
                         onMouseDown={swordDrag.handleMouseDown}
                         onTouchStart={swordDrag.handleTouchStart}
                     >
-                        <Sword className={`w-28 h-28 transition-all ${
-                            swordDrag.isDragging ? 'animate-none duration-300' : 'animate-bounce'
-                        }`} />
-                        
+                        <Sword className={`h-28 w-28 transition-all ${swordDrag.isDragging ? 'animate-none duration-300' : 'animate-bounce'}`} />
+
                         {!swordDrag.isDragging && (
-                            <div className="absolute -inset-2 border-2 border-dashed border-indigo-400/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300">
-                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-indigo-300 whitespace-nowrap bg-black/50 px-2 py-1 rounded">
+                            <div className="absolute -inset-2 rounded-lg border-2 border-dashed border-indigo-400/20 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-black/50 px-2 py-1 text-xs whitespace-nowrap text-indigo-300">
                                     Arrastra la espada 🗡️
                                 </div>
                             </div>
@@ -213,17 +210,17 @@ export default function Welcome() {
                     </div>
 
                     {/* Resto de elementos estáticos */}
-                    <div 
+                    <div
                         className="absolute bottom-40 left-10 text-purple-300/20 transition-transform duration-1000"
                         style={{ transform: `translateY(${scrollY * 0.08}px)` }}
                     >
-                        <Shield className="w-36 h-36 animate-pulse delay-1000" />
+                        <Shield className="h-36 w-36 animate-pulse delay-1000" />
                     </div>
-                    <div 
-                        className="absolute bottom-20 right-32 text-indigo-400/20 transition-transform duration-1000"
+                    <div
+                        className="absolute right-32 bottom-20 text-indigo-400/20 transition-transform duration-1000"
                         style={{ transform: `translateY(${scrollY * -0.1}px)` }}
                     >
-                        <Calculator className="w-24 h-24 animate-spin" />
+                        <Calculator className="h-24 w-24 animate-spin" />
                     </div>
 
                     {/* Partículas flotantes */}
@@ -232,10 +229,10 @@ export default function Welcome() {
                             key={i}
                             className={`absolute animate-pulse`}
                             style={{
-                                top: `${20 + (i * 5)}%`,
-                                left: `${10 + (i * 7)}%`,
+                                top: `${20 + i * 5}%`,
+                                left: `${10 + i * 7}%`,
                                 animationDelay: `${i * 0.5}s`,
-                                transform: `translateY(${scrollY * (0.02 + i * 0.01)}px)`
+                                transform: `translateY(${scrollY * (0.02 + i * 0.01)}px)`,
                             }}
                         >
                             <Sparkles className={`w-${3 + (i % 3)} h-${3 + (i % 3)} text-purple-${300 + (i % 3) * 100} opacity-60`} />
@@ -243,37 +240,52 @@ export default function Welcome() {
                     ))}
 
                     {/* Efectos de resplandor */}
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500" />
+                    <div className="absolute top-0 left-0 h-96 w-96 animate-pulse rounded-full bg-purple-500/20 blur-3xl" />
+                    <div className="absolute right-0 bottom-0 h-96 w-96 animate-pulse rounded-full bg-indigo-500/20 blur-3xl delay-1000" />
+                    <div className="absolute top-1/2 left-1/2 h-64 w-64 animate-pulse rounded-full bg-pink-500/10 blur-2xl delay-500" />
                 </div>
 
                 {/* Header */}
                 <header className="relative z-20 p-6">
-                    <nav className="flex items-center justify-between max-w-7xl mx-auto">
-                        <div className={`flex items-center space-x-3 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
-                            <Crown className="w-10 h-10 text-purple-300 animate-pulse" />
-                            <h1 className="text-3xl font-bold text-white">{ name }</h1>
+                    <nav className="mx-auto flex max-w-7xl items-center justify-between">
+                        <div
+                            className={`flex items-center space-x-3 transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}
+                        >
+                            <Crown className="h-10 w-10 animate-pulse text-purple-300" />
+                            <h1 className="font-jersey text-3xl md:text-4xl text-white">{name}</h1>
                         </div>
-                        
-                        <div className={`flex items-center space-x-4 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+
+                        <div
+                            className={`flex items-center space-x-4 transition-all delay-200 duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}
+                        >
                             {auth.user ? (
-                                <Link href={ auth.user.roles.some(r => r.name === Roles.Admin) ? route('dashboard') : (auth.user.roles.some(r => r.name === Roles.Teacher) ? route('rooms.index') : '#') }>
-                                    <Button className="cursor-pointer bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25">
-                                        <Shield className="w-4 h-4 mr-2" />
+                                <Link
+                                    href={
+                                        auth.user.roles.some((r) => r.name === Roles.Admin)
+                                            ? route('dashboard')
+                                            : auth.user.roles.some((r) => r.name === Roles.Teacher)
+                                              ? route('rooms.index')
+                                              : '#'
+                                    }
+                                >
+                                    <Button className="transform cursor-pointer rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-purple-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-purple-500/25">
+                                        <Shield className="mr-2 h-4 w-4" />
                                         Panel
                                     </Button>
                                 </Link>
                             ) : (
                                 <>
                                     <Link href={route('login')}>
-                                        <Button variant="ghost" className="cursor-pointer text-purple-200 hover:text-white hover:bg-purple-600/20 px-4 py-2 rounded-xl transition-all duration-300">
+                                        <Button
+                                            variant="ghost"
+                                            className="font-jersey md:text-2xl cursor-pointer rounded-xl px-4 py-2 text-purple-200 transition-all duration-300 hover:bg-purple-600/20 hover:text-white"
+                                        >
                                             Iniciar Sesión
                                         </Button>
                                     </Link>
                                     <Link href={route('register')}>
-                                        <Button className="cursor-pointer bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25">
-                                            <Crown className="w-4 h-4 mr-2" />
+                                        <Button className="font-jersey md:text-2xl transform cursor-pointer rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-2 text-white transition-all duration-300 hover:scale-105 hover:from-purple-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-purple-500/25">
+                                            <Crown className="mr-2 h-4 w-4" />
                                             Únete Ahora
                                         </Button>
                                     </Link>
@@ -285,105 +297,104 @@ export default function Welcome() {
 
                 {/* Hero Section */}
                 <main className="relative z-10">
-                    <section className="min-h-screen flex items-center justify-center px-6 relative">
-                        <div className="max-w-6xl mx-auto text-center">
+                    <section className="relative flex min-h-screen items-center justify-center px-6">
+                        <div className="mx-auto max-w-6xl text-center">
                             {/* Título principal con animación espectacular */}
-                            <div className={`mb-8 transition-all duration-1500 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
-                                <div className="flex items-center justify-center mb-6">
-                                    <Swords className="w-16 h-16 text-purple-300 animate-pulse mr-4" />
-                                    <h1 className="font-jersey text-6xl md:text-8xl lg:text-[10rem] ">
-                                        <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent animate-pulse">
-                                            { name }
+                            <div
+                                className={`mb-8 transition-all delay-300 duration-1500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+                            >
+                                <div className="mb-6 flex items-center justify-center">
+                                    <Swords className="mr-4 h-16 w-16 animate-pulse text-purple-300" />
+                                    <h1 className="font-jersey text-6xl md:text-8xl lg:text-[10rem]">
+                                        <span className="animate-pulse bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent">
+                                            {name}
                                         </span>
                                     </h1>
-                                    <ShieldPlus className="w-16 h-16 text-indigo-300 animate-pulse ml-4" />
+                                    <ShieldPlus className="ml-4 h-16 w-16 animate-pulse text-indigo-300" />
                                 </div>
-                                
-                                <h2 className="text-4xl font-jersey md:text-8xl font-extralight text-white mb-4">
+
+                                <h2 className="mb-4 font-jersey text-4xl font-extralight text-white md:text-8xl">
                                     Aventuras{' '}
-                                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                        Matemáticas
-                                    </span>
-                                    {' '}Épicas
+                                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Matemáticas</span>{' '}
+                                    Épicas
                                 </h2>
-                                
-                                <div className="text-xl md:text-2xl text-purple-200 mb-8 max-w-3xl mx-auto leading-relaxed min-h-[120px] flex items-center justify-center">
+
+                                <div className="mx-auto mb-8 flex min-h-[120px] max-w-3xl items-center justify-center text-xl leading-relaxed text-purple-200 md:text-2xl">
                                     {showTypewriter && (
-                                        <Typewriter 
+                                        <Typewriter
                                             text="Sumérgete en un mundo pixelart único donde las matemáticas se convierten en aventuras épicas. Resuelve problemas, desbloquea poderes y conviértete en el héroe matemático definitivo."
                                             speed={50}
-                                            className="text-xl md:text-2xl text-purple-200 leading-relaxed"
+                                            className="text-xl leading-relaxed text-purple-200 md:text-2xl"
                                         />
                                     )}
                                 </div>
                             </div>
 
                             {/* Botones de acción */}
-                            <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 transition-all duration-1500 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
+                            <div
+                                className={`mb-16 flex flex-col items-center justify-center gap-6 transition-all delay-500 duration-1500 sm:flex-row ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+                            >
                                 {!auth.user && (
                                     <Link href={route('register')}>
-                                        <Button className="cursor-pointer bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/50 group">
-                                            <Play className="w-6 h-6 mr-3 group-hover:animate-pulse" />
+                                        <Button className="group transform cursor-pointer rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 px-8 py-4 font-jersey text-lg text-white transition-all duration-300 hover:scale-110 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 hover:shadow-2xl hover:shadow-purple-500/50 md:text-2xl">
+                                            <Play className="mr-3 h-6 w-6 group-hover:animate-pulse" />
                                             Comenzar Aventura
-                                            <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
                                         </Button>
                                     </Link>
                                 )}
-                                
-                                <Button 
-                                    variant="outline" 
-                                    className="cursor-pointer border-2 border-purple-400 text-purple-300 hover:bg-purple-600 hover:text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 bg-white/10 backdrop-blur-sm"
+
+                                <Button
+                                    variant="outline"
+                                    className="md:text-1xl transform cursor-pointer rounded-2xl border-2 border-purple-400 bg-white/10 px-8 py-4 font-jersey text-lg text-purple-300 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-purple-600 hover:text-white"
                                 >
-                                    <Target className="w-6 h-6 mr-3" />
+                                    <Target className="mr-3 h-6 w-6" />
                                     Ver Demo
                                 </Button>
                             </div>
 
                             {/* Indicador de scroll */}
-                            <div 
-                                className={`animate-bounce cursor-pointer transition-all duration-1500 delay-700 hover:scale-110 hover:text-purple-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                            <div
+                                className={`animate-bounce cursor-pointer transition-all delay-700 duration-1500 hover:scale-110 hover:text-purple-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
                                 onClick={scrollToNextSection}
                             >
-                                <ChevronDown className="w-8 h-8 text-purple-300 mx-auto hover:animate-pulse" />
-                                <p className="text-purple-300 text-sm mt-2">Descubre más</p>
+                                <ChevronDown className="mx-auto h-8 w-8 text-purple-300 hover:animate-pulse" />
+                                <p className="mt-2 font-jersey text-sm text-purple-300 md:text-2xl">Descubre más</p>
                             </div>
                         </div>
                     </section>
 
                     {/* ✅ Features Section con ID para el scroll */}
-                    <section id="features-section" className="py-20 px-6 bg-black/20 backdrop-blur-sm">
-                        <div className="max-w-6xl mx-auto">
-                            <div className="text-center mb-16">
-                                <h3 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                    <section id="features-section" className="bg-black/20 px-6 py-20 backdrop-blur-sm">
+                        <div className="mx-auto max-w-6xl">
+                            <div className="mb-16 text-center">
+                                <h3 className="mb-6 font-jersey text-6xl text-white md:text-7xl">
                                     ¿Por qué elegir{' '}
-                                    <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                                        { name }
-                                    </span>
-                                    ?
+                                    <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">{name}</span>?
                                 </h3>
-                                <p className="text-xl text-purple-200 max-w-3xl mx-auto">
-                                    Descubre las características que hacen de { name } la experiencia definitiva para aprender matemáticas
+                                <p className="mx-auto max-w-3xl text-xl text-purple-200">
+                                    Descubre las características que hacen de {name} la experiencia definitiva para aprender matemáticas
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                                 {features.map((feature, index) => (
-                                    <div 
+                                    <div
                                         key={index}
-                                        className="group bg-white/10 backdrop-blur-lg border border-purple-300/30 rounded-2xl p-6 hover:bg-white/20 transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25"
+                                        className="group transform rounded-2xl border border-purple-300/30 bg-white/10 p-6 backdrop-blur-lg transition-all duration-500 hover:scale-105 hover:bg-white/20 hover:shadow-2xl hover:shadow-purple-500/25"
                                         style={{
-                                            animationDelay: `${index * 0.2}s`
+                                            animationDelay: `${index * 0.2}s`,
                                         }}
                                     >
-                                        <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:animate-pulse transition-all duration-300`}>
-                                            <feature.icon className="w-8 h-8 text-white" />
+                                        <div
+                                            className={`h-16 w-16 bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center rounded-2xl transition-all duration-300 group-hover:animate-pulse`}
+                                        >
+                                            <feature.icon className="h-8 w-8 text-white" />
                                         </div>
-                                        <h4 className="text-xl font-bold text-white mb-3 group-hover:text-purple-200 transition-colors">
+                                        <h4 className="font-jersey md:text-2xl mb-3 text-xl text-white transition-colors group-hover:text-purple-200">
                                             {feature.title}
                                         </h4>
-                                        <p className="text-purple-200 group-hover:text-purple-100 transition-colors">
-                                            {feature.description}
-                                        </p>
+                                        <p className="text-purple-200 transition-colors group-hover:text-purple-100">{feature.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -391,32 +402,25 @@ export default function Welcome() {
                     </section>
 
                     {/* Stats Section */}
-                    <section className="py-20 px-6">
-                        <div className="max-w-6xl mx-auto">
-                            <div className="text-center mb-16">
-                                <h3 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                    <section className="px-6 py-20">
+                        <div className="mx-auto max-w-6xl">
+                            <div className="mb-16 text-center">
+                                <h3 className="font-jersey mb-6 text-4xl md:text-7xl text-white">
                                     Números que{' '}
-                                    <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                        Impresionan
-                                    </span>
+                                    <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Impresionan</span>
                                 </h3>
                             </div>
 
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
                                 {stats.map((stat, index) => (
-                                    <div 
-                                        key={index}
-                                        className="text-center group"
-                                    >
-                                        <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-bounce">
-                                            <stat.icon className="w-10 h-10 text-white" />
+                                    <div key={index} className="group text-center">
+                                        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 group-hover:animate-bounce">
+                                            <stat.icon className="h-10 w-10 text-white" />
                                         </div>
-                                        <div className="text-3xl md:text-4xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+                                        <div className="font-jersey mb-2 text-3xl  text-white transition-colors group-hover:text-purple-300 md:text-4xl">
                                             {stat.value}
                                         </div>
-                                        <div className="text-purple-300 font-medium">
-                                            {stat.label}
-                                        </div>
+                                        <div className="font-medium text-purple-300">{stat.label}</div>
                                     </div>
                                 ))}
                             </div>
@@ -424,39 +428,35 @@ export default function Welcome() {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="py-20 px-6 bg-gradient-to-r from-purple-800/50 to-indigo-800/50 backdrop-blur-sm">
-                        <div className="max-w-4xl mx-auto text-center">
+                    <section className="bg-gradient-to-r from-purple-800/50 to-indigo-800/50 px-6 py-20 backdrop-blur-sm">
+                        <div className="mx-auto max-w-4xl text-center">
                             <div className="mb-8">
-                                <Medal className="w-24 h-24 text-purple-300 mx-auto mb-6 animate-pulse" />
-                                <h3 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                                <Medal className="mx-auto mb-6 h-24 w-24 animate-pulse text-purple-300" />
+                                <h3 className="font-jersey mb-6 text-4xl md:text-6xl text-white">
                                     ¿Listo para la{' '}
-                                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                        Aventura
-                                    </span>
-                                    ?
+                                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Aventura</span>?
                                 </h3>
-                                <p className="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">
-                                    Únete a miles de héroes que ya están viviendo aventuras matemáticas épicas. 
-                                    Tu leyenda comienza aquí.
+                                <p className="mx-auto mb-8 max-w-2xl text-xl text-purple-200">
+                                    Únete a miles de héroes que ya están viviendo aventuras matemáticas épicas. Tu leyenda comienza aquí.
                                 </p>
                             </div>
 
                             {!auth.user && (
-                                <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                                <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
                                     <Link href={route('register')}>
-                                        <Button className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/50 group">
-                                            <Crown className="w-6 h-6 mr-3 group-hover:animate-spin" />
+                                        <Button className="font-jersey group transform rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 px-10 py-4 text-xl text-white transition-all duration-300 hover:scale-110 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 hover:shadow-2xl hover:shadow-purple-500/50">
+                                            <Crown className="mr-3 h-6 w-6 group-hover:animate-spin" />
                                             Crear mi Leyenda
-                                            <Sparkles className="w-6 h-6 ml-3 group-hover:animate-pulse" />
+                                            <Sparkles className="ml-3 h-6 w-6 group-hover:animate-pulse" />
                                         </Button>
                                     </Link>
-                                    
+
                                     <Link href={route('login')}>
-                                        <Button 
-                                            variant="outline" 
-                                            className="border-2 border-purple-400 text-purple-300 hover:bg-purple-600 hover:text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 bg-white/10 backdrop-blur-sm"
+                                        <Button
+                                            variant="outline"
+                                            className="font-jersey transform rounded-2xl border-2 border-purple-400 bg-white/10 px-8 py-4 text-lg text-purple-300 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-purple-600 hover:text-white"
                                         >
-                                            <Shield className="w-6 h-6 mr-3" />
+                                            <Shield className="mr-3 h-6 w-6" />
                                             Ya soy un Héroe
                                         </Button>
                                     </Link>
@@ -467,35 +467,29 @@ export default function Welcome() {
                 </main>
 
                 {/* Footer */}
-                <footer className="relative z-10 py-12 px-6 bg-black/40 backdrop-blur-sm">
-                    <div className="max-w-6xl mx-auto text-center">
-                        <div className="flex items-center justify-center mb-6">
-                            <Crown className="w-8 h-8 text-purple-300 mr-3 animate-pulse" />
-                            <h4 className="text-2xl font-bold text-white">{ name }</h4>
-                            <Crown className="w-8 h-8 text-purple-300 ml-3 animate-pulse" />
+                <footer className="relative z-10 bg-black/40 px-6 py-12 backdrop-blur-sm">
+                    <div className="mx-auto max-w-6xl text-center">
+                        <div className="mb-6 flex items-center justify-center">
+                            <Crown className="mr-3 h-8 w-8 animate-pulse text-purple-300" />
+                            <h4 className="text-2xl font-jersey md:text-4xl text-white">{name}</h4>
+                            <Crown className="ml-3 h-8 w-8 animate-pulse text-purple-300" />
                         </div>
-                        <p className="text-purple-300 mb-4">
-                            Transformando las matemáticas en aventuras épicas desde 2024
-                        </p>
+                        <p className="mb-4 text-purple-300">Transformando las matemáticas en aventuras épicas desde 2024</p>
                         <div className="flex items-center justify-center space-x-4 text-purple-400">
-                            <Sparkles className="w-5 h-5 animate-pulse" />
+                            <Sparkles className="h-5 w-5 animate-pulse" />
                             <span className="text-sm">Hecho con ❤️ para futuros héroes matemáticos</span>
-                            <Sparkles className="w-5 h-5 animate-pulse" />
+                            <Sparkles className="h-5 w-5 animate-pulse" />
                         </div>
                     </div>
                 </footer>
 
-                <div className="fixed bottom-6 right-6 z-50">
+                <div className="fixed right-6 bottom-6 z-50">
                     <button
-                        onClick={scrollToTop} 
-                        className={`
-                            cursor-pointer relative bg-gradient-to-r overflow-hidden from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 
-                            text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border-2 
-                            border-purple-400 backdrop-blur-sm ${showScrollToTop ? 'size-14' : 'size-0 !p-0 !border-0'}    
-                        `}
+                        onClick={scrollToTop}
+                        className={`relative transform cursor-pointer overflow-hidden rounded-full border-2 border-purple-400 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl ${showScrollToTop ? 'size-14' : 'size-0 !border-0 !p-0'} `}
                         aria-label="Subir hacia arriba"
                     >
-                        <ChevronUp className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 size-8 transition-all duration-300" />
+                        <ChevronUp className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 transition-all duration-300" />
                     </button>
                 </div>
             </div>
