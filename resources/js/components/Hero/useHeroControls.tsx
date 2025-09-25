@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
-import { Direction } from "../types/common";
+import { Direction, Interactions } from "../types/common";
 import { DIRECTION_KEYS } from "../constants/game-world";
 
 export const useHeroControls = () => {
     const [heldDirection, setHeldDirection] = useState<Direction[]>([])
+    const [currentInteraction, setCurrentInteraction] = useState<Interactions>('NONE');
 
     const handleKey = useCallback((e:KeyboardEvent, isKeyDown:boolean) => {
         const direction = DIRECTION_KEYS[e.code];
@@ -16,6 +17,15 @@ export const useHeroControls = () => {
                     return prev.filter((dir) => dir !== direction);
                 }
             });
+            return;
+        }
+
+        if (e.code === 'KeyF' && isKeyDown) {
+            setCurrentInteraction('SELECT');
+            return;
+        } else if (e.code === 'KeyF' && !isKeyDown) {
+            setCurrentInteraction('NONE');
+            return;
         }
     }, [])
 
@@ -34,5 +44,17 @@ export const useHeroControls = () => {
         return heldDirection[0] || null;
     }, [heldDirection])
 
-    return {getControlsDirection}
+    const getInteraction = useCallback(() => {
+        return currentInteraction;
+    }, [currentInteraction])
+
+    const resetInteraction = useCallback(() => {
+        setCurrentInteraction('NONE');
+    }, []);
+
+    return {
+        getControlsDirection, 
+        getInteraction,
+        resetInteraction
+    }
 }
