@@ -1,7 +1,7 @@
 import { extend, useTick } from '@pixi/react';
 import { Container, Sprite, Texture } from 'pixi.js';
 import { RefObject, useCallback, useEffect, useRef } from 'react';
-import { ANIMATION_SPEED, DEFAULT_HERO_POSITION_X, DEFAULT_HERO_POSITION_Y, MOVE_SPEED } from '../constants/game-world';
+import { ANIMATION_SPEED, MOVE_SPEED } from '../constants/game-world';
 import { useHeroControls } from './useHeroControls';
 import { Direction, IPosition } from '../types/common';
 import { calculateNewTarget, checkCanMove, handleMovement } from '../helpers/common';

@@ -4,3 +4,5 @@ export interface IPosition {
 }
 
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | undefined;
+
+export type Interactions = 'SELECT' | 'NONE';
