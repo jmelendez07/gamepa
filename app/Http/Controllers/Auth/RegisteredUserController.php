@@ -60,6 +60,9 @@ class RegisteredUserController extends Controller
         $firstPlanet = Planet::orderBy('number', 'asc')->firstOrFail();
         $profile->unlockedPlanets()->attach($firstPlanet->id);
 
+        $firstStage = $firstPlanet->stages()->orderBy('number', 'asc')->firstOrFail();
+        $profile->unlockedStages()->attach($firstStage->id);
+
         event(new Registered($user));
 
         Auth::login($user);

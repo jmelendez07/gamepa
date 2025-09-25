@@ -46,4 +46,9 @@ class Profile extends Model
     {
         return $this->belongsToMany(Planet::class);
     }
+
+    public function unlockedStages()
+    {
+        return $this->belongsToMany(Stage::class);
+    }
 }

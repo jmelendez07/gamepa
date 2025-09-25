@@ -42,10 +42,12 @@ class GameplayController extends Controller
     public function galaxy($galaxyId)
     {
         $galaxy = Galaxy::with(['planets.stages'])->findOrFail($galaxyId);
+        $profile = Auth::user()->profile;
         
         return Inertia::render('gameplay/galaxies/show', [
             'galaxy' => $galaxy,
-            'unlocked_planets' => Auth::user()->profile->unlockedPlanets
+            'unlocked_planets' => $profile->unlockedPlanets,
+            'unlocked_stages' => $profile->unlockedStages,
         ]);
     }
 

@@ -21,4 +21,9 @@ class Stage extends Model
     {
         return $this->belongsTo(Planet::class);
     }
+
+    public function profiles()
+    {
+        return $this->belongsToMany(Profile::class);
+    }
 }

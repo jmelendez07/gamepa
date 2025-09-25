@@ -291,7 +291,7 @@ export default function Welcome() {
                             <div className={`mb-8 transition-all duration-1500 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
                                 <div className="flex items-center justify-center mb-6">
                                     <Swords className="w-16 h-16 text-purple-300 animate-pulse mr-4" />
-                                    <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold">
+                                    <h1 className="font-jersey text-6xl md:text-8xl lg:text-[10rem] ">
                                         <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent animate-pulse">
                                             { name }
                                         </span>
@@ -299,7 +299,7 @@ export default function Welcome() {
                                     <ShieldPlus className="w-16 h-16 text-indigo-300 animate-pulse ml-4" />
                                 </div>
                                 
-                                <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">
+                                <h2 className="text-4xl font-jersey md:text-8xl font-extralight text-white mb-4">
                                     Aventuras{' '}
                                     <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                                         Matemáticas
