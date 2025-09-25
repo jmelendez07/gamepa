@@ -13,7 +13,7 @@ import { Stage } from '@/types/planet';
 import { router, usePage } from '@inertiajs/react';
 import type { Page as InertiaPage } from '@inertiajs/core'; // was Page as InertiaPageProps
 import { extend } from '@pixi/react';
-import { Assets, Container, Sprite, Texture } from 'pixi.js';
+import { Assets, Container, Sprite, TextStyle, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { usePortalInteraction } from '@/components/Hero/usePortalInteraction';
 import { PortalUI } from '@/components/stages/portalUI';
@@ -30,6 +30,22 @@ interface IMainContainerProps {
 
 const bgAsset = '/assets/bg-galaxy.png';
 const portalAsset = '/assets/portal.png';
+
+const levelStyle = new TextStyle({
+    fontFamily: 'Jersey 10, Arial, sans-serif',
+    fontSize: 50,
+    fontWeight: '200',
+    fill: '#ffffff',
+    align: 'center',
+});
+
+const xpStyle = new TextStyle({
+    fontFamily: 'Jersey 10, Arial, sans-serif',
+    fontSize: 50,
+    fontWeight: '200',
+    fill: '#ffffff',
+    align: 'center',
+});
 
 export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
@@ -50,7 +66,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
 
     const portalPosition = { x: 480, y: 192 };
 
-    const { nearPortal, showPortalGraphic } = usePortalInteraction({
+    const { nearPortal, showPortalGraphic, nextStage } = usePortalInteraction({
         heroPosition: {
             x: position.current.x,
             y: position.current.y,
@@ -168,13 +184,11 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                     onSuccess: (page: InertiaPage) => {
                         const updatedUser = page.props.auth.user;
                         if (updatedUser?.profile) {
-                            console.log('Updated Profile from server:', updatedUser);
                             setUserProfile(updatedUser.profile);
                             setCurrentUserXp(updatedUser.profile.total_xp);
                         }
                     },
                     onError: (errors) => {
-                        console.error('Error updating user profile level:', errors);
                         setCurrentUserXp(currentUserXp);
                     },
                     preserveState: true,
@@ -250,11 +264,12 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                         x={portalPosition.x - 60}
                         y={portalPosition.y - 30}
                         style={{
-                            fontSize: 16,
+                            fontSize: 20,
                             fill: 0xffffff,
-                            fontFamily: 'Arial',
+                            fontFamily: 'Jersey 10, Arial, sans-serif',
                             stroke: 0x000000,
                         }}
+                        resolution={3}
                     />
                 )}
             </Camera>
@@ -273,17 +288,17 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                 <>
                     <pixiText
                         text={'Nivel: ' + (getCurrentLevel()?.order || 1)}
-                        x={10}
+                        x={20}
                         y={10}
                         zIndex={100}
-                        style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                        style={levelStyle}
                     />
                     <pixiText
                         text={'XP: ' + currentUserXp}
-                        x={125}
+                        x={180}
                         y={10}
                         zIndex={100}
-                        style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                        style={xpStyle}
                     />
                 </>
             )}
@@ -292,6 +307,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                 isVisible={showPortalGraphic && enemies.length <= 0}
                 title="¡Portal Activado!"
                 subtitle="Preparándote para el siguiente nivel..." 
+                nextStage={nextStage}
             />
         </pixiContainer>
     );

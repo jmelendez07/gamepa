@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { checkProximity } from '../helpers/common';
 import { IPosition } from '../types/common';
+import { router } from '@inertiajs/react';
+import { Stage } from '@/types/planet';
+import type { Page as InertiaPage } from '@inertiajs/core';
 
 interface UsePortalInteractionProps {
     heroPosition: IPosition;
@@ -12,8 +15,8 @@ interface UsePortalInteractionProps {
 export const usePortalInteraction = ({ heroPosition, portalPosition, enemiesCount, inCombat }: UsePortalInteractionProps) => {
     const [showPortalGraphic, setShowPortalGraphic] = useState(false);
     const [nearPortal, setNearPortal] = useState(false);
+    const [nextStage, setNextStage] = useState<Stage | null>(null);
 
-    // Verificar proximidad al portal
     const checkPortalProximity = useCallback(() => {
         if (enemiesCount < 0 || inCombat) {
             setNearPortal(false);
@@ -24,13 +27,10 @@ export const usePortalInteraction = ({ heroPosition, portalPosition, enemiesCoun
         setNearPortal(isNear);
     }, [heroPosition, portalPosition, enemiesCount, inCombat]);
 
-    // Activar portal
     const activatePortal = useCallback(() => {
         setShowPortalGraphic(true);
-        console.log('Portal activado!');
     }, []);
 
-    // Manejar interacción con tecla F
     const handlePortalInteraction = useCallback(
         (e: KeyboardEvent) => {
             if (e.code === 'KeyF' && nearPortal && !inCombat) {
@@ -51,8 +51,20 @@ export const usePortalInteraction = ({ heroPosition, portalPosition, enemiesCoun
         };
     }, [handlePortalInteraction]);
 
+    useEffect(() => {
+        if (enemiesCount === 0) {
+            router.post(route('gameplay.next-stage'), {}, {
+                onSuccess: (response) => {
+                    console.log(response.props);
+                    setNextStage(response.props.next_stage);
+                },
+            });
+        }
+    }, [enemiesCount]);
+
     return {
         nearPortal,
         showPortalGraphic,
+        nextStage
     };
 };
