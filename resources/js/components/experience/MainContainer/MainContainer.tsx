@@ -23,8 +23,8 @@ extend({ Container, Sprite });
 interface IMainContainerProps {
     canvasSize: { width: number; height: number };
     defaultEnemies: IEnemy[];
+    heroes: IHero[];
     cards: Card[];
-    hero: IHero;
     stage: Stage;
 }
 
@@ -47,16 +47,18 @@ const xpStyle = new TextStyle({
     align: 'center',
 });
 
-export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, children }: PropsWithChildren<IMainContainerProps>) => {
+export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
     const [portalTexture, setPortalTexture] = useState<Texture | null>(null);
-    const [heroTexture, setHeroTexture] = useState<Texture | null>(null);
+    const [heroTextures, setHeroTextures] = useState<Texture[]>([]);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [inCombat, setInCombat] = useState(false);
     const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
     const [totalXpGained, setTotalXpGained] = useState(0);
+    const [teamHeroes, setTeamHeroes] = useState<IHero[]>(heroes.length > 0 ? heroes : []);
+    const [heroOnTheField, setHeroOnTheField] = useState<IHero>(teamHeroes[1] ?? null);
 
     // Agregar estado local para el perfil del usuario
     const { auth } = usePage<SharedData>().props;
@@ -125,9 +127,12 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
             }
         });
 
-        Assets.load<Texture>(hero.spritesheet).then((tex) => {
+        // Cargar todas las texturas de héroes
+        const heroTexturePromises = heroes.map(hero => Assets.load<Texture>(hero.spritesheet));
+        
+        Promise.all(heroTexturePromises).then((textures) => {
             if (!cancelled) {
-                setHeroTexture(tex);
+                setHeroTextures(textures);
             }
         });
 
@@ -244,6 +249,11 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
         checkCombatArea();
     }, [checkCombatArea]);
 
+    // Obtener la textura del héroe actual
+    const currentHeroTexture = heroOnTheField && heroTextures.length > 0 
+        ? heroTextures[teamHeroes.findIndex(hero => hero.id === heroOnTheField.id)] 
+        : null;
+
     return (
         <pixiContainer>
             <GameplayMenu canvasSize={canvasSize} />
@@ -257,7 +267,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                 {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
-                {heroTexture && <Hero position={position} texture={heroTexture} onMove={updateHeroPosition} />}
+                {currentHeroTexture && <Hero position={position} texture={currentHeroTexture} onMove={updateHeroPosition} />}
                 {nearPortal && !inCombat && (
                     <pixiText
                         text="Presiona F para continuar"
@@ -273,10 +283,10 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                     />
                 )}
             </Camera>
-            {inCombat && heroTexture && (
+            {inCombat && currentHeroTexture && (
                 <Combat
-                    hero={hero}
-                    heroTexture={heroTexture}
+                    hero={heroOnTheField}
+                    heroTexture={currentHeroTexture}
                     cards={cards}
                     enemies={selectedEnemies}
                     onSetSelectedEnemies={onSetSelectedEnemies}

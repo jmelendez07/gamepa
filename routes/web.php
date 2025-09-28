@@ -27,10 +27,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('heroes/seleccionar', [HeroController::class, 'select'])->name('heroes.select');
 
         Route::middleware(['check_user_hero'])->group(function () {
-            Route::resource('gameplay', GameplayController::class)->names('gameplay');
+            // Rutas específicas primero
             Route::get('gameplay/galaxia/{galaxyId}', [GameplayController::class, 'galaxy'])->name('gameplay.galaxy');
             Route::get('gameplay/lugar/{stageId}', [GameplayController::class, 'stage'])->name('gameplay.stage');
             Route::post('gameplay/next-stage', [GameplayController::class, 'nextStage'])->name('gameplay.next-stage');
+            
+            // Resource route después (para evitar conflictos)
+            Route::resource('gameplay', GameplayController::class)->names('gameplay')->except(['show']);
         });
     });
 

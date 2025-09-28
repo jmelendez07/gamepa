@@ -14,7 +14,7 @@ class HeroSeeder extends Seeder
     {
         $heroes = [
             ['name' => 'Warrior', 'spritesheet' => asset('assets/default_heroes/hero-1.png'), 'health' => 150],
-            // ['name' => 'Mage', 'spritesheet' => asset('assets/default_heroes/hero-2.png'), 'health' => 100],
+            ['name' => 'Ninja', 'spritesheet' => asset('assets/default_heroes/hero-4.png'), 'health' => 100],
             // ['name' => 'Rogue', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 120],
             // ['name' => 'Paladin', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 180],
             // ['name' => 'Ranger', 'spritesheet' => asset('assets/default_heroes/hero-3.png'), 'health' => 130],
@@ -31,6 +31,19 @@ class HeroSeeder extends Seeder
             Card::factory()->create([
                 'hero_id' => $warrior->id,
                 'spritesheet' => asset('assets/cards/hero-1/card-hero-1.png'),
+                'energy_cost' => rand(1, 2),
+                'stats' => rand(10, 20),
+                'type_card_id' => $types->id,
+            ]);
+        }
+
+        $ninja = Hero::where('name', 'Ninja')->first();
+        $ninjaCards = 8;
+        $types = TypeCard::where('name', 'Ataque')->first();
+        for ($i = 0; $i < $ninjaCards; $i++) {
+            Card::factory()->create([
+                'hero_id' => $ninja->id,
+                'spritesheet' => asset('assets/cards/hero-4/card-hero-4.png'),
                 'energy_cost' => rand(1, 2),
                 'stats' => rand(10, 20),
                 'type_card_id' => $types->id,
