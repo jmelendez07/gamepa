@@ -1,0 +1,5 @@
+[build]
+builder = "railpack"
+
+[build.env]
+NIXPACKS_PHP_EXTENSIONS = "mongodb"
