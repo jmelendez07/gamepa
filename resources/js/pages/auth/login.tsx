@@ -99,10 +99,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <div className="text-center mb-8">
                             <Link href={route('home')} className="flex items-center justify-center mb-4">
                                 <Swords className="w-12 h-12 text-purple-300 mr-3 animate-pulse" />
-                                <h1 className="text-4xl font-bold text-white">{name}</h1>
+                                <h1 className="text-4xl font-jersey md:text-5xl text-white">{name}</h1>
                                 <ShieldPlus className="w-12 h-12 text-purple-300 ml-3 animate-pulse" />
                             </Link>
-                            <h2 className="text-2xl font-semibold text-purple-200 mb-2">Bienvenido, Héroe</h2>
+                            <h2 className="text-2xl font-jersey md:text-3xl text-purple-200 mb-2">Bienvenido, Héroe</h2>
                             <p className="text-purple-300">Ingresa a tu reino épico</p>
                         </div>
 
@@ -188,7 +188,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 {/* Botón de Login épico */}
                                 <Button 
                                     type="submit" 
-                                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 cursor-pointer h-12" 
+                                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-jersey md:text-2xl py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 cursor-pointer h-12" 
                                     tabIndex={4} 
                                     disabled={processing}
                                 >

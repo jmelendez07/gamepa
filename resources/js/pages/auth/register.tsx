@@ -98,10 +98,10 @@ export default function Register() {
                         <div className="text-center mb-8">
                             <Link href={route('home')} className="flex items-center justify-center mb-4">
                                 <Shield className="w-12 h-12 text-indigo-300 mr-3 animate-pulse" />
-                                <h1 className="text-4xl font-bold text-white">{name}</h1>
+                                <h1 className="text-4xl font-jersey md:text-5xl text-white">{name}</h1>
                                 <Sword className="w-12 h-12 text-purple-300 ml-3 animate-pulse" />
                             </Link>
-                            <h2 className="text-2xl font-semibold text-indigo-200 mb-2">Forja tu Leyenda</h2>
+                            <h2 className="text-2xl font-jersey text-indigo-200 mb-2">Forja tu Leyenda</h2>
                             <p className="text-purple-300">Crea tu cuenta y únete a la aventura épica</p>
                         </div>
 
@@ -218,7 +218,7 @@ export default function Register() {
                                 {/* Botón de Registro épico */}
                                 <Button 
                                     type="submit" 
-                                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/25 cursor-pointer h-12" 
+                                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-jersey py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/25 cursor-pointer h-12" 
                                     tabIndex={5} 
                                     disabled={processing}
                                 >
@@ -228,7 +228,7 @@ export default function Register() {
                                             <span>Forjando tu cuenta...</span>
                                         </div>
                                     ) : (
-                                        <div className="flex items-center justify-center space-x-2">
+                                        <div className="flex font-jersey md:text-2xl items-center justify-center space-x-2">
                                             <Crown className="w-5 h-5" />
                                             <span>Crear mi Leyenda</span>
                                         </div>

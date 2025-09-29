@@ -42,10 +42,12 @@ class GameplayController extends Controller
     public function galaxy($galaxyId)
     {
         $galaxy = Galaxy::with(['planets.stages'])->findOrFail($galaxyId);
+        $profile = Auth::user()->profile;
         
         return Inertia::render('gameplay/galaxies/show', [
             'galaxy' => $galaxy,
-            'unlocked_planets' => Auth::user()->profile->unlockedPlanets
+            'unlocked_planets' => $profile->unlockedPlanets,
+            'unlocked_stages' => $profile->unlockedStages,
         ]);
     }
 
@@ -91,6 +93,27 @@ class GameplayController extends Controller
         return Inertia::render('gameplay/stages/test', [
             'stage' => $stage
         ]);
+    }
+    
+    public function nextStage()
+    {
+        $profile = Auth::user()->profile;
+        $currentStage = $profile->unlockedStages()->orderByDesc('number')->firstOrFail();
+        $nextStage = Stage::where('number', '>', $currentStage->number)
+            ->orderBy('number', 'asc')
+            ->first();
+
+        if ($nextStage) {
+            $profile->unlockedStages()->attach($nextStage->id);
+            if ($currentStage->planet_id !== $nextStage->planet_id) {
+                $profile->unlockedPlanets()->attach($nextStage->planet_id);
+            }
+        }
+        
+        return back()->with([
+            'success' => true,
+            'next_stage' => $nextStage
+        ], 200);
     }
 
     public function randomExercise($difficultyId)

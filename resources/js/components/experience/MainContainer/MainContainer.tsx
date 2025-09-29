@@ -13,8 +13,10 @@ import { Stage } from '@/types/planet';
 import { router, usePage } from '@inertiajs/react';
 import type { Page as InertiaPage } from '@inertiajs/core'; // was Page as InertiaPageProps
 import { extend } from '@pixi/react';
-import { Assets, Container, Sprite, Texture } from 'pixi.js';
+import { Assets, Container, Sprite, TextStyle, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
+import { usePortalInteraction } from '@/components/Hero/usePortalInteraction';
+import { PortalUI } from '@/components/stages/portalUI';
 
 extend({ Container, Sprite });
 
@@ -27,11 +29,29 @@ interface IMainContainerProps {
 }
 
 const bgAsset = '/assets/bg-galaxy.png';
+const portalAsset = '/assets/portal.png';
+
+const levelStyle = new TextStyle({
+    fontFamily: 'Jersey 10, Arial, sans-serif',
+    fontSize: 50,
+    fontWeight: '200',
+    fill: '#ffffff',
+    align: 'center',
+});
+
+const xpStyle = new TextStyle({
+    fontFamily: 'Jersey 10, Arial, sans-serif',
+    fontSize: 50,
+    fontWeight: '200',
+    fill: '#ffffff',
+    align: 'center',
+});
 
 export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
+    const [portalTexture, setPortalTexture] = useState<Texture | null>(null);
     const [heroTexture, setHeroTexture] = useState<Texture | null>(null);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [inCombat, setInCombat] = useState(false);
@@ -44,6 +64,17 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
     const [userProfile, setUserProfile] = useState<UserProfile | undefined>(auth.user?.profile ?? undefined);
     const [currentUserXp, setCurrentUserXp] = useState<number>(auth.user?.profile?.total_xp ?? 0);
 
+    const portalPosition = { x: 480, y: 192 };
+
+    const { nearPortal, showPortalGraphic, nextStage } = usePortalInteraction({
+        heroPosition: {
+            x: position.current.x,
+            y: position.current.y,
+        },
+        portalPosition,
+        enemiesCount: enemies.length,
+        inCombat,
+    });
 
     const updateHeroPosition = useCallback((x: number, y: number) => {
         setHeroPosition({ x: Math.floor(x / TILE_SIZE), y: Math.floor(y / TILE_SIZE) });
@@ -100,6 +131,12 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
             }
         });
 
+        Assets.load<Texture>(portalAsset).then((tex) => {
+            if (!cancelled) {
+                setPortalTexture(tex);
+            }
+        });
+
         return () => {
             cancelled = true;
         };
@@ -147,13 +184,11 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                     onSuccess: (page: InertiaPage) => {
                         const updatedUser = page.props.auth.user;
                         if (updatedUser?.profile) {
-                            console.log('Updated Profile from server:', updatedUser);
-                            setUserProfile(updatedUser.profile); // <- perfil, no user
+                            setUserProfile(updatedUser.profile);
                             setCurrentUserXp(updatedUser.profile.total_xp);
                         }
                     },
                     onError: (errors) => {
-                        console.error('Error updating user profile level:', errors);
                         setCurrentUserXp(currentUserXp);
                     },
                     preserveState: true,
@@ -216,10 +251,27 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
             {children}
             <Camera canvasSize={canvasSize} heroPosition={heroPosition}>
                 <StageGame stage={stage} />
+                {portalTexture && enemies.length <= 0 && (
+                    <pixiSprite texture={portalTexture} x={portalPosition.x} y={portalPosition.y} width={45} height={45} />
+                )}
                 {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
                 {heroTexture && <Hero position={position} texture={heroTexture} onMove={updateHeroPosition} />}
+                {nearPortal && !inCombat && (
+                    <pixiText
+                        text="Presiona F para continuar"
+                        x={portalPosition.x - 60}
+                        y={portalPosition.y - 30}
+                        style={{
+                            fontSize: 20,
+                            fill: 0xffffff,
+                            fontFamily: 'Jersey 10, Arial, sans-serif',
+                            stroke: 0x000000,
+                        }}
+                        resolution={3}
+                    />
+                )}
             </Camera>
             {inCombat && heroTexture && (
                 <Combat
@@ -236,20 +288,27 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, hero, stage, 
                 <>
                     <pixiText
                         text={'Nivel: ' + (getCurrentLevel()?.order || 1)}
-                        x={10}
+                        x={20}
                         y={10}
                         zIndex={100}
-                        style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                        style={levelStyle}
                     />
                     <pixiText
                         text={'XP: ' + currentUserXp}
-                        x={125}
+                        x={180}
                         y={10}
                         zIndex={100}
-                        style={{ fontSize: 24, fill: 0xffffff, fontFamily: 'Arial' }}
+                        style={xpStyle}
                     />
                 </>
             )}
+            <PortalUI 
+                canvasSize={canvasSize} 
+                isVisible={showPortalGraphic && enemies.length <= 0}
+                title="¡Portal Activado!"
+                subtitle="Preparándote para el siguiente nivel..." 
+                nextStage={nextStage}
+            />
         </pixiContainer>
     );
 };

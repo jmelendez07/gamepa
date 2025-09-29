@@ -4,7 +4,7 @@ import { Application, extend } from '@pixi/react';
 import { calculateCanvasSize } from '@/components/helpers/common';
 import { Container, Sprite, Text, Graphics, TextStyle, Assets, Texture } from 'pixi.js';
 import Planet from '@/components/gameplay/galaxies/planet';
-import IPlanet from '@/types/planet';
+import IPlanet, { Stage as IStage } from '@/types/planet';
 import Stage from '@/components/gameplay/planets/stage';
 
 extend({ Container, Sprite, Text, Graphics });
@@ -12,6 +12,7 @@ extend({ Container, Sprite, Text, Graphics });
 interface IGalaxiesShowProps {
     galaxy: Galaxy;
     unlocked_planets: IPlanet[];
+    unlocked_stages: IStage[];
 }
 
 const planetPositions = [
@@ -67,7 +68,8 @@ const exitStyle = new TextStyle({
     align: 'center',
 });
 
-export default function GalaxiesShow({ galaxy, unlocked_planets }: IGalaxiesShowProps) {
+export default function GalaxiesShow({ galaxy, unlocked_planets, unlocked_stages }: IGalaxiesShowProps) {
+    console.log('Unlocked stages:', unlocked_stages);
     const [isClient, setIsClient] = useState(false);
     const [canvasSize, setCanvasSize] = useState(calculateCanvasSize());
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -182,6 +184,70 @@ export default function GalaxiesShow({ galaxy, unlocked_planets }: IGalaxiesShow
         }
     }, []);
 
+    // Función para verificar si dos círculos se intersectan
+    const checkIntersection = useCallback((x1: number, y1: number, x2: number, y2: number, minDistance: number): boolean => {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < minDistance;
+    }, []);
+
+    // Función para generar posiciones sin intersección
+    const generateStagePositions = useCallback((stages: any[], targetX: number, targetY: number, radius: number) => {
+        const stageSize = 80; // Tamaño aproximado de cada stage
+        const minDistance = stageSize + 20; // Distancia mínima entre stages
+        const maxAttempts = 100; // Máximo número de intentos por posición
+        const positions: Array<{ x: number; y: number; stage: any }> = [];
+
+        stages.forEach((stage, idx) => {
+            let validPosition = false;
+            let attempts = 0;
+            let x = 0;
+            let y = 0;
+
+            while (!validPosition && attempts < maxAttempts) {
+                // Generar posición aleatoria
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * radius * 0.8;
+                x = targetX + Math.cos(angle) * distance;
+                y = targetY + Math.sin(angle) * distance;
+
+                // Verificar que no se intersecte con posiciones existentes
+                validPosition = true;
+                for (const existingPos of positions) {
+                    if (checkIntersection(x, y, existingPos.x, existingPos.y, minDistance)) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+
+                attempts++;
+            }
+
+            // Si no se encontró una posición válida después de muchos intentos,
+            // usar distribución en círculo
+            if (!validPosition) {
+                const angleStep = (2 * Math.PI) / stages.length;
+                const fixedAngle = idx * angleStep;
+                const fixedDistance = radius * 0.6;
+                x = targetX + Math.cos(fixedAngle) * fixedDistance;
+                y = targetY + Math.sin(fixedAngle) * fixedDistance;
+            }
+
+            positions.push({ x, y, stage });
+        });
+
+        return positions;
+    }, [checkIntersection]);
+
+    // Agregar las conexiones para los stages
+    const stageConnections = [
+        { from: 0, to: 1 },
+        { from: 1, to: 2 },
+        { from: 2, to: 3 },
+        // Agregar más conexiones según necesites
+    ];
+
     return (
         <>
             {(isClient && appReady) && (
@@ -252,7 +318,7 @@ export default function GalaxiesShow({ galaxy, unlocked_planets }: IGalaxiesShow
                                             x={x}
                                             y={y}
                                             planetTextures={planetTextures}
-                                            locked={unlocked_planets.some(up => up.id !== planet.id)}
+                                            locked={!unlocked_planets.some(up => up.id === planet.id)}
                                         />
                                     );
                                 })}
@@ -270,14 +336,8 @@ export default function GalaxiesShow({ galaxy, unlocked_planets }: IGalaxiesShow
                             const initialY = initialPos.y * canvasSize.height;
 
                             const radius = (texture.height * expandedScale) / 2 - 80;
-                            const stagePositions = selectedPlanet.stages.map((stage, idx) => {
-                                const angle = Math.random() * Math.PI * 2;
-                                return {
-                                    x: targetX + Math.cos(angle) * (Math.random() * radius * 0.8),
-                                    y: targetY + Math.sin(angle) * (Math.random() * radius * 0.8),
-                                    stage
-                                };
-                            });
+                            const stagePositions = generateStagePositions(selectedPlanet.stages, targetX, targetY, radius);
+                            const sortedStages = [...selectedPlanet.stages].sort((a, b) => a.number - b.number);
 
                             return (
                                 <>
@@ -302,9 +362,42 @@ export default function GalaxiesShow({ galaxy, unlocked_planets }: IGalaxiesShow
                                                 y={60}
                                                 anchor={0.5}
                                             />
+
+                                            {/* Conexiones entre stages */}
+                                            {stageConnections.map((connection, index) => {
+                                                if (connection.from >= stagePositions.length || connection.to >= stagePositions.length) return null;
+                                                
+                                                const fromStage = stagePositions[connection.from];
+                                                const toStage = stagePositions[connection.to];
+                                                
+                                                if (!fromStage || !toStage) return null;
+                                                
+                                                return (
+                                                    <pixiGraphics
+                                                        key={`stage-connection-${index}`}
+                                                        draw={(g: Graphics) => drawDashedLine(
+                                                            g,
+                                                            fromStage.x,
+                                                            fromStage.y,
+                                                            toStage.x,
+                                                            toStage.y
+                                                        )}
+                                                    />
+                                                );
+                                            })}
+
+                                            {/* Renderizar stages */}
                                             {stagePositions.map(({ x, y, stage }) => (
-                                                <Stage key={stage.id} stage={stage} x={x} y={y} stageTextures={stageTextures} />
+                                                <Stage 
+                                                    locked={!unlocked_stages.some(us => us.id === stage.id)} 
+                                                    key={stage.id} 
+                                                    stage={stage} 
+                                                    x={x} 
+                                                    y={y} 
+                                                    stageTextures={stageTextures} 
+                                                />
                                             ))}
+
                                             <pixiText 
                                                 text={selectedPlanet.description}
                                                 style={planetDescriptionStyle}

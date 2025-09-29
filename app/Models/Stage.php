@@ -27,4 +27,9 @@ class Stage extends Model
     {
         return $this->hasMany(StageVectorPoint::class)->orderBy('number');
     }
+    
+    public function profiles()
+    {
+        return $this->belongsToMany(Profile::class);
+    }
 }

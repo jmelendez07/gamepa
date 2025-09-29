@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('gameplay', GameplayController::class)->names('gameplay');
             Route::get('gameplay/galaxia/{galaxyId}', [GameplayController::class, 'galaxy'])->name('gameplay.galaxy');
             Route::get('gameplay/lugar/{stageId}', [GameplayController::class, 'stage'])->name('gameplay.stage');
+            Route::post('gameplay/next-stage', [GameplayController::class, 'nextStage'])->name('gameplay.next-stage');
         });
     });
 

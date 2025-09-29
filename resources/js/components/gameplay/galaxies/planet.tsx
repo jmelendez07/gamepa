@@ -113,7 +113,6 @@ export default function Planet({
                 const texWidth = texture.width;
                 const texHeight = texture.height;
 
-                // Filtro escala de grises si está bloqueado
                 const filters = locked
                     ? [(() => { 
                         const f = new ColorMatrixFilter(); 

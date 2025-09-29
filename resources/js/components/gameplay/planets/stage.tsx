@@ -2,15 +2,17 @@ import { Stage as IStage } from "@/types/planet";
 import { router } from "@inertiajs/react";
 import { Graphics, Texture } from "pixi.js";
 import { useCallback, useEffect, useRef } from "react";
+import { ColorMatrixFilter } from "pixi.js";
 
 interface IStageProps {
     stage: IStage;
     x: number;
     y: number;
     stageTextures: { [key: string]: Texture };
+    locked?: boolean;
 }
 
-export default function Stage({ stage, x, y, stageTextures }: IStageProps) {
+export default function Stage({ stage, x, y, stageTextures, locked = false }: IStageProps) {
     const maskRef = useRef<Graphics>(null);
     const spriteRef = useRef<any>(null);
 
@@ -24,16 +26,32 @@ export default function Stage({ stage, x, y, stageTextures }: IStageProps) {
         router.visit(route('gameplay.stage', { stageId: stage.id }));
     }, [stage.id]);
 
+    const filters = locked
+        ? [(() => { 
+            const f = new ColorMatrixFilter(); 
+            f.greyscale(0.3, false); 
+            return f; 
+        })()]
+        : undefined;
+
     return (
-        <pixiContainer interactive={true} onClick={handleClick} cursor="pointer" key={stage.id} x={x} y={y}>
-            <pixiGraphics
-                draw={g => {
-                    g.clear();
-                    g.beginFill(0x8b5cf6);
-                    g.drawCircle(0, 0, 55);
-                    g.endFill();
-                }}
-            />
+        <pixiContainer 
+            x={x} 
+            y={y}
+            interactive={!locked} 
+            onClick={() => !locked && handleClick()} 
+            cursor={!locked ? 'pointer' : undefined}
+        >
+            {!locked && (
+                <pixiGraphics
+                    draw={g => {
+                        g.clear();
+                        g.beginFill(0x8b5cf6);
+                        g.drawCircle(0, 0, 55);
+                        g.endFill();
+                    }}
+                />
+            )}
             <pixiGraphics
                 ref={maskRef}
                 draw={g => {
@@ -52,6 +70,7 @@ export default function Stage({ stage, x, y, stageTextures }: IStageProps) {
                     height={100}
                     x={0}
                     y={0}
+                    filters={filters}
                 />
             )}
         </pixiContainer>

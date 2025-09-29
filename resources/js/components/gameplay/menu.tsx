@@ -125,6 +125,7 @@ export default function GameplayMenu({ canvasSize }: GameplayMenuProps) {
                             anchor={0.5}
                             x={-135}
                             y={-110}
+                            resolution={2}
                         />
 
                         <pixiContainer y={-70}>
@@ -148,6 +149,7 @@ export default function GameplayMenu({ canvasSize }: GameplayMenuProps) {
                                     anchor={0.5}
                                     x={0}
                                     y={0}
+                                    resolution={2}
                                 />
                             </pixiContainer>
                             <pixiContainer
@@ -170,6 +172,7 @@ export default function GameplayMenu({ canvasSize }: GameplayMenuProps) {
                                     anchor={0.5}
                                     x={0}
                                     y={0}
+                                    resolution={2}
                                 />
                             </pixiContainer>
                         </pixiContainer>
@@ -187,6 +190,7 @@ export default function GameplayMenu({ canvasSize }: GameplayMenuProps) {
                                 anchor={0.5}
                                 x={0}
                                 y={0}
+                                resolution={2}
                             />
                         </pixiContainer>
                     </pixiContainer>
