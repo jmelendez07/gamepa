@@ -1,5 +1,0 @@
-[build]
-builder = "railpack"
-
-[build.env]
-RAILPACK_PHP_EXTENSIONS = "mongodb"
