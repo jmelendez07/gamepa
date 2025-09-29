@@ -14,11 +14,17 @@ class Stage extends Model
         'number',
         'planet_id',
         'image_url',
-        'image_public_id'
+        'image_public_id',
+        ''
     ];
 
     public function planet()
     {
         return $this->belongsTo(Planet::class);
+    }
+
+    public function points()
+    {
+        return $this->hasMany(StageVectorPoint::class)->orderBy('number');
     }
 }
