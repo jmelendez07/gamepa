@@ -47,8 +47,12 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
         }
     };
 
-    const createSprite = (row: number, column: number) => {
-        const frame = new Rectangle(column * frameWidth, row * frameHeight, frameWidth, frameHeight);
+    const createSprite = (row: number, column: number, isAttacking: boolean) => {
+        // Para ataques, ajustar la posición X y el ancho del frame
+        const frameX = isAttacking ? column * frameWidth * 2 : column * frameWidth;
+
+        const frame = new Rectangle(frameX, row * frameHeight, frameWidth, frameHeight);
+
         const frameTexture = new Texture({
             source: texture.source,
             frame: frame,
@@ -81,7 +85,7 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
             }
         }
 
-        const newSprite = createSprite(row, column);
+        const newSprite = createSprite(row, column, false);
         setSprite(newSprite);
     };
 
@@ -105,19 +109,18 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
             // Si el siguiente paso se sale del total, no avanzamos y marcamos fin
             if (next >= totalFrames) {
                 // Dibuja el último frame válido (frameRef.current) y termina
-                const lastSprite = createSprite(row, frameRef.current);
+                const lastSprite = createSprite(row, frameRef.current, true);
                 setSprite(lastSprite);
                 return false; // ← animación terminada
             }
 
-            console.log('next attack frame:', next);
-
             // Aún hay frames por reproducir: avanzamos
             frameRef.current = next;
             column = frameRef.current;
+            console.log('Advancing to attack frame:', column);
         }
 
-        const newSprite = createSprite(row, column);
+        const newSprite = createSprite(row, column, true);
         setSprite(newSprite);
         return true;
     };

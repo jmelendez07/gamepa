@@ -1,4 +1,5 @@
 import Exercise from "./exercise";
+import Hero from "./hero";
 
 export default interface Card {
     id: string;
@@ -9,6 +10,7 @@ export default interface Card {
     exercise: Exercise;
     spritesheet: string;
     created_at: string;
+    hero_id: Hero['id'];
 }
 
 export interface TypeCard {

@@ -79,6 +79,8 @@ class GameplayController extends Controller
                 $cards[] = $card;
             }
         }
+
+        shuffle($cards);
         
         return Inertia::render('gameplay/stages/show', [
             'stage' => $stage,

@@ -254,6 +254,17 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         ? heroTextures[teamHeroes.findIndex(hero => hero.id === heroOnTheField.id)] 
         : null;
 
+
+    const changeHeroOnTheField = useCallback(
+        (heroIndex: number) => {
+            // Solo cambiar si no está en combate y el índice es válido
+            if (!inCombat && teamHeroes[heroIndex]) {
+                setHeroOnTheField(teamHeroes[heroIndex]);
+            }
+        },
+        [inCombat, teamHeroes],
+    );
+
     return (
         <pixiContainer>
             <GameplayMenu canvasSize={canvasSize} />
@@ -267,8 +278,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
-                {currentHeroTexture && <Hero position={position} texture={currentHeroTexture} onMove={updateHeroPosition} />}
-                {nearPortal && !inCombat && (
+                {currentHeroTexture && <Hero position={position} texture={currentHeroTexture} onMove={updateHeroPosition} onHeroChange={changeHeroOnTheField} />}
+                {nearPortal && !inCombat && enemies.length <= 0 && (
                     <pixiText
                         text="Presiona F para continuar"
                         x={portalPosition.x - 60}
@@ -285,8 +296,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
             </Camera>
             {inCombat && currentHeroTexture && (
                 <Combat
-                    hero={heroOnTheField}
-                    heroTexture={currentHeroTexture}
+                    team={teamHeroes}
+                    teamTextures={heroTextures}
                     cards={cards}
                     enemies={selectedEnemies}
                     onSetSelectedEnemies={onSetSelectedEnemies}

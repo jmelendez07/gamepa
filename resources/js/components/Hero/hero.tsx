@@ -6,6 +6,7 @@ import { useHeroControls } from './useHeroControls';
 import { Direction, IPosition } from '../types/common';
 import { calculateNewTarget, checkCanMove, handleMovement } from '../helpers/common';
 import { useHeroAnimation } from './useHeroAnimation';
+import { on } from 'events';
 
 extend({ Container, Sprite });
 
@@ -13,9 +14,10 @@ interface IHeroProps {
     texture: Texture;
     position: RefObject<{ x: number; y: number }>;
     onMove: (gridX: number, gridY: number) => void;
+    onHeroChange?: (heroIndex: number) => void;
 }
 
-export const Hero = ({ texture, position, onMove }: IHeroProps) => {
+export const Hero = ({ texture, position, onMove, onHeroChange }: IHeroProps) => {
     const targetPosition = useRef<IPosition>(null);
     const currentDirection = useRef<Direction>(null);
     const { sprite, updateSprite } = useHeroAnimation({
@@ -26,7 +28,7 @@ export const Hero = ({ texture, position, onMove }: IHeroProps) => {
         animationSpeed: ANIMATION_SPEED
     });
 
-    const {getControlsDirection} = useHeroControls();
+    const {getControlsDirection} = useHeroControls(onHeroChange);
 
     const direction = getControlsDirection();
     const isMoving = useRef(false);
