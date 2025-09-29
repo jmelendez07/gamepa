@@ -19,4 +19,14 @@ export interface Stage {
     galaxy_id?: string;
     image_url: string;
     image_public_id: string;
+    planet: Planet;
+    points: StagePoints[];
+}
+
+export interface StagePoints {
+    id: string;
+    stage_id: string;
+    number: number;
+    x: number;
+    y: number;
 }

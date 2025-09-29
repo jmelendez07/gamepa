@@ -30,6 +30,10 @@ export interface SharedData {
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
     updatedProfile?: UserProfile;
+    flash?: {
+        success?: string;
+        error?: string;
+    }
     [key: string]: unknown;
 }
 
@@ -94,7 +98,8 @@ export interface IOptions {
     isCorrect: boolean;
 }
 
-// Instead, augment Inertia's PageProps with your SharedData:
+export interface PageProps extends SharedData {}
+
 declare module '@inertiajs/core' {
     interface PageProps extends SharedData {}
 }

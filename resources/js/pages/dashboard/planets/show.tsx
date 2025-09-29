@@ -167,6 +167,11 @@ export default function PlanetsShow({ planet }: IPlanetsShowProps) {
                                             className="group relative pb-0 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border-0"
                                         >
                                             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+                                                <Link href={route('stages.show', stage.id)} className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                                                    <span className="text-white text-xl font-bold bg-purple-700/80 px-6 py-2 rounded-full shadow-lg">
+                                                        Abrir
+                                                    </span>
+                                                </Link>
                                                 {stage.image_url ? (
                                                     <img
                                                         src={stage.image_url}
@@ -203,7 +208,7 @@ export default function PlanetsShow({ planet }: IPlanetsShowProps) {
                                                                     e.stopPropagation();
                                                                     handleEditStage(stage);
                                                                 }}
-                                                                className="cursor-pointer size-8 bg-white/20 hover:bg-white/30 hover:text-white text-white border-white/30 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                                                                className="cursor-pointer z-30 size-8 bg-white/20 hover:bg-white/30 hover:text-white text-white border-white/30 backdrop-blur-sm transition-all duration-200 hover:scale-105"
                                                                 variant="outline"
                                                             >
                                                                 <Edit className="w-4 h-4" />
@@ -214,7 +219,7 @@ export default function PlanetsShow({ planet }: IPlanetsShowProps) {
                                                                     e.stopPropagation();
                                                                     handleDeleteStage(stage);
                                                                 }}
-                                                                className="cursor-pointer size-8 bg-red-500/80 hover:bg-red-500 text-white transition-all duration-200 hover:scale-105"
+                                                                className="cursor-pointer z-30 size-8 bg-red-500/80 hover:bg-red-500 text-white transition-all duration-200 hover:scale-105"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </Button>

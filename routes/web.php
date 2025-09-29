@@ -14,12 +14,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\StageController;
+use App\Http\Controllers\StageVectorPointController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+Route::get('gameplay/test/{stageId}', [GameplayController::class, 'test'])->name('gameplay.test');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:estudiante'])->group(function () {
@@ -67,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('enemigos', EnemyController::class)->names('enemies');
         Route::resource('heroes', HeroController::class)->names('heroes');
         Route::resource('lugares', StageController::class)->names('stages');
+        Route::post('lugares/{stageId}/puntos-vectoriales/sync', [StageVectorPointController::class, 'syncMany'])->name('stages.points.sync-many');
     });
 });
 

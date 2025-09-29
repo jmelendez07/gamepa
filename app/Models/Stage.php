@@ -14,7 +14,8 @@ class Stage extends Model
         'number',
         'planet_id',
         'image_url',
-        'image_public_id'
+        'image_public_id',
+        ''
     ];
 
     public function planet()
@@ -22,6 +23,11 @@ class Stage extends Model
         return $this->belongsTo(Planet::class);
     }
 
+    public function points()
+    {
+        return $this->hasMany(StageVectorPoint::class)->orderBy('number');
+    }
+    
     public function profiles()
     {
         return $this->belongsToMany(Profile::class);
