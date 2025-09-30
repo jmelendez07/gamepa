@@ -40,4 +40,9 @@ class Hero extends Model
     {
         return $this->hasMany(Card::class);
     }
+
+    public function heroAnimations()
+    {
+        return $this->hasMany(HeroAnimations::class);
+    }
 }
