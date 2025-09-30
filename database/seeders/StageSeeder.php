@@ -11,6 +11,8 @@ class StageSeeder extends Seeder
 {
     public function run(): void
     {
+        Stage::truncate();
+        
         $planets = Planet::orderBy('number')->get();
         $stages = [
             [

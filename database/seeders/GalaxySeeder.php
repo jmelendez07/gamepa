@@ -10,6 +10,8 @@ class GalaxySeeder extends Seeder
 {
     public function run(): void
     {
+        Galaxy::truncate();
+        
         $galaxies = [
             [
                 'name' => 'Via Lactea',

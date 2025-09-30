@@ -10,6 +10,8 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        User::truncate();
+        
         $admin = User::factory()->create([
             'name' => 'Administrador',
             'email' => 'admin@gamepa.com',

@@ -8,20 +8,18 @@ use Illuminate\Database\Seeder;
 
 class LevelSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $xpRequired = 0;
+        Level::truncate();
 
+        $xpRequired = 0;
         for ($i = 1; $i <= 50; $i++) {
             if ($i === 1) {
-                $xpRequired = 0; // Nivel 1 no requiere XP
+                $xpRequired = 0;
             } elseif ($i === 2) {
-                $xpRequired = 40; // Nivel 2 requiere 400 XP
+                $xpRequired = 40;
             } else {
-                $xpRequired *= 2; // Los siguientes niveles duplican el XP del anterior
+                $xpRequired *= 2;
             }
 
             Level::create([
