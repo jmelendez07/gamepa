@@ -54,7 +54,7 @@ class GameplayController extends Controller
     public function stage($stageId)
     {
         $stage = Stage::findOrFail($stageId);
-        $heroes = Auth::user()->heroes()->with(['cards.type'])->get();
+        $heroes = Auth::user()->heroes()->with(['cards.type', 'heroAnimations'])->get();
         $easy = Dificulty::where('name', 'Fácil')->firstOrFail()->id;
 
         $enemies = [];

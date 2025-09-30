@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Card;
 use App\Models\Hero;
+use App\Models\HeroAnimations;
 use App\Models\TypeCard;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -37,6 +38,14 @@ class HeroSeeder extends Seeder
             ]);
         }
 
+        HeroAnimations::factory()->create([
+            'hero_id' => $warrior->id,
+            'action' => 'attack',
+            'spritesheet_url' => asset('assets/default_heroes/hero-1.png'),
+            'row' => 64,
+            'totalFrames' => 8,
+        ]);
+
         $ninja = Hero::where('name', 'Ninja')->first();
         $ninjaCards = 8;
         $types = TypeCard::where('name', 'Ataque')->first();
@@ -49,5 +58,13 @@ class HeroSeeder extends Seeder
                 'type_card_id' => $types->id,
             ]);
         }
+
+        HeroAnimations::factory()->create([
+            'hero_id' => $ninja->id,
+            'action' => 'attack',
+            'spritesheet_url' => asset('assets/default_heroes/hero-4.png'),
+            'row' => 64,
+            'totalFrames' => 6,
+        ]);
     }
 }

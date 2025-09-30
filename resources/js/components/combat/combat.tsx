@@ -100,6 +100,7 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
         frameHeight: 64,
         totalFrames: 21,
         animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[attackingHeroIndex || 0]?.hero_animations.find((anim) => anim.action === 'attack')
     });
 
     // Array de animaciones para facilitar el acceso
@@ -121,7 +122,7 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
         if (selectedCard && selectedEnemy && heroEnergy > 0) {
             setHeroEnergy((prevHeroEnergy) => prevHeroEnergy - selectedCard.energy_cost);
 
-            if(selectedCard.hero_id && team.some((hero) => hero.id === selectedCard.hero_id)){
+            if (selectedCard.hero_id && team.some((hero) => hero.id === selectedCard.hero_id)) {
                 const attackingIndex = team.findIndex((hero) => hero.id === selectedCard.hero_id);
                 if (attackingIndex !== -1) {
                     setAttackingHeroIndex(attackingIndex);
@@ -178,7 +179,7 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
         });
     };
 
-    useTick((ticker) => {
+    useTick(() => {
         if (isAttackingAnimation && attackingHeroIndex !== null) {
             const keepPlaying = attackAnimation.updateAttackSprite('RIGHT', false, false, false, true);
             if (!keepPlaying) {
@@ -261,14 +262,22 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
                 const baseY = window.innerHeight * 0.4;
                 const spacing = 120;
 
+                // Calcular el ancho del sprite
+                const isAttackSprite = isAttackingAnimation && attackingHeroIndex === index;
+                const spriteWidth = isAttackSprite ? 384 : 128;
+                const normalWidth = 128;
+
+                // Ajustar la posición X para centrar el sprite cuando se estira
+                const adjustedX = isAttackSprite ? baseX - (spriteWidth - normalWidth) / 2 : baseX;
+
                 return (
                     heroSprite && (
                         <pixiSprite
                             key={hero.id || index}
                             texture={heroSprite.texture}
-                            x={baseX}
+                            x={adjustedX} // ← Usar la posición ajustada
                             y={baseY + index * spacing}
-                            width={isAttackingAnimation && attackingHeroIndex === index ? 256 : 128}
+                            width={spriteWidth}
                             height={128}
                         />
                     )
