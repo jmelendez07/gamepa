@@ -12,6 +12,8 @@ class EnemySeeder extends Seeder
 {
     public function run(): void
     {
+        Enemy::truncate();
+        
         $types = EnemyType::all();
         $planets = Planet::all();
 
