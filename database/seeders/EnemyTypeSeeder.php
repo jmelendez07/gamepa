@@ -10,6 +10,8 @@ class EnemyTypeSeeder extends Seeder
 {
     public function run(): void
     {
+        EnemyType::truncate();
+        
         $types = ['Minion', 'Normal', 'Elite', 'Boss'];
 
         foreach ($types as $type) {

@@ -10,6 +10,8 @@ class RoomStatusSeeder extends Seeder
 {
     public function run(): void
     {
+        RoomStatus::truncate();
+        
         $statuses = ['Borrador', 'En vivo', 'Completada'];
 
         foreach($statuses as $status) {

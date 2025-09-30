@@ -11,6 +11,8 @@ class AnswerSeeder extends Seeder
 {
     public function run(): void
     {
+        Answer::truncate();
+        
         $questions = Question::all();
         $answers = [
             [

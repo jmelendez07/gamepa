@@ -12,6 +12,9 @@ class HeroSeeder extends Seeder
 {
     public function run(): void
     {
+        Hero::truncate();
+        Card::truncate();
+        
         $heroes = [
             ['name' => 'Warrior', 'spritesheet' => asset('assets/default_heroes/hero-1.png'), 'health' => 150],
             ['name' => 'Ninja', 'spritesheet' => asset('assets/default_heroes/hero-4.png'), 'health' => 100],
