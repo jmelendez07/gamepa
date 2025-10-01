@@ -6,5 +6,6 @@ export interface HeroAnimation {
     action: string;
     spritesheet_url: string;
     row: number;
-    totalFrames: number;
+    totalAnimationsFrames: number;
+    totalTilesFrames: number;
 }

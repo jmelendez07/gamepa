@@ -15,7 +15,8 @@ class HeroAnimations extends Model
         'action',
         'spritesheet_url',
         'row',
-        'totalFrames',
+        'totalAnimationsFrames',
+        'totalTilesFrames',
         'hero_id',
     ];
 

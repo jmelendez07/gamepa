@@ -9,12 +9,12 @@ interface IHeroAnimationProps {
     texture: Texture;
     frameWidth: number;
     frameHeight: number;
-    totalFrames: number;
+    totalTilesFrames: number;
     animationSpeed: number;
-    heroAnimation?: HeroAnimation;
+    heroAnimation: HeroAnimation;
 }
 
-export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames, animationSpeed, heroAnimation }: IHeroAnimationProps) => {
+export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalTilesFrames, animationSpeed, heroAnimation }: IHeroAnimationProps) => {
     // Animation logic here
     const [sprite, setSprite] = useState<Sprite | null>(null);
     const frameRef = useRef(1);
@@ -33,13 +33,13 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
 
     const getRowByDirection = (direction: Direction | null, isFighting: boolean, isStat: boolean, isAttacking: boolean) => {
         if (isFighting) {
-            return 45;
+            return heroAnimation.row; // ← Usar row del heroAnimation si existe, sino fallback
         } else if (isStat) {
             return 44;
         }
 
         if (isAttacking) {
-            return heroAnimation?.row || 64; // ← Usar row del heroAnimation si existe, sino fallback
+            return heroAnimation.row; // ← Usar row del heroAnimation si existe, sino fallback
         }
 
         switch (direction) {
@@ -78,13 +78,13 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
             if (isAttacking) {
                 if (elapsedTimeRef.current >= 1) {
                     elapsedTimeRef.current = 0;
-                    frameRef.current = (frameRef.current + 3) % totalFrames;
+                    frameRef.current = (frameRef.current + 3) % totalTilesFrames;
                 }
                 column = frameRef.current;
             } else {
                 if (elapsedTimeRef.current >= 1) {
                     elapsedTimeRef.current = 0;
-                    frameRef.current = (frameRef.current + 1) % totalFrames;
+                    frameRef.current = (frameRef.current + 1) % totalTilesFrames;
                 }
                 column = frameRef.current;
             }
@@ -120,7 +120,7 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
 
         // Calcular ancho del frame de ataque basado en el ancho real de la textura
         const textureWidth = texture.source.width; // 1152px para hero1, etc.
-        const attackColumns = heroAnimation?.totalFrames || 1; // Número de columnas de ataque (ajusta según spritesheet)
+        const attackColumns = heroAnimation.totalAnimationsFrames; // Número de columnas de ataque (ajusta según spritesheet)
         const attackFrameWidth = textureWidth / attackColumns; // 1152 / 8 = 144px
 
         elapsedTimeRef.current += animationSpeed;
@@ -134,7 +134,7 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
             const maxColumnIndex = attackColumns - 1;
             const nextColumnIndex = Math.floor(next / step);
 
-            if (next >= totalFrames || nextColumnIndex > maxColumnIndex) {
+            if (next >= totalTilesFrames || nextColumnIndex > maxColumnIndex) {
                 // Mantener el último frame válido sin crear sprite extra
                 return false; // ← Animación terminada
             }
