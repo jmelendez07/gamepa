@@ -278,7 +278,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
-                {currentHeroTexture && <Hero position={position} texture={currentHeroTexture} onMove={updateHeroPosition} onHeroChange={changeHeroOnTheField} />}
+                {currentHeroTexture && <Hero position={position} texture={currentHeroTexture} onMove={updateHeroPosition} heroAtributes={heroOnTheField} onHeroChange={changeHeroOnTheField} />}
                 {nearPortal && !inCombat && enemies.length <= 0 && (
                     <pixiText
                         text="Presiona F para continuar"

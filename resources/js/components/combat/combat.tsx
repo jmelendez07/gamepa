@@ -65,32 +65,36 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
         texture: teamTextures[0], // fallback
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: 2,
+        totalTilesFrames: team[0].hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || 2,
         animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[0].hero_animations.find((anim) => anim.action === 'fighting') || team[0].hero_animations[0]
     });
 
     const hero1Animation = useHeroAnimation({
         texture: teamTextures[1] || teamTextures[0], // fallback
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: 2,
+        totalTilesFrames: team[1]?.hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || team[0].hero_animations[0].totalTilesFrames || 2,
         animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[1].hero_animations.find((anim) => anim.action === 'fighting') || team[1]?.hero_animations[1]
     });
 
     const hero2Animation = useHeroAnimation({
         texture: teamTextures[2] || teamTextures[0], // fallback
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: 2,
+        totalTilesFrames: team[2]?.hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || team[0].hero_animations[0].totalTilesFrames || 2,
         animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[2]?.hero_animations.find((anim) => anim.action === 'fighting') || team[2]?.hero_animations[0] || team[0].hero_animations[0]
     });
 
     const hero3Animation = useHeroAnimation({
         texture: teamTextures[3] || teamTextures[0], // fallback
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: 2,
+        totalTilesFrames: team[3]?.hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || team[0].hero_animations[0].totalTilesFrames || 2,
         animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[3]?.hero_animations.find((anim) => anim.action === 'fighting') || team[3]?.hero_animations[0] || team[0].hero_animations[0]
     });
 
     // Hook para animación de ataque
@@ -98,9 +102,9 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
         texture: attackingHeroIndex !== null ? teamTextures[attackingHeroIndex] : teamTextures[0],
         frameWidth: 128,
         frameHeight: 64,
-        totalFrames: 21,
+        totalTilesFrames: team[attackingHeroIndex || 0].hero_animations.find((anim) => anim.action === 'attack')?.totalTilesFrames || 8,
         animationSpeed: ANIMATION_SPEED,
-        heroAnimation: team[attackingHeroIndex || 0]?.hero_animations.find((anim) => anim.action === 'attack')
+        heroAnimation: team[attackingHeroIndex || 0].hero_animations.find((anim) => anim.action === 'attack') || team[attackingHeroIndex || 0].hero_animations[0]
     });
 
     // Array de animaciones para facilitar el acceso
