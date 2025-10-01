@@ -19,6 +19,8 @@ class Hero extends Model
         'name',
         'spritesheet',
         'health',
+        'hero_role_id',
+        'avatar_url',
     ];
 
     #[SearchUsingPrefix(['name', 'health'])]
@@ -27,7 +29,8 @@ class Hero extends Model
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'health' => $this->health
+            'health' => $this->health,
+            'avatar_url' => $this->avatar_url,
         ];
     }
 
@@ -44,5 +47,10 @@ class Hero extends Model
     public function heroAnimations()
     {
         return $this->hasMany(HeroAnimations::class);
+    }
+
+    public function heroRole()
+    {
+        return $this->belongsTo(HeroRole::class);
     }
 }

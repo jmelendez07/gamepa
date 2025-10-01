@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             JobSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            HeroRoleSeeder::class,
             LevelSeeder::class,
             TypeCardSeeder::class,
             DificultySeeder::class,

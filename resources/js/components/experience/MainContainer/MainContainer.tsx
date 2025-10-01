@@ -4,19 +4,21 @@ import { DEFAULT_HERO_POSITION_X, DEFAULT_HERO_POSITION_Y, TILE_SIZE } from '@/c
 import Enemy from '@/components/enemy/enemy';
 import GameplayMenu from '@/components/gameplay/menu';
 import { Hero } from '@/components/Hero/hero';
+import { usePortalInteraction } from '@/components/Hero/usePortalInteraction';
+import { PortalUI } from '@/components/stages/portalUI';
 import { StageGame } from '@/components/stages/stageGame';
 import { UserProfile, type SharedData } from '@/types';
 import Card from '@/types/card';
 import IEnemy from '@/types/enemy';
 import IHero from '@/types/hero';
 import { Stage } from '@/types/planet';
-import { router, usePage } from '@inertiajs/react';
 import type { Page as InertiaPage } from '@inertiajs/core'; // was Page as InertiaPageProps
+import { router, usePage } from '@inertiajs/react';
 import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, TextStyle, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
-import { usePortalInteraction } from '@/components/Hero/usePortalInteraction';
-import { PortalUI } from '@/components/stages/portalUI';
+import { StatsUI } from './stats-ui';
+import { HeroSelectionUI } from './MainContainer-UI/hero-selection-ui';
 
 extend({ Container, Sprite });
 
@@ -87,7 +89,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
             // x: Math.floor(Math.random() * (750 - 20 + 1)) + 20,
             // y: Math.floor(Math.random() * (470 - 30 + 1)) + 30,
             x: 200 + index * 200,
-            y: 200
+            y: 200,
         }),
         [],
     );
@@ -128,8 +130,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         });
 
         // Cargar todas las texturas de héroes
-        const heroTexturePromises = heroes.map(hero => Assets.load<Texture>(hero.spritesheet));
-        
+        const heroTexturePromises = heroes.map((hero) => Assets.load<Texture>(hero.spritesheet));
+
         Promise.all(heroTexturePromises).then((textures) => {
             if (!cancelled) {
                 setHeroTextures(textures);
@@ -250,10 +252,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
     }, [checkCombatArea]);
 
     // Obtener la textura del héroe actual
-    const currentHeroTexture = heroOnTheField && heroTextures.length > 0 
-        ? heroTextures[teamHeroes.findIndex(hero => hero.id === heroOnTheField.id)] 
-        : null;
-
+    const currentHeroTexture =
+        heroOnTheField && heroTextures.length > 0 ? heroTextures[teamHeroes.findIndex((hero) => hero.id === heroOnTheField.id)] : null;
 
     const changeHeroOnTheField = useCallback(
         (heroIndex: number) => {
@@ -278,7 +278,15 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
-                {currentHeroTexture && <Hero position={position} texture={currentHeroTexture} onMove={updateHeroPosition} heroAtributes={heroOnTheField} onHeroChange={changeHeroOnTheField} />}
+                {currentHeroTexture && (
+                    <Hero
+                        position={position}
+                        texture={currentHeroTexture}
+                        onMove={updateHeroPosition}
+                        heroAtributes={heroOnTheField}
+                        onHeroChange={changeHeroOnTheField}
+                    />
+                )}
                 {nearPortal && !inCombat && enemies.length <= 0 && (
                     <pixiText
                         text="Presiona F para continuar"
@@ -294,6 +302,15 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                     />
                 )}
             </Camera>
+
+            {heroOnTheField && (
+                <StatsUI currentHero={heroOnTheField} />
+            )}
+
+            {teamHeroes && (
+                <HeroSelectionUI teamHeroes={teamHeroes} currentHeroIndex={teamHeroes.findIndex((hero) => hero.id === heroOnTheField?.id)} />
+            )}
+
             {inCombat && currentHeroTexture && (
                 <Combat
                     team={teamHeroes}
@@ -307,27 +324,15 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
             )}
             {!inCombat && (
                 <>
-                    <pixiText
-                        text={'Nivel: ' + (getCurrentLevel()?.order || 1)}
-                        x={20}
-                        y={10}
-                        zIndex={100}
-                        style={levelStyle}
-                    />
-                    <pixiText
-                        text={'XP: ' + currentUserXp}
-                        x={180}
-                        y={10}
-                        zIndex={100}
-                        style={xpStyle}
-                    />
+                    <pixiText text={'Nivel: ' + (getCurrentLevel()?.order || 1)} x={20} y={10} zIndex={100} style={levelStyle} />
+                    <pixiText text={'XP: ' + currentUserXp} x={180} y={10} zIndex={100} style={xpStyle} />
                 </>
             )}
-            <PortalUI 
-                canvasSize={canvasSize} 
+            <PortalUI
+                canvasSize={canvasSize}
                 isVisible={showPortalGraphic && enemies.length <= 0}
                 title="¡Portal Activado!"
-                subtitle="Preparándote para el siguiente nivel..." 
+                subtitle="Preparándote para el siguiente nivel..."
                 nextStage={nextStage}
             />
         </pixiContainer>
