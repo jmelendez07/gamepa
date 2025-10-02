@@ -1,0 +1,2929 @@
+openapi: 3.0.3
+info:
+  title: 'MathG API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://gamepa.test'
+tags:
+  -
+    name: Endpoints
+    description: ''
+paths:
+  /broadcasting/auth:
+    get:
+      summary: 'Authenticate the request for channel access.'
+      operationId: authenticateTheRequestForChannelAccess
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ''
+      tags:
+        - Endpoints
+      security: []
+  /up:
+    get:
+      summary: ''
+      operationId: getUp
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\n    <title>MathG</title>\n\n    <!-- Fonts -->\n    <link rel=\"preconnect\" href=\"https://fonts.bunny.net\">\n    <link href=\"https://fonts.bunny.net/css?family=figtree:400,600&display=swap\" rel=\"stylesheet\" />\n\n    <!-- Styles -->\n    <script src=\"https://cdn.tailwindcss.com\"></script>\n\n    <script>\n        tailwind.config = {\n            theme: {\n                extend: {\n                    fontFamily: {\n                        sans: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif', \"Apple Color Emoji\", \"Segoe UI Emoji\"],\n                    }\n                }\n            }\n        }\n    </script>\n</head>\n<body class=\"antialiased\">\n<div class=\"relative flex justify-center items-center min-h-screen bg-gray-100 selection:bg-red-500 selection:text-white\">\n    <div class=\"w-full sm:w-3/4 xl:w-1/2 mx-auto p-6\">\n        <div class=\"px-6 py-4 bg-white from-gray-700/50 via-transparent rounded-lg shadow-2xl shadow-gray-500/20 flex items-center focus:outline focus:outline-2 focus:outline-red-500\">\n            <div class=\"relative flex h-3 w-3 group \">\n                <span class=\"animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 group-[.status-down]:bg-red-600 opacity-75\"></span>\n                <span class=\"relative inline-flex rounded-full h-3 w-3 bg-green-400 group-[.status-down]:bg-red-600\"></span>\n            </div>\n\n            <div class=\"ml-6\">\n                <h2 class=\"text-xl font-semibold text-gray-900\">Application up</h2>\n\n                <p class=\"mt-2 text-gray-500 dark:text-gray-400 text-sm leading-relaxed\">\n                    HTTP request received.\n\n                                            Response rendered in 31684ms.\n                                    </p>\n            </div>\n        </div>\n    </div>\n</div>\n</body>\n</html>\n"
+      tags:
+        - Endpoints
+      security: []
+  /:
+    get:
+      summary: ''
+      operationId: get
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+  '/gameplay/test/{stageId}':
+    get:
+      summary: ''
+      operationId: getGameplayTestStageId
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: stageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /heroes/opciones:
+    get:
+      summary: ''
+      operationId: getHeroesOpciones
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /heroes/seleccionar:
+    post:
+      summary: ''
+      operationId: postHeroesSeleccionar
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the heroes table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - id
+      security: []
+  '/gameplay/galaxia/{galaxyId}':
+    get:
+      summary: ''
+      operationId: getGameplayGalaxiaGalaxyId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: galaxyId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/gameplay/lugar/{stageId}':
+    get:
+      summary: ''
+      operationId: getGameplayLugarStageId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: stageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /gameplay/next-stage:
+    post:
+      summary: ''
+      operationId: postGameplayNextStage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /gameplay:
+    get:
+      summary: ''
+      operationId: getGameplay
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /profile/update-xp:
+    post:
+      summary: ''
+      operationId: postProfileUpdateXp
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total_xp:
+                  type: integer
+                  description: 'Must be at least 0.'
+                  example: 27
+                  nullable: false
+              required:
+                - total_xp
+      security: []
+  /salas:
+    get:
+      summary: ''
+      operationId: getSalas
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postSalas
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                pin:
+                  type: string
+                  description: 'Must be 6 characters.'
+                  example: ngzmiy
+                  nullable: false
+                questions:
+                  type: array
+                  description: 'Must have at least 1 items.'
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                        description: 'Must not be greater than 1000 characters.'
+                        example: b
+                        nullable: false
+                      answers:
+                        type: array
+                        description: 'Must contain 4 items.'
+                        example:
+                          - []
+                        items:
+                          type: object
+                          properties:
+                            text:
+                              type: string
+                              description: 'Must not be greater than 500 characters.'
+                              example: b
+                              nullable: false
+                            is_correct:
+                              type: boolean
+                              description: ''
+                              example: false
+                              nullable: false
+                          required:
+                            - text
+                            - is_correct
+                    required:
+                      - text
+                      - answers
+              required:
+                - name
+                - pin
+                - questions
+      security: []
+  /salas/crear:
+    get:
+      summary: ''
+      operationId: getSalasCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/salas/{sala}':
+    get:
+      summary: ''
+      operationId: getSalasSala
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putSalasSala
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                questions:
+                  type: array
+                  description: 'Must have at least 1 items.'
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                        description: 'Must not be greater than 1000 characters.'
+                        example: b
+                        nullable: false
+                      answers:
+                        type: array
+                        description: 'Must contain 4 items.'
+                        example:
+                          - []
+                        items:
+                          type: object
+                          properties:
+                            text:
+                              type: string
+                              description: 'Must not be greater than 500 characters.'
+                              example: b
+                              nullable: false
+                            is_correct:
+                              type: boolean
+                              description: ''
+                              example: false
+                              nullable: false
+                          required:
+                            - text
+                            - is_correct
+                    required:
+                      - text
+                      - answers
+              required:
+                - name
+                - questions
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteSalasSala
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: sala
+        description: 'The sala.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/salas/{sala}/editar':
+    get:
+      summary: ''
+      operationId: getSalasSalaEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: sala
+        description: 'The sala.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/salas/jugar/{pin}':
+    get:
+      summary: ''
+      operationId: getSalasJugarPin
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: pin
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /panel:
+    get:
+      summary: ''
+      operationId: getPanel
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /users:
+    get:
+      summary: ''
+      operationId: getUsers
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Store a newly created resource in storage.'
+      operationId: storeANewlyCreatedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /users/crear:
+    get:
+      summary: 'Show the form for creating a new resource.'
+      operationId: showTheFormForCreatingANewResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/users/{id}':
+    get:
+      summary: ''
+      operationId: getUsersId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Update the specified resource in storage.'
+      operationId: updateTheSpecifiedResourceInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: 'Remove the specified resource from storage.'
+      operationId: removeTheSpecifiedResourceFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the user.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/users/{user}/editar':
+    get:
+      summary: 'Show the form for editing the specified resource.'
+      operationId: showTheFormForEditingTheSpecifiedResource
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: user
+        description: 'The user.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /docentes:
+    get:
+      summary: ''
+      operationId: getDocentes
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postDocentes
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: zbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: 'Must be at least 8 characters.'
+                  example: '-0pBNvYgxw'
+                  nullable: false
+              required:
+                - name
+                - email
+                - password
+      security: []
+  '/docentes/{docente}':
+    put:
+      summary: ''
+      operationId: putDocentesDocente
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                email:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+              required:
+                - name
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteDocentesDocente
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: docente
+        description: 'The docente.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /docentes/bulk-destroy:
+    post:
+      summary: ''
+      operationId: postDocentesBulkDestroy
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teacher_ids:
+                  type: array
+                  description: ''
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - teacher_ids
+      security: []
+  /galaxias:
+    get:
+      summary: ''
+      operationId: getGalaxias
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postGalaxias
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: false
+              required:
+                - name
+                - image
+      security: []
+  /galaxias/crear:
+    get:
+      summary: ''
+      operationId: getGalaxiasCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/galaxias/{galaxia}':
+    get:
+      summary: ''
+      operationId: getGalaxiasGalaxia
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putGalaxiasGalaxia
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteGalaxiasGalaxia
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: galaxia
+        description: 'The galaxia.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/galaxias/{galaxia}/editar':
+    get:
+      summary: ''
+      operationId: getGalaxiasGalaxiaEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: galaxia
+        description: 'The galaxia.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /planetas:
+    get:
+      summary: ''
+      operationId: getPlanetas
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postPlanetas
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                galaxy_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the galaxies table.'
+                  example: architecto
+                  nullable: false
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: false
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+              required:
+                - name
+                - galaxy_id
+                - image
+      security: []
+  /planetas/crear:
+    get:
+      summary: ''
+      operationId: getPlanetasCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/planetas/{planeta}':
+    get:
+      summary: ''
+      operationId: getPlanetasPlaneta
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putPlanetasPlaneta
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+                galaxy_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the galaxies table.'
+                  example: architecto
+                  nullable: false
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: true
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+              required:
+                - galaxy_id
+      security: []
+    delete:
+      summary: ''
+      operationId: deletePlanetasPlaneta
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: planeta
+        description: 'The planeta.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/planetas/{planeta}/editar':
+    get:
+      summary: ''
+      operationId: getPlanetasPlanetaEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: planeta
+        description: 'The planeta.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /ejercicios:
+    get:
+      summary: ''
+      operationId: getEjercicios
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postEjercicios
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operation:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                planet_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the planets table.'
+                  example: architecto
+                  nullable: false
+                difficulty_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the dificulties table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - operation
+                - planet_id
+                - difficulty_id
+      security: []
+  /ejercicios/crear:
+    get:
+      summary: ''
+      operationId: getEjerciciosCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/ejercicios/{ejercicio}':
+    get:
+      summary: ''
+      operationId: getEjerciciosEjercicio
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putEjerciciosEjercicio
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operation:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                planet_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the planets table.'
+                  example: architecto
+                  nullable: false
+                difficulty_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the dificulties table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - operation
+                - planet_id
+                - difficulty_id
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteEjerciciosEjercicio
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: ejercicio
+        description: 'The ejercicio.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/ejercicios/{ejercicio}/editar':
+    get:
+      summary: ''
+      operationId: getEjerciciosEjercicioEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: ejercicio
+        description: 'The ejercicio.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /cartas:
+    get:
+      summary: ''
+      operationId: getCartas
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postCartas
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                energy_cost:
+                  type: integer
+                  description: 'Must be at least 0.'
+                  example: 39
+                  nullable: false
+                stats:
+                  type: integer
+                  description: 'Must be at least 0.'
+                  example: 84
+                  nullable: false
+                type_id:
+                  type: string
+                  description: 'The <code>_id</code> of an existing record in the type_cards table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - energy_cost
+                - stats
+                - type_id
+      security: []
+  /cartas/crear:
+    get:
+      summary: ''
+      operationId: getCartasCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/cartas/{carta}':
+    get:
+      summary: ''
+      operationId: getCartasCarta
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putCartasCarta
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+                energy_cost:
+                  type: integer
+                  description: 'Must be at least 0.'
+                  example: 27
+                  nullable: false
+                stats:
+                  type: integer
+                  description: 'Must be at least 0.'
+                  example: 39
+                  nullable: false
+                type_id:
+                  type: string
+                  description: 'The <code>_id</code> of an existing record in the type_cards table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - energy_cost
+                - stats
+                - type_id
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteCartasCarta
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: carta
+        description: 'The carta.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/cartas/{carta}/editar':
+    get:
+      summary: ''
+      operationId: getCartasCartaEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: carta
+        description: 'The carta.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/cartas/{carta}/ejercicios/{ejercicio}':
+    post:
+      summary: ''
+      operationId: postCartasCartaEjerciciosEjercicio
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteCartasCartaEjerciciosEjercicio
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: carta
+        description: 'The carta.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: ejercicio
+        description: 'The ejercicio.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /pasos:
+    get:
+      summary: ''
+      operationId: getPasos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postPasos
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exercise_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the exercises table.'
+                  example: architecto
+                  nullable: false
+                order:
+                  type: integer
+                  description: ''
+                  example: 16
+                  nullable: false
+              required:
+                - exercise_id
+                - order
+      security: []
+  /pasos/crear:
+    get:
+      summary: ''
+      operationId: getPasosCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/pasos/{paso}':
+    get:
+      summary: ''
+      operationId: getPasosPaso
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putPasosPaso
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deletePasosPaso
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: paso
+        description: 'The paso.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/pasos/{paso}/editar':
+    get:
+      summary: ''
+      operationId: getPasosPasoEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: paso
+        description: 'The paso.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /opciones:
+    get:
+      summary: ''
+      operationId: getOpciones
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postOpciones
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                step_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the steps table.'
+                  example: architecto
+                  nullable: false
+                result:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                is_correct:
+                  type: boolean
+                  description: ''
+                  example: true
+                  nullable: false
+              required:
+                - step_id
+                - result
+                - is_correct
+      security: []
+  /opciones/crear:
+    get:
+      summary: ''
+      operationId: getOpcionesCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/opciones/{opcione}':
+    get:
+      summary: ''
+      operationId: getOpcionesOpcione
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putOpcionesOpcione
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                is_correct:
+                  type: boolean
+                  description: ''
+                  example: true
+                  nullable: false
+              required:
+                - result
+                - is_correct
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteOpcionesOpcione
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: opcione
+        description: 'The opcione.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/opciones/{opcione}/editar':
+    get:
+      summary: ''
+      operationId: getOpcionesOpcioneEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: opcione
+        description: 'The opcione.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /enemigos:
+    get:
+      summary: ''
+      operationId: getEnemigos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postEnemigos
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                spritesheet:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: false
+                health:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 22
+                  nullable: false
+                is_hostile:
+                  type: boolean
+                  description: ''
+                  example: false
+                  nullable: false
+                basic_attack:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 67
+                  nullable: false
+                planet_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the planets table.'
+                  example: architecto
+                  nullable: false
+                enemy_type_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the enemy_types table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - spritesheet
+                - health
+                - is_hostile
+                - basic_attack
+                - planet_id
+                - enemy_type_id
+      security: []
+  '/enemigos/{enemigo}':
+    put:
+      summary: ''
+      operationId: putEnemigosEnemigo
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                spritesheet:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: true
+                health:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 22
+                  nullable: false
+                is_hostile:
+                  type: boolean
+                  description: ''
+                  example: true
+                  nullable: false
+                basic_attack:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 67
+                  nullable: false
+                planet_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the planets table.'
+                  example: architecto
+                  nullable: false
+                enemy_type_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the enemy_types table.'
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - health
+                - is_hostile
+                - basic_attack
+                - planet_id
+                - enemy_type_id
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteEnemigosEnemigo
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: enemigo
+        description: 'The enemigo.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /heroes:
+    get:
+      summary: ''
+      operationId: getHeroes
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postHeroes
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                spritesheet:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: false
+                health:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 22
+                  nullable: false
+              required:
+                - name
+                - spritesheet
+                - health
+      security: []
+  '/heroes/{id}':
+    put:
+      summary: ''
+      operationId: putHeroesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+                spritesheet:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+                  nullable: true
+                health:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 16
+                  nullable: false
+              required:
+                - health
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteHeroesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the hero.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /lugares:
+    get:
+      summary: ''
+      operationId: getLugares
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postLugares
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                planet_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the planets table.'
+                  example: architecto
+                  nullable: false
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 5120 kilobytes.'
+                  nullable: false
+              required:
+                - name
+                - planet_id
+                - image
+      security: []
+  /lugares/crear:
+    get:
+      summary: ''
+      operationId: getLugaresCrear
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/lugares/{lugare}':
+    get:
+      summary: ''
+      operationId: getLugaresLugare
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putLugaresLugare
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+                image:
+                  type: string
+                  format: binary
+                  description: 'Must be an image. Must not be greater than 5120 kilobytes.'
+                  nullable: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteLugaresLugare
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: lugare
+        description: 'The lugare.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/lugares/{lugare}/editar':
+    get:
+      summary: ''
+      operationId: getLugaresLugareEditar
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: lugare
+        description: 'The lugare.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/lugares/{stageId}/puntos-vectoriales/sync':
+    post:
+      summary: ''
+      operationId: postLugaresStageIdPuntosVectorialesSync
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                points:
+                  type: array
+                  description: ''
+                  example:
+                    - []
+                  items:
+                    type: object
+                    properties:
+                      x:
+                        type: number
+                        description: ''
+                        example: 4326.41688
+                        nullable: false
+                      'y':
+                        type: number
+                        description: ''
+                        example: 4326.41688
+                        nullable: false
+                    required:
+                      - x
+                      - 'y'
+              required:
+                - points
+      security: []
+    parameters:
+      -
+        in: path
+        name: stageId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /settings:
+    get:
+      summary: 'Invoke the controller method.'
+      operationId: invokeTheControllerMethod
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /settings/profile:
+    get:
+      summary: "Show the user's profile settings page."
+      operationId: showTheUsersProfileSettingsPage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: "Delete the user's account."
+      operationId: deleteTheUsersAccount
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - password
+      security: []
+  /settings/password:
+    get:
+      summary: "Show the user's password settings page."
+      operationId: showTheUsersPasswordSettingsPage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: "Update the user's password."
+      operationId: updateTheUsersPassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - current_password
+                - password
+      security: []
+  /settings/appearance:
+    get:
+      summary: ''
+      operationId: getSettingsAppearance
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /register:
+    get:
+      summary: 'Show the registration page.'
+      operationId: showTheRegistrationPage
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Handle an incoming registration request.'
+      operationId: handleAnIncomingRegistrationRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: false
+                email:
+                  type: string
+                  description: ''
+                  example: null
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - password
+      security: []
+  /login:
+    get:
+      summary: 'Show the login page.'
+      operationId: showTheLoginPage
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Handle an incoming authentication request.'
+      operationId: handleAnIncomingAuthenticationRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+                  nullable: false
+              required:
+                - email
+                - password
+      security: []
+  /forgot-password:
+    get:
+      summary: 'Show the password reset link request page.'
+      operationId: showThePasswordResetLinkRequestPage
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Handle an incoming password reset link request.'
+      operationId: handleAnIncomingPasswordResetLinkRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+                  nullable: false
+              required:
+                - email
+      security: []
+  '/reset-password/{token}':
+    get:
+      summary: 'Show the password reset page.'
+      operationId: showThePasswordResetPage
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: token
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /reset-password:
+    post:
+      summary: 'Handle an incoming new password request.'
+      operationId: handleAnIncomingNewPasswordRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: zbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - token
+                - email
+                - password
+      security: []
+  /verify-email:
+    get:
+      summary: 'Show the email verification prompt page.'
+      operationId: showTheEmailVerificationPromptPage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/verify-email/{id}/{hash}':
+    get:
+      summary: "Mark the authenticated user's email address as verified."
+      operationId: markTheAuthenticatedUsersEmailAddressAsVerified
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the verify email.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: hash
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /email/verification-notification:
+    post:
+      summary: 'Send a new email verification notification.'
+      operationId: sendANewEmailVerificationNotification
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /confirm-password:
+    get:
+      summary: 'Show the confirm password page.'
+      operationId: showTheConfirmPasswordPage
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: "Confirm the user's password."
+      operationId: confirmTheUsersPassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /logout:
+    post:
+      summary: 'Destroy an authenticated session.'
+      operationId: destroyAnAuthenticatedSession
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  '/storage/{path}':
+    get:
+      summary: ''
+      operationId: getStoragePath
+      description: ''
+      parameters: []
+      responses:
+        403:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: ''
+                properties:
+                  message:
+                    type: string
+                    example: ''
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: path
+        description: ''
+        example: '|{+-0p'
+        required: true
+        schema:
+          type: string
