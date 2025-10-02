@@ -3,7 +3,6 @@ import { Rectangle, Sprite, Texture } from 'pixi.js';
 import { useEffect, useRef, useState } from 'react';
 import { TILE_SIZE } from '../constants/game-world';
 import { Direction } from '../types/common';
-import { set } from 'react-hook-form';
 
 interface IHeroAnimationProps {
     texture: Texture;
