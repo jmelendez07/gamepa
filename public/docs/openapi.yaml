@@ -6,8 +6,11 @@ info:
   contact:
     name: José Melendez
     email: josemelendezramos123@gmail.com
-    url: ''
-  termsOfService: ''
+    url: 'https://github.com/jmelendez07'
+  termsOfService: 'https://github.com/jmelendez07/MathG'
+  license:
+    name: MIT License
+    url: 'https://github.com/jmelendez07/MathG/blob/develop/LICENSE'
 servers:
   - url: 'https://math-g-pre-production.up.railway.app'
     description: pre-production
