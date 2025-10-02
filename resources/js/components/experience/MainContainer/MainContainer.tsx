@@ -19,6 +19,7 @@ import { Assets, Container, Sprite, TextStyle, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { StatsUI } from './stats-ui';
 import { HeroSelectionUI } from './MainContainer-UI/hero-selection-ui';
+import { color } from 'motion/react';
 
 extend({ Container, Sprite });
 
@@ -32,9 +33,10 @@ interface IMainContainerProps {
 
 const bgAsset = '/assets/bg-galaxy.png';
 const portalAsset = '/assets/portal.png';
+const stageAsset = 'https://res.cloudinary.com/dvibz13t8/image/upload/v1759327239/etapa_qicev8.png'
 
 const levelStyle = new TextStyle({
-    fontFamily: 'Jersey 10, Arial, sans-serif',
+    fontFamily: 'Jersey 10',
     fontSize: 50,
     fontWeight: '200',
     fill: '#ffffff',
@@ -42,7 +44,7 @@ const levelStyle = new TextStyle({
 });
 
 const xpStyle = new TextStyle({
-    fontFamily: 'Jersey 10, Arial, sans-serif',
+    fontFamily: 'Jersey 10',
     fontSize: 50,
     fontWeight: '200',
     fill: '#ffffff',
@@ -54,6 +56,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
     const [portalTexture, setPortalTexture] = useState<Texture | null>(null);
+    const [stageTexture, setStageTexture] = useState<Texture | null>(null);
     const [heroTextures, setHeroTextures] = useState<Texture[]>([]);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [inCombat, setInCombat] = useState(false);
@@ -126,6 +129,12 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         Assets.load<Texture>(bgAsset).then((tex) => {
             if (!cancelled) {
                 setBgTexture(tex);
+            }
+        });
+
+        Assets.load<Texture>(stageAsset).then((tex) => {
+            if (!cancelled) {
+                setStageTexture(tex);
             }
         });
 
@@ -309,6 +318,14 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
 
             {teamHeroes && (
                 <HeroSelectionUI teamHeroes={teamHeroes} currentHeroIndex={teamHeroes.findIndex((hero) => hero.id === heroOnTheField?.id)} />
+            )}
+
+            {stage && (
+                <pixiText text={`Etapa ${stage.number} : ${stage.name}`} x={(window.innerWidth / 9) * 7} y={35} zIndex={100} style={{ fill: 0xffffff, fontSize: 24, fontFamily: 'Jersey 10' }} />
+            )}
+
+            {stageTexture && (
+                <pixiSprite texture={stageTexture} x={(window.innerWidth / 7) * 5 + 30} y={10} width={64} height={64} />
             )}
 
             {inCombat && currentHeroTexture && (
