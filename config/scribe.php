@@ -24,7 +24,7 @@ return [
 
     // The base URL displayed in the docs.
     // If you're using `laravel` type, you can set this to a dynamic string, like '{{ config("app.tenant_url") }}' to get a dynamic base URL.
-    'base_url' => config("app.url"),
+    'base_url' => env('OPEN_API_BASE_URL', 'https://math-g-pre-production.up.railway.app'),
 
     // Routes to include in the docs
     'routes' => [
