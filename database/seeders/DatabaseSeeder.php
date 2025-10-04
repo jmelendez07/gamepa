@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             GalaxySeeder::class,
             PlanetSeeder::class,
             StageSeeder::class,
+            MissionSeeder::class,
             EnemyTypeSeeder::class,
             EnemySeeder::class,
             HeroSeeder::class,

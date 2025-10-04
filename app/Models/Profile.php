@@ -17,7 +17,8 @@ class Profile extends Model
         'level_id',
         'avatar_url',
         'progress_bar',
-        'total_xp'
+        'total_xp',
+        'avatar_frame_url'
     ];
 
     #[SearchUsingPrefix(['user_id'])]
@@ -50,5 +51,10 @@ class Profile extends Model
     public function unlockedStages()
     {
         return $this->belongsToMany(Stage::class);
+    }
+
+    public function completedMissions()
+    {
+        return $this->belongsToMany(Mission::class, 'completed_missions', 'profile_id', 'mission_id');
     }
 }
