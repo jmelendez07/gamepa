@@ -20,6 +20,8 @@ import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'rea
 import { StatsUI } from './stats-ui';
 import { HeroSelectionUI } from './MainContainer-UI/hero-selection-ui';
 import { color } from 'motion/react';
+import { ProfileUI } from './MainContainer-UI/profile-ui';
+import { MissionsUI } from './MainContainer-UI/misions-ui';
 
 extend({ Container, Sprite });
 
@@ -35,22 +37,6 @@ const bgAsset = '/assets/bg-galaxy.png';
 const portalAsset = '/assets/portal.png';
 const stageAsset = 'https://res.cloudinary.com/dvibz13t8/image/upload/v1759327239/etapa_qicev8.png'
 
-const levelStyle = new TextStyle({
-    fontFamily: 'Jersey 10',
-    fontSize: 50,
-    fontWeight: '200',
-    fill: '#ffffff',
-    align: 'center',
-});
-
-const xpStyle = new TextStyle({
-    fontFamily: 'Jersey 10',
-    fontSize: 50,
-    fontWeight: '200',
-    fill: '#ffffff',
-    align: 'center',
-});
-
 export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
@@ -59,6 +45,8 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
     const [stageTexture, setStageTexture] = useState<Texture | null>(null);
     const [heroTextures, setHeroTextures] = useState<Texture[]>([]);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [avatarFrameTexture, setAvatarFrameTexture] = useState<Texture | null>(null);
+    const [avatarProfileTexture, setAvatarProfileTexture] = useState<Texture | null>(null);
     const [inCombat, setInCombat] = useState(false);
     const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
     const [totalXpGained, setTotalXpGained] = useState(0);
@@ -137,6 +125,25 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 setStageTexture(tex);
             }
         });
+
+        // Validar que avatar_frame_url exista antes de cargar
+        const avatarFrameUrl = auth.user?.profile?.avatar_frame_url;
+        if (avatarFrameUrl) {
+            Assets.load<Texture>(avatarFrameUrl).then((tex) => {
+                if (!cancelled) {
+                    setAvatarFrameTexture(tex);
+                }
+            });
+        }
+
+        const avatarUrl = auth.user?.profile?.avatar_url;
+        if (avatarUrl) {
+            Assets.load<Texture>(avatarUrl).then((tex) => {
+                if (!cancelled) {
+                    setAvatarProfileTexture(tex);
+                }
+            });
+        }
 
         // Cargar todas las texturas de héroes
         const heroTexturePromises = heroes.map((hero) => Assets.load<Texture>(hero.spritesheet));
@@ -339,12 +346,21 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                     lose={loseCombat}
                 />
             )}
-            {!inCombat && (
+            {/* {!inCombat && (
                 <>
                     <pixiText text={'Nivel: ' + (getCurrentLevel()?.order || 1)} x={20} y={10} zIndex={100} style={levelStyle} />
                     <pixiText text={'XP: ' + currentUserXp} x={180} y={10} zIndex={100} style={xpStyle} />
                 </>
+            )} */}
+
+            {!inCombat && userProfile && (
+                <ProfileUI userProfile={userProfile || null} />
             )}
+
+            {!inCombat && (
+                <MissionsUI stage={stage} />
+            )}
+
             <PortalUI
                 canvasSize={canvasSize}
                 isVisible={showPortalGraphic && enemies.length <= 0}

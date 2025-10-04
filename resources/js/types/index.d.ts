@@ -59,12 +59,14 @@ export interface UserProfile {
     avatar_url: string;
     progress_bar: number;
     total_xp: number;
+    avatar_frame_url: string;
 }
 
 export interface Level {
     id: string; // was number
     order: number;
     xp_required: number;
+    next_level_xp: number | null;
 }
 
 export interface Role {
