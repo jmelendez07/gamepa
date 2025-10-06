@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PlanetController;
 use App\Http\Controllers\ExerciseController;
@@ -51,9 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware(['role:administrador'])->group(function () {
-        Route::get('panel', function () {
-            return Inertia::render('dashboard');
-        })->name('dashboard');
+        Route::get('panel', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('users', UserController::class)->names('users');
         Route::resource('docentes', TeacherController::class)->names('teachers');
         Route::post('docentes/bulk-destroy', [TeacherController::class, 'bulkDestroy'])->name('teachers.bulk-destroy');

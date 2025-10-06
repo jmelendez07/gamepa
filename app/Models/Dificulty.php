@@ -25,4 +25,9 @@ class Dificulty extends Model
             'name' => $this->name,
         ];
     }
+
+    public function exercises()
+    {
+        return $this->hasMany(Exercise::class, 'difficulty_id', '_id');
+    }
 }
