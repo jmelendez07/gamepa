@@ -12,6 +12,8 @@ class EnemySeeder extends Seeder
 {
     public function run(): void
     {
+        Enemy::truncate();
+        
         $types = EnemyType::all();
         $planets = Planet::all();
 
@@ -24,8 +26,8 @@ class EnemySeeder extends Seeder
             // ],
             [
                 'name' => 'Orc',
-                'health' => 25,
-                'basic_attack' => 15,
+                'health' => 1000,
+                'basic_attack' => 1,
                 'spritesheet' => asset('assets/default_enemies/enemy-2.png'),
             ],
             [

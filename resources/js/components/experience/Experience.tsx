@@ -10,11 +10,11 @@ import { Stage } from '@/types/planet';
 interface IExperienceProps {
 	enemies: Enemy[];
 	cards: Card[];
-	hero: Hero;
+	heroes: Hero[];
 	stage: Stage;
 }
 
-export const Experience = ({ enemies, cards, hero, stage }: IExperienceProps) => {
+export const Experience = ({ enemies, cards, heroes, stage }: IExperienceProps) => {
 	const [isClient, setIsClient] = useState(false);
 	const [canvasSize, setCanvasSize] = useState(calculateCanvasSize());
 
@@ -30,11 +30,13 @@ export const Experience = ({ enemies, cards, hero, stage }: IExperienceProps) =>
 		};
 	}, [updateCanvasSize]);
 
+	console.log('heroes in Experience:', heroes);
+
 	return (
 		<>
 			{isClient && (
 				<Application width={canvasSize.width} height={canvasSize.height}>
-					<MainContainer defaultEnemies={enemies} cards={cards} canvasSize={canvasSize} hero={hero} stage={stage}>
+					<MainContainer defaultEnemies={enemies} cards={cards} canvasSize={canvasSize} heroes={heroes} stage={stage}>
 					</MainContainer>
 				</Application>
 			)}

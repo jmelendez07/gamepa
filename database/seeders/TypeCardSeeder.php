@@ -10,6 +10,7 @@ class TypeCardSeeder extends Seeder
 {
     public function run(): void
     {
+        TypeCard::truncate();
         $typeCards = ['Ataque', 'Defensa', 'Curación', 'Potenciación'];
 
         foreach ($typeCards as $type) {

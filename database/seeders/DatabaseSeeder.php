@@ -11,18 +11,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            JobSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            HeroRoleSeeder::class,
             LevelSeeder::class,
             TypeCardSeeder::class,
-            // CardSeeder::class,
             DificultySeeder::class,
             GalaxySeeder::class,
             PlanetSeeder::class,
             StageSeeder::class,
-            // ExerciseSeeder::class,
-            // StepSeeder::class,
-            // OptionSeeder::class,
+            MissionSeeder::class,
             EnemyTypeSeeder::class,
             EnemySeeder::class,
             HeroSeeder::class,

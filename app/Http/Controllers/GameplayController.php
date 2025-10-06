@@ -53,8 +53,8 @@ class GameplayController extends Controller
 
     public function stage($stageId)
     {
-        $stage = Stage::findOrFail($stageId);
-        $hero = Auth::user()->heroes()->with(['cards.type'])->firstOrFail();
+        $stage = Stage::with('missions')->findOrFail($stageId);
+        $heroes = Auth::user()->heroes()->with(['cards.type', 'heroAnimations', 'heroRole'])->get();
         $easy = Dificulty::where('name', 'Fácil')->firstOrFail()->id;
 
         $enemies = [];
@@ -73,16 +73,20 @@ class GameplayController extends Controller
 
         $cards = [];
 
-        foreach ($hero->cards as $card) {
-            $card->exercise = $this->randomExercise($easy);
-            $cards[] = $card;
+        foreach($heroes as $hero){
+            foreach($hero->cards as $card) {
+                $card->exercise = $this->randomExercise($easy);
+                $cards[] = $card;
+            }
         }
+
+        shuffle($cards);
         
         return Inertia::render('gameplay/stages/show', [
             'stage' => $stage,
             'enemies' => $enemies,
             'cards' => $cards,
-            'hero' => $hero
+            'heroes' => $heroes
         ]);
     }
 
