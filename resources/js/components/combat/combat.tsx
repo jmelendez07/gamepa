@@ -15,6 +15,8 @@ import StolenCardsStack from './combat/stolen-cards-stack';
 import { Enemy } from './enemy/enemy';
 import { Exercise } from './exercise/exercise';
 import HeroStats from './hero-stats';
+import { CombatUI } from './combat-ui/combat-ui';
+import { Stage } from '@/types/planet';
 
 extend({ Sprite, Container, Graphics });
 
@@ -23,6 +25,7 @@ interface ICombatProps {
     teamTextures: Texture[];
     enemies: IEnemy[];
     cards: ICard[];
+    currentStage: Stage;
     onSetSelectedEnemies: (enemies: IEnemy[]) => void;
     finish: (isFinished: boolean, xpGained: number) => void;
     lose: () => void;
@@ -37,7 +40,7 @@ const MAX_CARDS_IN_HAND = 4;
 const assetEnergy = '/assets/energy.png';
 const spriteBgCombat = '/assets/bg-battle.jpg';
 
-export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
+export const Combat = ({ team, teamTextures, enemies, cards, currentStage, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
     const [heroHealth, setHeroHealth] = useState(team[0]?.health || 100); // Usar el primer héroe como referencia
     const [heroEnergy, setHeroEnergy] = useState(4);
     const [turn, setTurn] = useState(0);
@@ -243,7 +246,9 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
         <pixiContainer>
             {combatTexture && <pixiSprite texture={combatTexture} width={window.innerWidth} height={window.innerHeight} x={0} y={0} />}
 
-            <pixiText
+            <CombatUI teamHeroes={team} currentTurn={turn + 1} currentStage={currentStage} />
+
+            {/* <pixiText
                 text={`Turno N°${turn + 1}`}
                 x={5}
                 y={5}
@@ -254,7 +259,7 @@ export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemie
                     fontWeight: 'bold',
                     stroke: { color: 0x000000, width: 3 },
                 }}
-            />
+            /> */}
 
             {/* Renderizar héroes con animaciones */}
             {team.map((hero, index) => {
