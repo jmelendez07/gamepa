@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type PageProps, type BreadcrumbItem } from '@/types';
+import { PageProps, type BreadcrumbItem } from '@/types';
 import Card, { TypeCard } from '@/types/card';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from "sonner";
-import { TypeCards } from '@/enums/type-cards';
 import CreateCardModal from '@/components/dashboard/cards/create-card-modal';
 import EditCardModal from '@/components/dashboard/cards/edit-card-modal';
 import DeleteCardModal from '@/components/dashboard/cards/delete-card-modal';

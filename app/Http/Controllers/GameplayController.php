@@ -86,6 +86,15 @@ class GameplayController extends Controller
         ]);
     }
 
+    public function test($stage)
+    {
+        $stage = Stage::with(['points'])->findOrFail($stage);
+        
+        return Inertia::render('gameplay/stages/test', [
+            'stage' => $stage
+        ]);
+    }
+    
     public function nextStage()
     {
         $profile = Auth::user()->profile;

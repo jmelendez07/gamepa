@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Stage;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class StageController extends Controller
 {
@@ -47,9 +48,13 @@ class StageController extends Controller
         return redirect()->back()->with('success', 'Lugar ' . $stage->name . ' creado exitosamente.');
     }
 
-    public function show(string $id)
+    public function show(string $stageId)
     {
-        return redirect()->route('planets.index');
+        $stage = Stage::with(['planet', 'points'])->findOrFail($stageId);
+
+        return Inertia::render('dashboard/stages/show', [
+            'stage' => $stage
+        ]);
     }
 
     public function edit(string $id)

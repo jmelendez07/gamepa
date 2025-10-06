@@ -2,7 +2,15 @@
 
 use App\Models\User;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Illuminate\Support\Facades\DB;
+
+beforeEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+});
+
+afterEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+});
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
