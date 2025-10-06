@@ -17,6 +17,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -71,15 +73,6 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FA35901D338E450A96517811B680BD4C }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_935189DEF84E468584640AE7D6987E53 }}
 
-      - name: Create necessary directories (e.g., storage/cache)
-        run: |
-          mkdir -p /home/site/wwwroot/storage/app/public
-          mkdir -p /home/site/wwwroot/storage/app/private
-          mkdir -p /home/site/wwwroot/storage/framework/cache/data
-          mkdir -p /home/site/wwwroot/storage/framework/sessions
-          mkdir -p /home/site/wwwroot/storage/framework/views
-          mkdir -p /home/site/wwwroot/storage/framework/testing
-
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
@@ -89,3 +82,4 @@ jobs:
           package: .
 
           
+
