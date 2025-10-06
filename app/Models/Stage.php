@@ -32,4 +32,9 @@ class Stage extends Model
     {
         return $this->belongsToMany(Profile::class);
     }
+
+    public function missions()
+    {
+        return $this->hasMany(Mission::class);
+    }
 }

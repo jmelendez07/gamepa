@@ -5,22 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
 
-class Level extends Model
+class HeroRole extends Model
 {
-
     use HasFactory;
-
     protected $connection = 'mongodb';
-    protected $collection = 'levels';
+    protected $collection = 'hero_roles';
 
     protected $fillable = [
-        'order',
-        'xp_required',
-        'next_level_xp'
+        'name',
+        'description',
+        'icon_url'
     ];
 
-    public function profiles()
+    public function heroes()
     {
-        return $this->hasMany(Profile::class);
+        return $this->hasMany(Hero::class);
     }
 }

@@ -53,9 +53,10 @@ class RegisteredUserController extends Controller
         $profile = Profile::create([
             'user_id' => $user->id,
             'level_id' => $levelOneId,
-            'avatar_url' => asset('assets/default-user-avatar.png'),
+            'avatar_url' => asset('https://res.cloudinary.com/dvibz13t8/image/upload/v1759418515/avatar_ldk2rr.png'),
             'progress_bar' => 0,
             'total_xp' => 0,
+            'avatar_frame_url' => asset('https://res.cloudinary.com/dvibz13t8/image/upload/v1759413505/marco_M_hyzhg3.png')
         ]);
 
         $heroes = Hero::whereIn('name', ['Warrior', 'Ninja'])->get();

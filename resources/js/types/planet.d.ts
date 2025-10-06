@@ -20,7 +20,15 @@ export interface Stage {
     image_url: string;
     image_public_id: string;
     planet: Planet;
+    missions: Mission[];
     points: StagePoints[];
+}
+
+export interface Mission {
+    id: string;
+    name: string;
+    description: string;
+    number_actions: number;
 }
 
 export interface StagePoints {

@@ -16,15 +16,19 @@ class LevelSeeder extends Seeder
         for ($i = 1; $i <= 50; $i++) {
             if ($i === 1) {
                 $xpRequired = 0;
+                $nextLevelXp = 40;
             } elseif ($i === 2) {
                 $xpRequired = 40;
+                $nextLevelXp = 80;
             } else {
                 $xpRequired *= 2;
+                $nextLevelXp = $xpRequired * 2;
             }
 
             Level::create([
                 'order' => $i,
                 'xp_required' => $xpRequired,
+                'next_level_xp' => $nextLevelXp,
             ]);
         }
     }
