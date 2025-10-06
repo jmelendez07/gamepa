@@ -1,6 +1,25 @@
 <?php
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Database\Seeders\DificultySeeder;
+use Illuminate\Support\Facades\DB;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\LevelSeeder;
+use Database\Seeders\PlanetSeeder;
+use Database\Seeders\StageSeeder;
+use Database\Seeders\GalaxySeeder;
+
+beforeEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+
+    $this->seed([
+        RoleSeeder::class,
+        LevelSeeder::class,
+        DificultySeeder::class,
+        GalaxySeeder::class,
+        PlanetSeeder::class,
+        StageSeeder::class,
+    ]);
+});
 
 test('registration screen can be rendered', function () {
     $response = $this->get('/register');
@@ -10,12 +29,12 @@ test('registration screen can be rendered', function () {
 
 test('new users can register', function () {
     $response = $this->post('/register', [
-        'name' => 'Test User',
+        'name' => 'Register Test User',
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('heroes.options', absolute: false));
 });

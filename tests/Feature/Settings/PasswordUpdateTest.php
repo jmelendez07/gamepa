@@ -3,7 +3,11 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Illuminate\Support\Facades\DB;
+
+beforeEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+});
 
 test('password can be updated', function () {
     $user = User::factory()->create();

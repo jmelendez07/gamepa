@@ -1,15 +1,25 @@
 <?php
 
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\DB;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+beforeEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+
+    $this->seed([
+        RoleSeeder::class,
+    ]);
+});
 
 test('guests are redirected to the login page', function () {
-    $this->get('/dashboard')->assertRedirect('/login');
+    $this->get('/panel')->assertRedirect('/login');
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $this->actingAs($user = User::factory()->create());
+    $user = User::factory()->create();
+    $user->assignRole('administrador');
+    $this->actingAs($user);
 
-    $this->get('/dashboard')->assertOk();
+    $this->get('/panel')->assertOk();
 });
