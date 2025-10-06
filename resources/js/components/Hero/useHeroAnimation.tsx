@@ -1,5 +1,6 @@
+import { HeroAnimation } from '@/types/HeroAnimations';
 import { Rectangle, Sprite, Texture } from 'pixi.js';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TILE_SIZE } from '../constants/game-world';
 import { Direction } from '../types/common';
 
@@ -7,11 +8,12 @@ interface IHeroAnimationProps {
     texture: Texture;
     frameWidth: number;
     frameHeight: number;
-    totalFrames: number;
+    totalTilesFrames: number;
     animationSpeed: number;
+    heroAnimation: HeroAnimation;
 }
 
-export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames, animationSpeed }: IHeroAnimationProps) => {
+export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalTilesFrames, animationSpeed, heroAnimation }: IHeroAnimationProps) => {
     // Animation logic here
     const [sprite, setSprite] = useState<Sprite | null>(null);
     const frameRef = useRef(1);
@@ -22,15 +24,21 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
         elapsedTimeRef.current = 0;
     };
 
+    // Agregar useEffect para resetear cuando cambie la textura o heroAnimation
+    useEffect(() => {
+        resetAnimation();
+        setSprite(null); // ← Limpiar el sprite inmediatamente para evitar frames residuales
+    }, [texture, heroAnimation]); // ← Resetear al cambiar textura o heroAnimation
+
     const getRowByDirection = (direction: Direction | null, isFighting: boolean, isStat: boolean, isAttacking: boolean) => {
         if (isFighting) {
-            return 45;
+            return heroAnimation.row; // ← Usar row del heroAnimation si existe, sino fallback
         } else if (isStat) {
             return 44;
         }
 
         if (isAttacking) {
-            return 64;
+            return heroAnimation.row; // ← Usar row del heroAnimation si existe, sino fallback
         }
 
         switch (direction) {
@@ -69,13 +77,13 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
             if (isAttacking) {
                 if (elapsedTimeRef.current >= 1) {
                     elapsedTimeRef.current = 0;
-                    frameRef.current = (frameRef.current + 3) % totalFrames;
+                    frameRef.current = (frameRef.current + 3) % totalTilesFrames;
                 }
                 column = frameRef.current;
             } else {
                 if (elapsedTimeRef.current >= 1) {
                     elapsedTimeRef.current = 0;
-                    frameRef.current = (frameRef.current + 1) % totalFrames;
+                    frameRef.current = (frameRef.current + 1) % totalTilesFrames;
                 }
                 column = frameRef.current;
             }
@@ -83,6 +91,21 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
 
         const newSprite = createSprite(row, column);
         setSprite(newSprite);
+    };
+
+    const createAttackSprite = (row: number, columnIndex: number, attackFrameWidth: number) => {
+        const frameX = columnIndex * attackFrameWidth;
+        const frame = new Rectangle(frameX, row * frameHeight, attackFrameWidth, frameHeight);
+
+        const frameTexture = new Texture({
+            source: texture.source,
+            frame: frame,
+        });
+        const newSprite = new Sprite(frameTexture);
+        newSprite.width = TILE_SIZE * 2; // Escala visual si quieres
+        newSprite.height = TILE_SIZE;
+
+        return newSprite;
     };
 
     const updateAttackSprite = (
@@ -93,31 +116,34 @@ export const useHeroAnimation = ({ texture, frameWidth, frameHeight, totalFrames
         isAttacking?: boolean,
     ): boolean => {
         const row = getRowByDirection(direction, isFighting, isStat ?? false, isAttacking ?? false);
-        let column = frameRef.current;
+
+        // Calcular ancho del frame de ataque basado en el ancho real de la textura
+        const textureWidth = texture.source.width; // 1152px para hero1, etc.
+        const attackColumns = heroAnimation.totalAnimationsFrames; // Número de columnas de ataque (ajusta según spritesheet)
+        const attackFrameWidth = textureWidth / attackColumns; // 1152 / 8 = 144px
 
         elapsedTimeRef.current += animationSpeed;
         if (elapsedTimeRef.current >= 1) {
             elapsedTimeRef.current = 0;
 
-            const step = 3; // salto entre columnas reales del spritesheet
+            const step = 3;
             const next = frameRef.current + step;
 
-            // Si el siguiente paso se sale del total, no avanzamos y marcamos fin
-            if (next >= totalFrames) {
-                // Dibuja el último frame válido (frameRef.current) y termina
-                const lastSprite = createSprite(row, frameRef.current);
-                setSprite(lastSprite);
-                return false; // ← animación terminada
+            // Limitar para no exceder las columnas disponibles
+            const maxColumnIndex = attackColumns - 1;
+            const nextColumnIndex = Math.floor(next / step);
+
+            if (next >= totalTilesFrames || nextColumnIndex > maxColumnIndex) {
+                // Mantener el último frame válido sin crear sprite extra
+                return false; // ← Animación terminada
             }
 
-            console.log('next attack frame:', next);
-
-            // Aún hay frames por reproducir: avanzamos
             frameRef.current = next;
-            column = frameRef.current;
         }
 
-        const newSprite = createSprite(row, column);
+        // Calcular columnIndex y clamp para seguridad
+        const columnIndex = Math.min(Math.floor(frameRef.current / 3), attackColumns - 1);
+        const newSprite = createAttackSprite(row, columnIndex, attackFrameWidth);
         setSprite(newSprite);
         return true;
     };

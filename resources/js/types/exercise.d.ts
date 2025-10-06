@@ -11,6 +11,7 @@ export default interface Exercise {
 export interface Difficulty {
     id: string;
     name: string;
+    exercises: Exercise[];
 }
 
 export interface Step {

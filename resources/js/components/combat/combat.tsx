@@ -19,8 +19,8 @@ import HeroStats from './hero-stats';
 extend({ Sprite, Container, Graphics });
 
 interface ICombatProps {
-    hero: Hero;
-    heroTexture: Texture;
+    team: Hero[];
+    teamTextures: Texture[];
     enemies: IEnemy[];
     cards: ICard[];
     onSetSelectedEnemies: (enemies: IEnemy[]) => void;
@@ -37,11 +37,11 @@ const MAX_CARDS_IN_HAND = 4;
 const assetEnergy = '/assets/energy.png';
 const spriteBgCombat = '/assets/bg-battle.jpg';
 
-export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
-    const [heroHealth, setHeroHealth] = useState(hero.health);
+export const Combat = ({ team, teamTextures, enemies, cards, onSetSelectedEnemies, finish, lose }: ICombatProps) => {
+    const [heroHealth, setHeroHealth] = useState(team[0]?.health || 100); // Usar el primer héroe como referencia
     const [heroEnergy, setHeroEnergy] = useState(4);
     const [turn, setTurn] = useState(0);
-    const [maxHeroHealth] = useState(hero.health);
+    const [maxHeroHealth] = useState(team[0]?.health || 100);
     const [maxHeroEnergy] = useState(4);
     const [combatTexture, setCombatTexture] = useState<Texture | null>(null);
     const [isCardHeldDown, setIsCardHeldDown] = useState(false);
@@ -58,19 +58,57 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
     const [showStolenCardsModal, setShowStolenCardsModal] = useState(false);
     const [isAttackingAnimation, setIsAttackingAnimation] = useState(false);
     const [xpGained, setXpGained] = useState(0);
+    const [attackingHeroIndex, setAttackingHeroIndex] = useState<number | null>(null);
 
-    const {
-        sprite: heroSprite,
-        updateSprite: updateHeroSprite,
-        updateAttackSprite: updateHeroAttackSprite,
-        resetAnimation: resetHeroAnimation,
-    } = useHeroAnimation({
-        texture: heroTexture,
+    // Crear hooks de animación para hasta 4 héroes (ajusta según tus necesidades)
+    const hero0Animation = useHeroAnimation({
+        texture: teamTextures[0], // fallback
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: isAttackingAnimation ? 21 : 2,
+        totalTilesFrames: team[0].hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || 2,
         animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[0].hero_animations.find((anim) => anim.action === 'fighting') || team[0].hero_animations[0]
     });
+
+    const hero1Animation = useHeroAnimation({
+        texture: teamTextures[1] || teamTextures[0], // fallback
+        frameWidth: 64,
+        frameHeight: 64,
+        totalTilesFrames: team[1]?.hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || team[0].hero_animations[0].totalTilesFrames || 2,
+        animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[1].hero_animations.find((anim) => anim.action === 'fighting') || team[1]?.hero_animations[1]
+    });
+
+    const hero2Animation = useHeroAnimation({
+        texture: teamTextures[2] || teamTextures[0], // fallback
+        frameWidth: 64,
+        frameHeight: 64,
+        totalTilesFrames: team[2]?.hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || team[0].hero_animations[0].totalTilesFrames || 2,
+        animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[2]?.hero_animations.find((anim) => anim.action === 'fighting') || team[2]?.hero_animations[0] || team[0].hero_animations[0]
+    });
+
+    const hero3Animation = useHeroAnimation({
+        texture: teamTextures[3] || teamTextures[0], // fallback
+        frameWidth: 64,
+        frameHeight: 64,
+        totalTilesFrames: team[3]?.hero_animations.find((anim) => anim.action === 'fighting')?.totalTilesFrames || team[0].hero_animations[0].totalTilesFrames || 2,
+        animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[3]?.hero_animations.find((anim) => anim.action === 'fighting') || team[3]?.hero_animations[0] || team[0].hero_animations[0]
+    });
+
+    // Hook para animación de ataque
+    const attackAnimation = useHeroAnimation({
+        texture: attackingHeroIndex !== null ? teamTextures[attackingHeroIndex] : teamTextures[0],
+        frameWidth: 128,
+        frameHeight: 64,
+        totalTilesFrames: team[attackingHeroIndex || 0].hero_animations.find((anim) => anim.action === 'attack')?.totalTilesFrames || 8,
+        animationSpeed: ANIMATION_SPEED,
+        heroAnimation: team[attackingHeroIndex || 0].hero_animations.find((anim) => anim.action === 'attack') || team[attackingHeroIndex || 0].hero_animations[0]
+    });
+
+    // Array de animaciones para facilitar el acceso
+    const heroAnimations = [hero0Animation, hero1Animation, hero2Animation, hero3Animation];
 
     const assignCardTarget = useCallback(
         ({ cardPosition, characterTarget }: { cardPosition: { x: number; y: number }; characterTarget: { x: number; y: number } }) => {
@@ -87,15 +125,25 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
     const attack = () => {
         if (selectedCard && selectedEnemy && heroEnergy > 0) {
             setHeroEnergy((prevHeroEnergy) => prevHeroEnergy - selectedCard.energy_cost);
+
+            if (selectedCard.hero_id && team.some((hero) => hero.id === selectedCard.hero_id)) {
+                const attackingIndex = team.findIndex((hero) => hero.id === selectedCard.hero_id);
+                if (attackingIndex !== -1) {
+                    setAttackingHeroIndex(attackingIndex);
+                    attackAnimation.resetAnimation();
+                    setIsAttackingAnimation(true);
+                }
+            }
+            attackAnimation.resetAnimation();
+            setIsAttackingAnimation(true);
+
             onSetSelectedEnemies(
                 enemies.map((enemy) => {
                     if (enemy.id === selectedEnemy.id) {
-                        resetHeroAnimation();
-                        setIsAttackingAnimation(true);
                         if (enemy.health - selectedCard.stats <= 0) {
                             console.log('enemy', enemy);
                             setXpGained((prev) => prev + (enemy.type?.reward_xp || 0));
-                            console.log('Total XP gained:', xpGained + (enemy.type?.reward_xp));
+                            console.log('Total XP gained:', xpGained + (enemy.type?.reward_xp || 0));
                         }
                         return { ...enemy, health: enemy.health - selectedCard.stats };
                     } else {
@@ -135,16 +183,22 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
         });
     };
 
-    useTick((ticker) => {
-        if (isAttackingAnimation) {
-            const keepPlaying = updateHeroAttackSprite('RIGHT', false, false, false, true);
+    useTick(() => {
+        if (isAttackingAnimation && attackingHeroIndex !== null) {
+            const keepPlaying = attackAnimation.updateAttackSprite('RIGHT', false, false, false, true);
             if (!keepPlaying) {
-                resetHeroAnimation();
+                attackAnimation.resetAnimation();
                 setIsAttackingAnimation(false);
+                setAttackingHeroIndex(null);
             }
-        } else {
-            updateHeroSprite('DOWN', true, true, false, false);
         }
+
+        // Actualizar animaciones de todos los héroes disponibles
+        heroAnimations.forEach((animation, index) => {
+            if (index < team.length && (!isAttackingAnimation || attackingHeroIndex !== index)) {
+                animation.updateSprite('DOWN', true, true, false, false);
+            }
+        });
 
         if (isCardHeldDown) {
             enemies.forEach((enemy) => {
@@ -202,9 +256,37 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
                 }}
             />
 
-            {heroSprite && (
-                <pixiSprite texture={heroSprite.texture} x={window.innerWidth * 0.15} y={window.innerHeight * 0.4} width={128} height={128} />
-            )}
+            {/* Renderizar héroes con animaciones */}
+            {team.map((hero, index) => {
+                if (index >= heroAnimations.length) return null;
+
+                const heroSprite = isAttackingAnimation && attackingHeroIndex === index ? attackAnimation.sprite : heroAnimations[index]?.sprite;
+
+                const baseX = window.innerWidth * 0.15;
+                const baseY = window.innerHeight * 0.4;
+                const spacing = 120;
+
+                // Calcular el ancho del sprite
+                const isAttackSprite = isAttackingAnimation && attackingHeroIndex === index;
+                const spriteWidth = isAttackSprite ? 384 : 128;
+                const normalWidth = 128;
+
+                // Ajustar la posición X para centrar el sprite cuando se estira
+                const adjustedX = isAttackSprite ? baseX - (spriteWidth - normalWidth) / 2 : baseX;
+
+                return (
+                    heroSprite && (
+                        <pixiSprite
+                            key={hero.id || index}
+                            texture={heroSprite.texture}
+                            x={adjustedX} // ← Usar la posición ajustada
+                            y={baseY + index * spacing}
+                            width={spriteWidth}
+                            height={128}
+                        />
+                    )
+                );
+            })}
 
             <CombatEnemies enemies={enemies} />
 
@@ -223,7 +305,7 @@ export const Combat = ({ hero, heroTexture, enemies, cards, onSetSelectedEnemies
             <HeroStats
                 currentHp={heroHealth}
                 maxHp={maxHeroHealth}
-                heroTexture={heroTexture}
+                heroTexture={teamTextures[0]}
                 energyTexture={energyTexture}
                 maxEnergy={maxHeroEnergy}
                 currentEnergy={heroEnergy}

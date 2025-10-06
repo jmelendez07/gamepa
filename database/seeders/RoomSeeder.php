@@ -12,6 +12,8 @@ class RoomSeeder extends Seeder
 {
     public function run(): void
     {
+        Room::truncate();
+        
         $teachers = Role::where('name', 'docente')->firstOrFail()->users;
         $statuses = RoomStatus::all();
 

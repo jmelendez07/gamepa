@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Planet;
 use App\Models\Galaxy;
+use App\Models\Exercise;
+use App\Models\Step;
+use App\Models\Option;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -11,6 +14,11 @@ class PlanetSeeder extends Seeder
 {
     public function run(): void
     {
+        Planet::truncate();
+        Exercise::truncate();
+        Step::truncate();
+        Option::truncate();
+        
         $galaxies = Galaxy::all();
         $planets = [
             [

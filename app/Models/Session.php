@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -35,7 +36,7 @@ class Session extends Model
      */
     public function getLastActivityAttribute($value)
     {
-        return \Carbon\Carbon::createFromTimestamp($value);
+        return Carbon::createFromTimestamp($value);
     }
 
     /**
@@ -86,5 +87,37 @@ class Session extends Model
         } else {
             return 'Desconocido';
         }
+    }
+
+    public static function getSessionsLastMonth(): array
+    {
+        $startDate = Carbon::now()->subDays(30)->startOfDay();
+        
+        // Obtener todas las sesiones de los últimos 30 días
+        // last_activity es un timestamp numérico
+        $sessions = self::where('last_activity', '>=', $startDate->timestamp)->get();
+        
+        // Agrupar por fecha y contar
+        $grouped = $sessions->groupBy(function ($session) {
+            // last_activity ya viene como timestamp numérico
+            return Carbon::createFromTimestamp($session->getRawOriginal('last_activity'))->format('Y-m-d');
+        })->map(function ($group) {
+            return $group->count();
+        });
+        
+        // Crear array con todos los días (incluso los que tienen 0 sesiones)
+        $sessionsData = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dateKey = $date->format('Y-m-d');
+            $dateLabel = $date->format('d M');
+            
+            $sessionsData[] = [
+                'date' => $dateLabel,
+                'count' => $grouped[$dateKey] ?? 0
+            ];
+        }
+        
+        return $sessionsData;
     }
 }

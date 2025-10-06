@@ -6,27 +6,32 @@ import { useHeroControls } from './useHeroControls';
 import { Direction, IPosition } from '../types/common';
 import { calculateNewTarget, checkCanMove, handleMovement } from '../helpers/common';
 import { useHeroAnimation } from './useHeroAnimation';
+import { on } from 'events';
+import IHero from '@/types/hero';
 
 extend({ Container, Sprite });
 
 interface IHeroProps {
     texture: Texture;
     position: RefObject<{ x: number; y: number }>;
+    heroAtributes: IHero;
     onMove: (gridX: number, gridY: number) => void;
+    onHeroChange?: (heroIndex: number) => void;
 }
 
-export const Hero = ({ texture, position, onMove }: IHeroProps) => {
+export const Hero = ({ texture, position, heroAtributes, onMove, onHeroChange }: IHeroProps) => {
     const targetPosition = useRef<IPosition>(null);
     const currentDirection = useRef<Direction>(null);
     const { sprite, updateSprite } = useHeroAnimation({
         texture,
         frameWidth: 64,
         frameHeight: 64,
-        totalFrames: 9,
-        animationSpeed: ANIMATION_SPEED
+        totalTilesFrames: heroAtributes.hero_animations.find((anim) => anim.action === 'walk')?.totalTilesFrames || 9,
+        animationSpeed: ANIMATION_SPEED,
+        heroAnimation: heroAtributes.hero_animations.find((anim) => anim.action === 'walk') || heroAtributes.hero_animations[0]
     });
 
-    const {getControlsDirection} = useHeroControls();
+    const {getControlsDirection} = useHeroControls(onHeroChange);
 
     const direction = getControlsDirection();
     const isMoving = useRef(false);

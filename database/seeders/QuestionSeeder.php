@@ -11,6 +11,8 @@ class QuestionSeeder extends Seeder
 {
     public function run(): void
     {
+        Question::truncate();
+        
         $rooms = Room::all();
         $questions = [
             [

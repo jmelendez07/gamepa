@@ -17,7 +17,8 @@ class Profile extends Model
         'level_id',
         'avatar_url',
         'progress_bar',
-        'total_xp'
+        'total_xp',
+        'avatar_frame_url'
     ];
 
     #[SearchUsingPrefix(['user_id'])]
@@ -50,5 +51,32 @@ class Profile extends Model
     public function unlockedStages()
     {
         return $this->belongsToMany(Stage::class);
+    }
+
+    public static function getAverageProgress(): float
+    {
+        $totalPlanets = Planet::count();
+        
+        if ($totalPlanets === 0) {
+            return 0;
+        }
+
+        $profiles = self::with('unlockedPlanets')->get();
+        
+        if ($profiles->isEmpty()) {
+            return 0;
+        }
+
+        $totalProgress = $profiles->sum(function ($profile) use ($totalPlanets) {
+            $unlockedCount = $profile->unlockedPlanets->count();
+            return ($unlockedCount / $totalPlanets) * 100;
+        });
+
+        return round($totalProgress / $profiles->count(), 2);
+    }
+    
+    public function completedMissions()
+    {
+        return $this->belongsToMany(Mission::class, 'completed_missions', 'profile_id', 'mission_id');
     }
 }
