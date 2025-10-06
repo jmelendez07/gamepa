@@ -4,7 +4,11 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Illuminate\Support\Facades\DB;
+
+beforeEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+});
 
 test('reset password link screen can be rendered', function () {
     $response = $this->get('/forgot-password');

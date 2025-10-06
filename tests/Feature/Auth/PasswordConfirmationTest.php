@@ -2,7 +2,11 @@
 
 use App\Models\User;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Illuminate\Support\Facades\DB;
+
+beforeEach(function () {
+    DB::connection('mongodb')->getMongoDB()->drop();
+});
 
 test('confirm password screen can be rendered', function () {
     $user = User::factory()->create();
