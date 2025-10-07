@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, ShieldCheck, Folder, LayoutGrid, Users, Earth, Dumbbell, GalleryHorizontalEnd, Swords, GraduationCap, Component } from 'lucide-react';
+import { BookOpen, ShieldCheck, Folder, LayoutGrid, Users, Earth, Dumbbell, GalleryHorizontalEnd, Swords, GraduationCap, Component, BookImage } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -59,6 +59,11 @@ const gameplayNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
+    {
+        title: 'Activos - Cloudinary',
+        href: 'https://console.cloudinary.com/app/c-3e219221fefc2b1b4348bbfc802a8d/assets/media_library/folders/ccb2be57b08937c49136246704c50f77a3',
+        icon: BookImage,
+    },
     {
         title: 'Repository',
         href: 'https://github.com/laravel/react-starter-kit',
