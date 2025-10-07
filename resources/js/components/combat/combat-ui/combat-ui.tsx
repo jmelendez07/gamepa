@@ -67,7 +67,7 @@ export const CombatUI = ({ teamHeroes, currentTurn, currentStage }: CombatUIProp
             })}
 
             <pixiText 
-                text={currentStage.name}
+                text={`Etapa N°${currentStage.number}: ${currentStage.name}`}
                 x={window.innerWidth - 30}
                 y={5 + window.innerHeight / 13 / 2}
                 anchor={{ x: 1, y: 0.5 }}
