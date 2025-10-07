@@ -15,11 +15,10 @@ import { Stage } from '@/types/planet';
 import type { Page as InertiaPage } from '@inertiajs/core'; // was Page as InertiaPageProps
 import { router, usePage } from '@inertiajs/react';
 import { extend } from '@pixi/react';
-import { Assets, Container, Sprite, TextStyle, Texture } from 'pixi.js';
+import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { StatsUI } from './stats-ui';
 import { HeroSelectionUI } from './MainContainer-UI/hero-selection-ui';
-import { color } from 'motion/react';
 import { ProfileUI } from './MainContainer-UI/profile-ui';
 import { MissionsUI } from './MainContainer-UI/misions-ui';
 
@@ -45,8 +44,6 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
     const [stageTexture, setStageTexture] = useState<Texture | null>(null);
     const [heroTextures, setHeroTextures] = useState<Texture[]>([]);
     const [heroPosition, setHeroPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const [avatarFrameTexture, setAvatarFrameTexture] = useState<Texture | null>(null);
-    const [avatarProfileTexture, setAvatarProfileTexture] = useState<Texture | null>(null);
     const [inCombat, setInCombat] = useState(false);
     const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
     const [totalXpGained, setTotalXpGained] = useState(0);
@@ -125,25 +122,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 setStageTexture(tex);
             }
         });
-
-        // Validar que avatar_frame_url exista antes de cargar
-        const avatarFrameUrl = auth.user?.profile?.avatar_frame_url;
-        if (avatarFrameUrl) {
-            Assets.load<Texture>(avatarFrameUrl).then((tex) => {
-                if (!cancelled) {
-                    setAvatarFrameTexture(tex);
-                }
-            });
-        }
-
-        const avatarUrl = auth.user?.profile?.avatar_url;
-        if (avatarUrl) {
-            Assets.load<Texture>(avatarUrl).then((tex) => {
-                if (!cancelled) {
-                    setAvatarProfileTexture(tex);
-                }
-            });
-        }
+        
 
         // Cargar todas las texturas de héroes
         const heroTexturePromises = heroes.map((hero) => Assets.load<Texture>(hero.spritesheet));
@@ -224,10 +203,6 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         }
     };
 
-    // Función para obtener el nivel actual basado en XP
-    const getCurrentLevel = useCallback(() => {
-        return userProfile?.level || auth.user?.profile?.level || null;
-    }, [userProfile, auth.user]);
 
     const checkCombatArea = useCallback(() => {
         enemies.forEach((enemy) => {
@@ -283,7 +258,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
 
     return (
         <pixiContainer>
-            <GameplayMenu canvasSize={canvasSize} />
+            {!inCombat && <GameplayMenu canvasSize={canvasSize} />}
             {bgTexture && <pixiSprite texture={bgTexture} width={canvasSize.width} height={canvasSize.height} />}
             {children}
             <Camera canvasSize={canvasSize} heroPosition={heroPosition}>
@@ -319,21 +294,23 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 )}
             </Camera>
 
-            {heroOnTheField && (
-                <StatsUI currentHero={heroOnTheField} />
-            )}
+            {heroOnTheField && <StatsUI currentHero={heroOnTheField} />}
 
             {teamHeroes && (
                 <HeroSelectionUI teamHeroes={teamHeroes} currentHeroIndex={teamHeroes.findIndex((hero) => hero.id === heroOnTheField?.id)} />
             )}
 
-            {stage && (
-                <pixiText text={`Etapa ${stage.number} : ${stage.name}`} x={(window.innerWidth / 9) * 7} y={35} zIndex={100} style={{ fill: 0xffffff, fontSize: 24, fontFamily: 'Jersey 10' }} />
+            {stage && !inCombat && (
+                <pixiText
+                    text={`Etapa ${stage.number} : ${stage.name}`}
+                    x={(window.innerWidth / 9) * 7}
+                    y={35}
+                    zIndex={100}
+                    style={{ fill: 0xffffff, fontSize: 24, fontFamily: 'Jersey 10' }}
+                />
             )}
 
-            {stageTexture && (
-                <pixiSprite texture={stageTexture} x={(window.innerWidth / 7) * 5 + 30} y={10} width={64} height={64} />
-            )}
+            {stageTexture && <pixiSprite texture={stageTexture} x={(window.innerWidth / 7) * 5 + 30} y={10} width={64} height={64} />}
 
             {inCombat && currentHeroTexture && (
                 <Combat
@@ -341,6 +318,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                     teamTextures={heroTextures}
                     cards={cards}
                     enemies={selectedEnemies}
+                    currentStage={stage}
                     onSetSelectedEnemies={onSetSelectedEnemies}
                     finish={finish}
                     lose={loseCombat}
@@ -353,13 +331,9 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 </>
             )} */}
 
-            {!inCombat && userProfile && (
-                <ProfileUI userProfile={userProfile || null} />
-            )}
+            {!inCombat && userProfile && <ProfileUI userProfile={userProfile || null} />}
 
-            {!inCombat && (
-                <MissionsUI stage={stage} />
-            )}
+            {!inCombat && <MissionsUI stage={stage} />}
 
             <PortalUI
                 canvasSize={canvasSize}
