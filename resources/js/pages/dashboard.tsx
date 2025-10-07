@@ -44,6 +44,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
+
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
     usePoll(10000);
     const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
@@ -444,7 +446,30 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                     </div>
                 </div>
 
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
+                {powerBiUrl && (
+                    <Card className="border-purple-200 dark:border-purple-900 pb-0">
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold">
+                                Reporte Power BI
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                                Análisis detallado de datos
+                            </p>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+                                <iframe
+                                    title="Power BI Report"
+                                    src={powerBiUrl}
+                                    className="absolute top-0 left-0 w-full h-full border-0 rounded-b-lg"
+                                    allowFullScreen
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-40 dark:border-sidebar-border">
                     <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
                 </div>
             </div>
