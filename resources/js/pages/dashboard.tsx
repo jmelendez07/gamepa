@@ -47,7 +47,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
 
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
-    usePoll(10000);
     const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
 
     const planetColors = ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#581c87', '#3b0764'];
