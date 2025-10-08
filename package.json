@@ -56,6 +56,8 @@
         "clsx": "^2.1.1",
         "concurrently": "^9.0.1",
         "globals": "^15.14.0",
+        "html2canvas-pro": "^1.5.11",
+        "jspdf": "^3.0.3",
         "laravel-echo": "^2.2.0",
         "laravel-vite-plugin": "^2.0",
         "lucide-react": "^0.475.0",
