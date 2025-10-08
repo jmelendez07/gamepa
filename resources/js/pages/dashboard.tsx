@@ -456,12 +456,12 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="relative w-full" style={{ paddingTop: '56.25%'}}>
-                            <iframe
+                            {/* <iframe
                                 title="Power BI Report"
                                 src="https://app.powerbi.com/view?r=eyJrIjoiOTlmYWE5OGYtYWFmYi00NTI2LWE0NWQtOGVhMDZhMTU0YzhjIiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
                                 className="absolute top-0 left-0 w-full h-full border-0 rounded-b-lg"
                                 {...({ allowFullScreen: true } as React.IframeHTMLAttributes<HTMLIFrameElement>)}
-                            />
+                            /> */}
                         </div>
                     </CardContent>
                 </Card>
