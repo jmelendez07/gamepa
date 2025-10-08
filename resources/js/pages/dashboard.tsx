@@ -460,7 +460,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                 title="Power BI Report"
                                 src="https://app.powerbi.com/view?r=eyJrIjoiOTlmYWE5OGYtYWFmYi00NTI2LWE0NWQtOGVhMDZhMTU0YzhjIiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
                                 className="absolute top-0 left-0 w-full h-full border-0 rounded-b-lg"
-                                allowFullScreen
+                                {...({ allowFullScreen: true } as React.IframeHTMLAttributes<HTMLIFrameElement>)}
                             />
                         </div>
                     </CardContent>
