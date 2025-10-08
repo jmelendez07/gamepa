@@ -6,6 +6,7 @@ import Enemy from '@/types/enemy';
 import Card from '@/types/card';
 import Hero from '@/types/hero';
 import { Stage } from '@/types/planet';
+import { TeamProvider, useTeam } from '@/Providers/TeamProvider';
 
 interface IExperienceProps {
 	enemies: Enemy[];
@@ -36,8 +37,10 @@ export const Experience = ({ enemies, cards, heroes, stage }: IExperienceProps) 
 		<>
 			{isClient && (
 				<Application width={canvasSize.width} height={canvasSize.height}>
-					<MainContainer defaultEnemies={enemies} cards={cards} canvasSize={canvasSize} heroes={heroes} stage={stage}>
-					</MainContainer>
+					<TeamProvider initialHeroes={heroes}>
+						<MainContainer defaultEnemies={enemies} cards={cards} canvasSize={canvasSize} stage={stage}>
+						</MainContainer>
+					</TeamProvider>
 				</Application>
 			)}
 		</>

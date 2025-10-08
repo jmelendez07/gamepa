@@ -1,5 +1,7 @@
 import ICard from '@/types/card';
+import Hero from '@/types/hero';
 import { extend, useTick } from '@pixi/react';
+import { on } from 'events';
 import { Assets, ColorMatrixFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -10,6 +12,7 @@ interface ICardProps {
     onSelectedCard: (card: ICard | null) => void;
     onHeldDownChange: (isHeldDown: boolean) => void;
     onCardPositionChange: (cardPosition: { x: number; y: number }) => void;
+    onCurrentHeroInCombatId?: (id: string) => void;
     isTargetAssigned?: boolean;
     onAttack?: (isAttacking: boolean) => void;
     initialPosition?: { x: number; y: number };
@@ -22,6 +25,7 @@ export const Card = ({
     onSelectedCard,
     onHeldDownChange,
     onCardPositionChange,
+    onCurrentHeroInCombatId,
     isTargetAssigned,
     onAttack,
     initialPosition,
@@ -160,7 +164,10 @@ export const Card = ({
     };
 
     const handlePointerOver = () => {
-        if (!isPointerDown && !isDisabled) setIsHovered(true);
+        if (!isPointerDown && !isDisabled) {
+            setIsHovered(true);
+            onCurrentHeroInCombatId?.(card.hero_id);
+        }
     };
 
     const handlePointerOut = () => {
