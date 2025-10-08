@@ -14,6 +14,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useChartExport from '@/hooks/use-chart-export';
 
 interface SessionData {
     date: string;
@@ -43,7 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
-    // const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
+    const { exportAsImage, exportDashboardCompleteImage } = useChartExport();
 
     const planetColors = ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#581c87', '#3b0764'];
 
