@@ -8,6 +8,7 @@ interface ICardsInHandProps {
     isTargetAssigned: boolean;
     setIsAttacking: (isAttacking: boolean) => void;
     setSelectedCard: (card: ICard | null) => void;
+    setCurrentHeroInCombatId?: (id: string | null) => void;
     isDisabled: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function CardsInHand({
     isTargetAssigned,
     setIsAttacking,
     setSelectedCard,
+    setCurrentHeroInCombatId,
     isDisabled,
 }: ICardsInHandProps) {
     // Calcular espaciado y posición basado en el tamaño de pantalla
@@ -70,6 +72,7 @@ export default function CardsInHand({
                         initialPosition={cardPosition}
                         initialRotation={rotationAngle}
                         onSelectedCard={isDisabled ? () => {} : setSelectedCard}
+                        onCurrentHeroInCombatId={setCurrentHeroInCombatId}
                         isDisabled={isDisabled}
                     />
                 );

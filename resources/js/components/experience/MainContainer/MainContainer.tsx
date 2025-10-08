@@ -12,7 +12,7 @@ import Card from '@/types/card';
 import IEnemy from '@/types/enemy';
 import IHero from '@/types/hero';
 import { Stage } from '@/types/planet';
-import type { Page as InertiaPage } from '@inertiajs/core'; // was Page as InertiaPageProps
+import type { Page as InertiaPage } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/react';
 import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
@@ -21,22 +21,22 @@ import { StatsUI } from './stats-ui';
 import { HeroSelectionUI } from './MainContainer-UI/hero-selection-ui';
 import { ProfileUI } from './MainContainer-UI/profile-ui';
 import { MissionsUI } from './MainContainer-UI/misions-ui';
+import { useTeam } from '@/Providers/TeamProvider';
 
 extend({ Container, Sprite });
 
 interface IMainContainerProps {
     canvasSize: { width: number; height: number };
     defaultEnemies: IEnemy[];
-    heroes: IHero[];
     cards: Card[];
     stage: Stage;
 }
 
 const bgAsset = '/assets/bg-galaxy.png';
 const portalAsset = '/assets/portal.png';
-const stageAsset = 'https://res.cloudinary.com/dvibz13t8/image/upload/v1759327239/etapa_qicev8.png'
+const stageAsset = 'https://res.cloudinary.com/dvibz13t8/image/upload/v1759327239/etapa_qicev8.png';
 
-export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage, children }: PropsWithChildren<IMainContainerProps>) => {
+export const MainContainer = ({ canvasSize, defaultEnemies, cards, stage, children }: PropsWithChildren<IMainContainerProps>) => {
     const position = useRef({ x: DEFAULT_HERO_POSITION_X, y: DEFAULT_HERO_POSITION_Y });
     const [selectedEnemies, setSelectedEnemies] = useState<IEnemy[]>([]);
     const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -47,8 +47,15 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
     const [inCombat, setInCombat] = useState(false);
     const [enemies, setEnemies] = useState<IEnemy[]>(defaultEnemies);
     const [totalXpGained, setTotalXpGained] = useState(0);
-    const [teamHeroes, setTeamHeroes] = useState<IHero[]>(heroes.length > 0 ? heroes : []);
-    const [heroOnTheField, setHeroOnTheField] = useState<IHero>(teamHeroes[1] ?? null);
+    const [heroOnTheFieldId, setHeroOnTheFieldId] = useState<string | null>(null); // ✅ Guardar solo el ID
+
+    // Usar teamHeroes del context en lugar de estado local
+    const { teamHeroes, updateHeroHealth, resetTeamHealth } = useTeam();
+
+    // ✅ Obtener el héroe actual desde teamHeroes (siempre actualizado)
+    const heroOnTheField = heroOnTheFieldId 
+        ? teamHeroes.find(h => h.id === heroOnTheFieldId) || teamHeroes[0] || null
+        : teamHeroes[0] || null;
 
     // Agregar estado local para el perfil del usuario
     const { auth } = usePage<SharedData>().props;
@@ -74,8 +81,6 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
 
     const generateRandomPosition = useCallback(
         (index: number) => ({
-            // x: Math.floor(Math.random() * (750 - 20 + 1)) + 20,
-            // y: Math.floor(Math.random() * (470 - 30 + 1)) + 30,
             x: 200 + index * 200,
             y: 200,
         }),
@@ -83,15 +88,12 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
     );
 
     const generateRandomMapPosition = useCallback((index: number) => {
-        // Área horizontal: mitad de la pantalla (centrada)
         const baseX = window.innerWidth * 0.5;
+        const minY = window.innerHeight * (1 / 3);
+        const maxY = window.innerHeight * (2 / 3);
+        const baseY = minY + (maxY - minY) * 0.3;
 
-        // Área vertical: segundo cuadrante (1/3 a 2/3 de la altura)
-        const minY = window.innerHeight * (1 / 3); // Inicio del segundo cuadrante
-        const maxY = window.innerHeight * (2 / 3); // Final del segundo cuadrante
-        const baseY = minY + (maxY - minY) * 0.3; // Posición base dentro del cuadrante
-
-        const spacing = 120; // Reducido para ajustarse al área más pequeña
+        const spacing = 120;
         const enemiesPerRow = 3;
 
         const row = Math.floor(index / enemiesPerRow);
@@ -104,9 +106,16 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
 
         return {
             x: Math.max(150, Math.min(baseX + col * spacing + randomOffsetX, window.innerWidth - 150)),
-            y: Math.max(minY, Math.min(calculatedY, maxY - 50)), // Mantener dentro del segundo cuadrante
+            y: Math.max(minY, Math.min(calculatedY, maxY - 50)),
         };
     }, []);
+
+    // ✅ Inicializar heroOnTheFieldId con el primer héroe del context
+    useEffect(() => {
+        if (teamHeroes.length > 0 && !heroOnTheFieldId) {
+            setHeroOnTheFieldId(teamHeroes[0].id);
+        }
+    }, [teamHeroes, heroOnTheFieldId]);
 
     useEffect(() => {
         let cancelled = false;
@@ -122,10 +131,9 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 setStageTexture(tex);
             }
         });
-        
 
-        // Cargar todas las texturas de héroes
-        const heroTexturePromises = heroes.map((hero) => Assets.load<Texture>(hero.spritesheet));
+        // Cargar todas las texturas de héroes del context
+        const heroTexturePromises = teamHeroes.map((hero) => Assets.load<Texture>(hero.spritesheet));
 
         Promise.all(heroTexturePromises).then((textures) => {
             if (!cancelled) {
@@ -142,7 +150,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [teamHeroes]);
 
     const checkCollisionWithArea = useCallback((heroPos: { x: number; y: number }, enemyPos: { x: number; y: number }, threshold: number) => {
         const dx = Math.abs(heroPos.x - enemyPos.x / TILE_SIZE);
@@ -154,15 +162,21 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         if (value && selectedEnemies) {
             setEnemies((enemies) => enemies.filter((enemy) => !selectedEnemies.some((selectedEnemy) => selectedEnemy.id === enemy.id)));
             setSelectedEnemies([]);
+            
         }
         const newTotalXp = totalXpGained + xpFromCombat;
         setTotalXpGained(newTotalXp);
         updateUserProfileLevel(newTotalXp);
-        console.log('Total XP Gained:', newTotalXp);
         setInCombat(!value);
     };
 
     const loseCombat = () => {
+        // Reducir salud de todos los héroes cuando pierden
+        teamHeroes.forEach(hero => {
+            const newHealth = Math.floor(hero.health * 0.5); // Reducir al 50%
+            updateHeroHealth(hero.id, newHealth);
+        });
+
         setInCombat(false);
         setSelectedEnemies([]);
         updateHeroPosition(0, 0);
@@ -175,7 +189,6 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
 
     const updateUserProfileLevel = async (newTotalXp: number) => {
         try {
-            // Actualizar estado local inmediatamente para la UI
             const newTotalUserXp = (currentUserXp ?? 0) + newTotalXp;
             setCurrentUserXp(newTotalUserXp);
 
@@ -203,7 +216,6 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         }
     };
 
-
     const checkCombatArea = useCallback(() => {
         enemies.forEach((enemy) => {
             if (enemy.map_position && checkCollisionWithArea(heroPosition, enemy.map_position, 1)) {
@@ -224,7 +236,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 setSelectedEnemies(enemiesInCombat);
             }
         });
-    }, [heroPosition, enemies]);
+    }, [heroPosition, enemies, checkCollisionWithArea]);
 
     useEffect(() => {
         if (enemies.length > 0) {
@@ -236,7 +248,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 })),
             );
         }
-    }, [enemies.length, generateRandomPosition]);
+    }, [enemies.length, generateRandomPosition, generateRandomMapPosition]);
 
     useEffect(() => {
         checkCombatArea();
@@ -250,7 +262,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
         (heroIndex: number) => {
             // Solo cambiar si no está en combate y el índice es válido
             if (!inCombat && teamHeroes[heroIndex]) {
-                setHeroOnTheField(teamHeroes[heroIndex]);
+                setHeroOnTheFieldId(teamHeroes[heroIndex].id); // ✅ Guardar el ID
             }
         },
         [inCombat, teamHeroes],
@@ -269,7 +281,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                 {enemies.map((enemy) => (
                     <Enemy key={enemy.id} enemy={enemy} x={enemy.map_position?.x || 0} y={enemy.map_position?.y || 0} />
                 ))}
-                {currentHeroTexture && (
+                {currentHeroTexture && heroOnTheField && (
                     <Hero
                         position={position}
                         texture={currentHeroTexture}
@@ -296,7 +308,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
 
             {heroOnTheField && <StatsUI currentHero={heroOnTheField} />}
 
-            {teamHeroes && (
+            {teamHeroes.length > 0 && (
                 <HeroSelectionUI teamHeroes={teamHeroes} currentHeroIndex={teamHeroes.findIndex((hero) => hero.id === heroOnTheField?.id)} />
             )}
 
@@ -319,17 +331,12 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, heroes, stage
                     cards={cards}
                     enemies={selectedEnemies}
                     currentStage={stage}
+                    currentHero={heroOnTheField}
                     onSetSelectedEnemies={onSetSelectedEnemies}
                     finish={finish}
                     lose={loseCombat}
                 />
             )}
-            {/* {!inCombat && (
-                <>
-                    <pixiText text={'Nivel: ' + (getCurrentLevel()?.order || 1)} x={20} y={10} zIndex={100} style={levelStyle} />
-                    <pixiText text={'XP: ' + currentUserXp} x={180} y={10} zIndex={100} style={xpStyle} />
-                </>
-            )} */}
 
             {!inCombat && userProfile && <ProfileUI userProfile={userProfile || null} />}
 

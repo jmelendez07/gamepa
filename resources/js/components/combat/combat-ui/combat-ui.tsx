@@ -51,18 +51,25 @@ export const CombatUI = ({ teamHeroes, currentTurn, currentStage }: CombatUIProp
                 const avatarSize = 40;
                 const xPosition = window.innerWidth / 3 - (avatarSize + gap) * (teamHeroes.length - index) + gap;
                 const yPosition = 5 + (window.innerHeight / 13 - avatarSize) / 2;
+                const hero = teamHeroes[index];
+                
                 return (
-                    <>
+                    <pixiContainer key={`hero-ui-${hero.id}-${index}`}>
                         <pixiText
-                            key={index}
-                            text={`30/${teamHeroes[index].health}`}
+                            text={`${hero.current_health}/${hero.health}`}
                             x={xPosition - 35}
                             y={5 + window.innerHeight / 13 / 2}
                             anchor={{ x: 0.5, y: 0.5 }}
                             style={{ fill: 'white', fontSize: 24, fontFamily: 'Jersey 10' }}
                         />
-                        <pixiSprite key={index} texture={texture} x={xPosition} y={yPosition} width={avatarSize} height={avatarSize} />
-                    </>
+                        <pixiSprite 
+                            texture={texture} 
+                            x={xPosition} 
+                            y={yPosition} 
+                            width={avatarSize} 
+                            height={avatarSize} 
+                        />
+                    </pixiContainer>
                 );
             })}
 

@@ -1,4 +1,4 @@
-import Hero from '@/types/hero';
+ import Hero from '@/types/hero';
 import { extend } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { useEffect, useState } from 'react';
@@ -11,10 +11,7 @@ interface StatsUIProps {
 
 export const StatsUI = ({ currentHero }: StatsUIProps) => {
     const [iconHeroRole, setIconHeroRole] = useState<Texture>();
-
-    const maxHp = currentHero.health; // Define un HP máximo fijo o desde las props
-    const currentHp = currentHero.health; // HP actual del héroe
-    const healthPercentage = currentHp / maxHp;
+    const healthPercentage = currentHero.current_health / currentHero.health;
 
     useEffect(() => {
         Assets.load<Texture>(currentHero.hero_role.icon_url).then((texture) => {
@@ -176,7 +173,7 @@ export const StatsUI = ({ currentHero }: StatsUIProps) => {
 
             {/* Texto de HP */}
             <pixiText
-                text={`${Math.round(currentHp)}/${maxHp}`}
+                text={`${Math.round(currentHero.current_health)}/${currentHero.health} HP`}
                 anchor={0.5}
                 x={contentOffsetX + dimensions.iconSize + dimensions.spacing + dimensions.barWidth / 2}
                 y={0}

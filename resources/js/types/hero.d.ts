@@ -5,6 +5,7 @@ export default interface Hero {
     name: string;
     spritesheet: string;
     health: number;
+    current_health: number;
     avatar_url: string;
     hero_animations: HeroAnimation[];
     hero_role: HeroRole;
