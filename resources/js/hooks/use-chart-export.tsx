@@ -1,5 +1,5 @@
 import html2canvas from 'html2canvas-pro';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 
 export default function useChartExport() {
     const exportAsImage = async (elementId: string, fileName: string = 'chart') => {
