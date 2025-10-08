@@ -66,7 +66,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
         exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
     };
     
-    const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
+    // const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
 
     usePoll(10000);
 
@@ -447,7 +447,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                     </div>
                 </div>
 
-                {powerBiUrl && (
+                {/* powerBiUrl && (
                     <Card className="border-purple-200 dark:border-purple-900 pb-0">
                         <CardHeader>
                             <CardTitle className="text-lg font-semibold">
@@ -458,7 +458,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                             </p>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+                            <div className="relative w-full" style={{ paddingTop: '56.25%'}}>
                                 <iframe
                                     title="Power BI Report"
                                     src={powerBiUrl}
@@ -468,7 +468,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                             </div>
                         </CardContent>
                     </Card>
-                )}
+                )*/}
 
                 <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-40 dark:border-sidebar-border">
                     <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
