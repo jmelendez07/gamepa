@@ -58,17 +58,15 @@ const gameplayNavItems: NavItem[] = [
     }
 ];
 
-const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
-
 const footerNavItems: NavItem[] = [
     {
         title: 'Activos - Cloudinary',
         href: 'https://console.cloudinary.com/app/c-3e219221fefc2b1b4348bbfc802a8d/assets/media_library/folders/ccb2be57b08937c49136246704c50f77a3',
         icon: BookImage,
     },
-    powerBiUrl && {
+    {
         title: 'Power BI',
-        href: powerBiUrl,
+        href: 'https://app.powerbi.com/view?r=eyJrIjoiOTlmYWE5OGYtYWFmYi00NTI2LWE0NWQtOGVhMDZhMTU0YzhjIiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9',
         icon: ChartNoAxesColumnIncreasing
     }
 ];
