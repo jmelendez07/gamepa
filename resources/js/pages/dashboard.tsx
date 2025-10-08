@@ -44,8 +44,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
-
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
     const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
 
@@ -67,6 +65,10 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
     const handleExportDashboardImage = () => {
         exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
     };
+    
+    const powerBiUrl = import.meta.env.VITE_POWER_BI_URL || null;
+
+    usePoll(10000);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
