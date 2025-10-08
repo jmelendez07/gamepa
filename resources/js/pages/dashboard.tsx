@@ -180,23 +180,9 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                             Actividad diaria de sesiones
                                         </p>
                                     </div>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8">
-                                                <Download className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        {/* <DropdownMenuContent align="end">
-                                            <DropdownMenuItem className="cursor-pointer" onClick={() => exportAsImage('sessions-chart', 'sesiones-ultimos-30-dias')}>
-                                                <FileImage className="mr-2 h-4 w-4" />
-                                                Exportar como PNG
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem className="cursor-pointer" onClick={() => exportAsPDF('sessions-chart', 'sesiones-ultimos-30-dias')}>
-                                                <Download className="mr-2 h-4 w-4" />
-                                                Exportar como PDF
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent> */}
-                                    </DropdownMenu>
+                                    <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8">
+                                        <Download className="h-4 w-4" onClick={() => exportAsImage('sessions-chart', 'sesiones-ultimos-30-dias')} />
+                                    </Button>
                                 </div>
                             </CardHeader>
                             <CardContent id="sessions-chart">
@@ -272,23 +258,9 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Rocket className="size-8 text-purple-600 dark:text-purple-400" />
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8">
-                                                    <Download className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            {/* <DropdownMenuContent align="end">
-                                                <DropdownMenuItem className="cursor-pointer" onClick={() => exportAsImage('planet-chart', 'distribucion-por-planeta')}>
-                                                    <FileImage className="mr-2 h-4 w-4" />
-                                                    Exportar como PNG
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="cursor-pointer" onClick={() => exportAsPDF('planet-chart', 'distribucion-por-planeta')}>
-                                                    <Download className="mr-2 h-4 w-4" />
-                                                    Exportar como PDF
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent> */}
-                                        </DropdownMenu>
+                                        <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8" onClick={() => exportAsImage('planet-chart', 'distribucion-por-planeta')}>
+                                            <Download className="h-4 w-4" />
+                                        </Button>
                                     </div>
                                 </div>
                             </CardHeader>
