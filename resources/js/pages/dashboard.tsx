@@ -44,7 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
-    const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
+    const { exportAsImage, exportDashboardCompleteImage } = useChartExport();
 
     const planetColors = ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#581c87', '#3b0764'];
 
@@ -57,11 +57,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
         percentage: totalProfiles > 0 ? Math.round((planet.profiles_count / totalProfiles) * 100) : 0
     }));
 
-    const handleExportDashboardPDF = () => {
-        exportDashboardCompletePDF('dashboard-content', 'dashboard-completo');
-    };
-
-    const handleExportDashboardImage = () => {
+    const handleExportDashboard = () => {
         exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
     };
 
@@ -80,24 +76,14 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
             `}</style>
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <div className="flex justify-end">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="default" className="cursor-pointer gap-2 bg-purple-600 hover:bg-purple-700">
-                                <FileDown className="h-4 w-4" />
-                                Exportar Todas las Gráficas
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem className='cursor-pointer' onClick={handleExportDashboardPDF}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Exportar dashboard como PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className='cursor-pointer' onClick={handleExportDashboardImage}>
-                                <FileImage className="mr-2 h-4 w-4" />
-                                Exportar dashboard como PNG
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button 
+                        variant="default" 
+                        className="cursor-pointer gap-2 bg-purple-600 hover:bg-purple-700"
+                        onClick={handleExportDashboard}
+                    >
+                        <FileImage className="h-4 w-4" />
+                        Exportar Dashboard
+                    </Button>
                 </div>
 
                 <div id="dashboard-content" className="flex flex-col gap-4">
