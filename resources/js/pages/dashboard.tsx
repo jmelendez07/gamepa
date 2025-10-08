@@ -44,7 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
-    const { exportAsImage, exportDashboardCompleteImage } = useChartExport();
+    const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
 
     const planetColors = ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#581c87', '#3b0764'];
 
@@ -58,11 +58,11 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
     }));
 
     const handleExportDashboardPDF = () => {
-        // exportDashboardCompletePDF('dashboard-content', 'dashboard-completo');
+        exportDashboardCompletePDF('dashboard-content', 'dashboard-completo');
     };
 
     const handleExportDashboardImage = () => {
-        // exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
+        exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
     };
 
     usePoll(10000);
