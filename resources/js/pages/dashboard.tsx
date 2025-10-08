@@ -12,10 +12,8 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useChartExport } from '@/hooks/use-chart-export';
 
 interface SessionData {
     date: string;
@@ -45,7 +43,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ users, sessions, difficulties, averageProgress, sessionsLastMonth, profilesPerPlanet }: IDashboardProps) {
-    const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
+    // const { exportAsImage, exportAsPDF, exportDashboardCompletePDF, exportDashboardCompleteImage } = useChartExport();
 
     const planetColors = ['#a855f7', '#9333ea', '#7e22ce', '#6b21a8', '#581c87', '#3b0764'];
 
@@ -59,11 +57,11 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
     }));
 
     const handleExportDashboardPDF = () => {
-        exportDashboardCompletePDF('dashboard-content', 'dashboard-completo');
+        // exportDashboardCompletePDF('dashboard-content', 'dashboard-completo');
     };
 
     const handleExportDashboardImage = () => {
-        exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
+        // exportDashboardCompleteImage('dashboard-content', 'dashboard-completo');
     };
 
     usePoll(10000);
@@ -201,7 +199,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                                 <Download className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
+                                        {/* <DropdownMenuContent align="end">
                                             <DropdownMenuItem className="cursor-pointer" onClick={() => exportAsImage('sessions-chart', 'sesiones-ultimos-30-dias')}>
                                                 <FileImage className="mr-2 h-4 w-4" />
                                                 Exportar como PNG
@@ -210,7 +208,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                                 <Download className="mr-2 h-4 w-4" />
                                                 Exportar como PDF
                                             </DropdownMenuItem>
-                                        </DropdownMenuContent>
+                                        </DropdownMenuContent> */}
                                     </DropdownMenu>
                                 </div>
                             </CardHeader>
@@ -293,7 +291,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                                     <Download className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
+                                            {/* <DropdownMenuContent align="end">
                                                 <DropdownMenuItem className="cursor-pointer" onClick={() => exportAsImage('planet-chart', 'distribucion-por-planeta')}>
                                                     <FileImage className="mr-2 h-4 w-4" />
                                                     Exportar como PNG
@@ -302,7 +300,7 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                                                     <Download className="mr-2 h-4 w-4" />
                                                     Exportar como PDF
                                                 </DropdownMenuItem>
-                                            </DropdownMenuContent>
+                                            </DropdownMenuContent> */}
                                         </DropdownMenu>
                                     </div>
                                 </div>
@@ -456,12 +454,12 @@ export default function Dashboard({ users, sessions, difficulties, averageProgre
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="relative w-full" style={{ paddingTop: '56.25%'}}>
-                            {/* <iframe
+                            <iframe
                                 title="Power BI Report"
                                 src="https://app.powerbi.com/view?r=eyJrIjoiOTlmYWE5OGYtYWFmYi00NTI2LWE0NWQtOGVhMDZhMTU0YzhjIiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
                                 className="absolute top-0 left-0 w-full h-full border-0 rounded-b-lg"
                                 {...({ allowFullScreen: true } as React.IframeHTMLAttributes<HTMLIFrameElement>)}
-                            /> */}
+                            />
                         </div>
                     </CardContent>
                 </Card>
