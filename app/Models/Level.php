@@ -16,6 +16,7 @@ class Level extends Model
     protected $fillable = [
         'order',
         'xp_required',
+        'next_level_xp'
     ];
 
     public function profiles()

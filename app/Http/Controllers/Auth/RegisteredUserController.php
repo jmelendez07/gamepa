@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hero;
 use App\Models\Level;
 use App\Models\Planet;
 use App\Models\Profile;
@@ -52,10 +53,20 @@ class RegisteredUserController extends Controller
         $profile = Profile::create([
             'user_id' => $user->id,
             'level_id' => $levelOneId,
-            'avatar_url' => asset('assets/default-user-avatar.png'),
+            'avatar_url' => asset('https://res.cloudinary.com/dvibz13t8/image/upload/v1759418515/avatar_ldk2rr.png'),
             'progress_bar' => 0,
             'total_xp' => 0,
+            'avatar_frame_url' => asset('https://res.cloudinary.com/dvibz13t8/image/upload/v1759413505/marco_M_hyzhg3.png')
         ]);
+
+        $heroes = Hero::whereIn('name', ['Warrior', 'Ninja'])->get();
+        $warrior = $heroes->firstWhere('name', 'Warrior');
+        $ninja = $heroes->firstWhere('name', 'Ninja');
+        if (!$warrior || !$ninja) {
+            throw new \Exception('Required heroes not found');
+        }
+
+        $user->heroes()->attach([$warrior->id, $ninja->id]);
 
         $firstPlanet = Planet::orderBy('number', 'asc')->firstOrFail();
         $profile->unlockedPlanets()->attach($firstPlanet->id);
@@ -73,6 +84,6 @@ class RegisteredUserController extends Controller
             return redirect()->intended(route('rooms.index'));
         }
 
-        return redirect()->intended(route('heroes.options'));
+        return redirect()->intended(route('gameplay.index'));
     }
 }

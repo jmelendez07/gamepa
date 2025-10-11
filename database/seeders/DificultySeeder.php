@@ -10,8 +10,9 @@ class DificultySeeder extends Seeder
 {
     public function run(): void
     {
-        $dificulties = ['Fácil', 'Media', 'Difícil'];
+        Dificulty::truncate();
 
+        $dificulties = ['Fácil', 'Media', 'Difícil'];
         foreach ($dificulties as $dificulty) {
             Dificulty::updateOrInsert(
                 ['name' => $dificulty],

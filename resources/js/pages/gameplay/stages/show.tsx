@@ -8,11 +8,11 @@ interface IStagesShowProps {
     stage: Stage;
     enemies: Enemy[];
     cards: Card[];
-    hero: Hero;
+    heroes: Hero[];
 }
 
-export default function StagesShow({ stage, enemies, cards, hero }: IStagesShowProps) {
+export default function StagesShow({ stage, enemies, cards, heroes }: IStagesShowProps) {
     return (
-        <Experience enemies={enemies} cards={cards} hero={hero} stage={stage} />
+        <Experience enemies={enemies} cards={cards} heroes={heroes} stage={stage} />
     );
 }
