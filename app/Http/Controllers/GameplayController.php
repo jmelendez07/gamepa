@@ -90,12 +90,27 @@ class GameplayController extends Controller
         ]);
     }
 
-    public function test($stage)
+    public function test($stageId)
     {
-        $stage = Stage::with(['points'])->findOrFail($stage);
+        $stage = Stage::with(['points'])->findOrFail($stageId);
+        $heroes = Auth::user()->heroes()->with(['cards.type', 'heroAnimations', 'heroRole'])->get();
+
+        $enemies = [];
+
+        $orcEnemy = Enemy::with('type')->where('name', 'Orc')->first();
+        if ($orcEnemy) {
+            $enemies[] = $orcEnemy;
+        }
+
+        $DragonEnemy = Enemy::with('type')->where('name', 'Dragon')->first();
+        if ($DragonEnemy) {
+            $enemies[] = $DragonEnemy;
+        }
         
         return Inertia::render('gameplay/stages/test', [
-            'stage' => $stage
+            'stage' => $stage,
+            'heroes' => $heroes,
+            'enemies' => $enemies
         ]);
     }
     
