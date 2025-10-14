@@ -94,6 +94,7 @@ class GameplayController extends Controller
     {
         $stage = Stage::with(['points'])->findOrFail($stageId);
         $heroes = Auth::user()->heroes()->with(['cards.type', 'heroAnimations', 'heroRole'])->get();
+        $easy = Dificulty::where('name', 'Fácil')->firstOrFail()->id;
 
         $enemies = [];
 
@@ -106,11 +107,23 @@ class GameplayController extends Controller
         if ($DragonEnemy) {
             $enemies[] = $DragonEnemy;
         }
+
+        $cards = [];
+
+        foreach($heroes as $hero){
+            foreach($hero->cards as $card) {
+                $card->exercise = $this->randomExercise($easy);
+                $cards[] = $card;
+            }
+        }
+
+        shuffle($cards);
         
         return Inertia::render('gameplay/stages/test', [
             'stage' => $stage,
             'heroes' => $heroes,
-            'enemies' => $enemies
+            'enemies' => $enemies,
+            'cards' => $cards,
         ]);
     }
     

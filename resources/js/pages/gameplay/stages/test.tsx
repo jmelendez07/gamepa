@@ -1,19 +1,26 @@
+import { Combat } from "@/components/combat/combat";
 import useEnemyAnimation from "@/components/enemy/useEnemyAnimation";
 import { KeyMap } from "@/components/types/key";
 import { Actions } from "@/enums/hero-actions";
 import { Directions } from "@/enums/hero-directions";
 import { ALLOWED_KEYS, getPolygonCentroid, getRow, HERO_FRAME_SIZE, HERO_MOVING_SPEED, HERO_MOVING_SPEED_RUNNING, isPointInPolygon, MAP_SCALE } from "@/lib/utils";
 import { TeamProvider, useTeam } from "@/Providers/TeamProvider";
+import { SharedData, UserProfile } from "@/types";
 import Enemy from "@/types/enemy";
 import Hero from "@/types/hero";
 import { Stage as IStage } from "@/types/planet";
+import { router, usePage } from "@inertiajs/react";
 import { Application, extend, useTick } from "@pixi/react";
-import { Assets, Container, Sprite, Texture, Ticker, Graphics, Rectangle } from "pixi.js";
+import type { Page as InertiaPage } from '@inertiajs/core';
+import { Assets, Container, Sprite, Texture, Ticker, Graphics, Rectangle, Text } from "pixi.js";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Card from "@/types/card";
 
-extend({ Sprite, Container, Graphics});
+extend({ Sprite, Container, Graphics, Text});
 
-function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[] }) {
+function Experience({ stage, initEnemies, cards }: { stage: IStage, initEnemies: Enemy[], cards: Card[] }) {
+    const { currentHero, teamHeroes, updateHeroHealth, textures } = useTeam();
+    const { auth } = usePage<SharedData>().props;
     const [stageTexture, setStageTexture] = useState<Texture | null>(null);
     const [keys, setKeys] = useState<KeyMap>({});
     const spriteRef = useRef<Sprite>(null);
@@ -23,6 +30,12 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
     const [cooldownLeft, setCooldownLeft] = useState(0);
     const [direction, setDirection] = useState<Directions>(Directions.DOWN);
     const [enemies, setEnemies] = useState<Enemy[]>([]);
+    const [nearbyEnemy, setNearbyEnemy] = useState<Enemy | null>(null);
+    const [combatEnemy, setCombatEnemy] = useState<Enemy | null>(null);
+    const [inCombat, setInCombat] = useState<boolean>(false);
+    const [totalXpGained, setTotalXpGained] = useState(0);
+    const [currentUserXp, setCurrentUserXp] = useState<number>(auth.user?.profile?.total_xp ?? 0);
+    const [userProfile, setUserProfile] = useState<UserProfile | undefined>(auth.user?.profile ?? undefined);
 
     const polygonPoints: [number, number][] = stage.points
         .map(p => [p.x, p.y] as [number, number])
@@ -37,6 +50,29 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
         }),
         [],
     );
+
+    const generateRandomCombatPosition = useCallback((index: number) => {
+        const baseX = window.innerWidth * 0.5;
+        const minY = window.innerHeight * (1 / 3);
+        const maxY = window.innerHeight * (2 / 3);
+        const baseY = minY + (maxY - minY) * 0.3;
+
+        const spacing = 120;
+        const enemiesPerRow = 3;
+
+        const row = Math.floor(index / enemiesPerRow);
+        const col = index % enemiesPerRow;
+
+        const randomOffsetX = (Math.random() - 0.5) * 30;
+        const randomOffsetY = (Math.random() - 0.5) * 40;
+
+        const calculatedY = baseY + row * spacing + randomOffsetY;
+
+        return {
+            x: Math.max(150, Math.min(baseX + col * spacing + randomOffsetX, window.innerWidth - 150)),
+            y: Math.max(minY, Math.min(calculatedY, maxY - 50)),
+        };
+    }, []);
     
     const keysLoop = useCallback((delta: number) => {
         const sprite = spriteRef.current;
@@ -117,6 +153,25 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
         const heroSize = HERO_FRAME_SIZE * 2;
         const enemySize = 64 * 2;
         const collisionRadius = (heroSize + enemySize) / 4;
+        const interactionRadius = collisionRadius * 1.5;
+
+        let closestEnemy: Enemy | null = null;
+        let minDistance = interactionRadius;
+
+        enemies.forEach(enemy => {
+            if (!enemy.map_position) return;
+
+            const dx = newX - enemy.map_position.x;
+            const dy = newY - enemy.map_position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestEnemy = enemy;
+            }
+        });
+
+        setNearbyEnemy(closestEnemy);
 
         const collidesWithEnemy = enemies.some(enemy => {
             if (!enemy.map_position) return false;
@@ -138,6 +193,63 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
 
     }, [keys, polygonPoints, isRunning, runTimeLeft, cooldownLeft, enemies]);
 
+    const updateUserProfileLevel = async (newTotalXp: number) => {
+        try {
+            const newTotalUserXp = (currentUserXp ?? 0) + newTotalXp;
+            setCurrentUserXp(newTotalUserXp);
+
+            await router.post(
+                '/profile/update-xp',
+                { total_xp: newTotalXp },
+                {
+                    onSuccess: (page: InertiaPage) => {
+                        const updatedUser = page.props.auth.user;
+                        if (updatedUser?.profile) {
+                            setUserProfile(updatedUser.profile);
+                            setCurrentUserXp(updatedUser.profile.total_xp);
+                        }
+                    },
+                    onError: (errors) => {
+                        setCurrentUserXp(currentUserXp);
+                    },
+                    preserveState: true,
+                    preserveScroll: true,
+                },
+            );
+        } catch (error) {
+            console.error('Error updating user profile level:', error);
+            setCurrentUserXp(currentUserXp);
+        }
+    };
+
+    const finish = (value: boolean, xpFromCombat: number) => {
+        if (value && combatEnemy) {
+            setEnemies((enemies) => enemies.filter((enemy) => combatEnemy.id === enemy.id));
+            setCombatEnemy(null);
+        }
+
+        const newTotalXp = totalXpGained + xpFromCombat;
+        setTotalXpGained(newTotalXp);
+        updateUserProfileLevel(newTotalXp);
+        setInCombat(false);
+    };
+
+    const lose = () => {
+        teamHeroes.forEach(hero => {
+            const newHealth = Math.floor(hero.health * 0.5);
+            updateHeroHealth(hero.id, newHealth);
+        });
+
+        setCombatEnemy(null);
+        setInCombat(false);
+    };
+
+    const onSetSelectedEnemies = (e: Enemy[]) => {
+        if (e.length === 0) return;
+
+        setCombatEnemy(e[0]);
+    };
+
     useEffect(() => {
         Assets.load(stage.image_url)
             .then((result) => {
@@ -145,9 +257,20 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
             });
 
         const handleKeyDown = (event: KeyboardEvent) => {
+            if (inCombat) {
+                handleBlur();
+                return;
+            }
+
             if (event.code === ALLOWED_KEYS[4]) {
                 event.preventDefault();
                 event.stopPropagation();
+            }
+
+            if (event.code === 'KeyF' && nearbyEnemy) {
+                setInCombat(true);
+                setCombatEnemy(nearbyEnemy);
+                setNearbyEnemy(null);
             }
 
             if (ALLOWED_KEYS.includes(event.code)) {
@@ -156,6 +279,11 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
         };
 
         const handleKeyUp = (event: KeyboardEvent) => {
+            if (inCombat) {
+                handleBlur();
+                return;
+            }
+
             if (ALLOWED_KEYS.includes(event.code)) {
                 setKeys((prevKeys) => ({ ...prevKeys, [event.code]: false }));
             }
@@ -168,7 +296,8 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
         if (initEnemies.length > 0) {
             setEnemies(initEnemies.map((enemy, index) => ({
                 ...enemy,
-                map_position: generateRandomPosition(index)
+                map_position: generateRandomPosition(index),
+                combat_position: generateRandomCombatPosition(index)
             })));
         }
 
@@ -180,11 +309,25 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
             window.removeEventListener('keyup', handleKeyUp);
             window.removeEventListener('blur', handleBlur);
         };
-    }, []);
+    }, [nearbyEnemy, inCombat]);
 
     useTick((ticker: Ticker) => keysLoop(ticker.deltaTime));
 
-    return (
+    return ((inCombat && combatEnemy) 
+    ? (
+        <Combat
+            
+            team={teamHeroes}
+            teamTextures={textures}
+            cards={cards}
+            enemies={[combatEnemy]}
+            currentStage={stage}
+            currentHero={currentHero}
+            onSetSelectedEnemies={onSetSelectedEnemies}
+            finish={finish}
+            lose={lose}
+        />
+    ) : (
         <pixiContainer ref={cameraRef} sortableChildren={true}>
             <HeroUI 
                 spriteRef={spriteRef} 
@@ -197,6 +340,7 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
                 <EnemyUI 
                     key={enemy.id}
                     enemy={enemy}
+                    showInteraction={nearbyEnemy?.id === enemy.id}
                 />
             )) }
             { stageTexture && (
@@ -223,7 +367,7 @@ function Experience({ stage, initEnemies }: { stage: IStage, initEnemies: Enemy[
                 zIndex={2}
             />
         </pixiContainer>
-    );
+    ));
 }
 
 interface HeroUIProps {
@@ -339,8 +483,10 @@ function HeroUI({ x, y, direction, isMoving, isRunning, spriteRef }: HeroUIProps
     ));
 }
 
-function EnemyUI({ enemy }: { enemy: Enemy}) {
+function EnemyUI({ enemy, showInteraction }: { enemy: Enemy, showInteraction?: boolean }) {
     const [texture, setTexture] = useState<Texture>(Texture.WHITE);
+    const pulseRef = useRef(0);
+    const [pulseScale, setPulseScale] = useState(1);
 
     const { sprite, updateSprite } = useEnemyAnimation({
         texture,
@@ -350,7 +496,14 @@ function EnemyUI({ enemy }: { enemy: Enemy}) {
         animationSpeed: 0.1
     });
 
-    useTick(() => updateSprite('idle', 'down'));
+    useTick((ticker) => {
+        updateSprite('idle', 'down');
+        
+        if (showInteraction) {
+            pulseRef.current += ticker.deltaTime * 0.1;
+            setPulseScale(1 + Math.sin(pulseRef.current) * 0.1);
+        }
+    });
 
     useEffect(() => {
         Assets.load<Texture>(enemy.spritesheet)
@@ -360,14 +513,48 @@ function EnemyUI({ enemy }: { enemy: Enemy}) {
     }, []);
 
     return (sprite && (
-        <pixiSprite 
-            texture={sprite.texture}
-            anchor={0.5}
-            scale={2}
-            y={enemy.map_position?.y || 0}
-            x={enemy.map_position?.x || 0}
-            zIndex={enemy.map_position?.y}
-        />   
+        <>
+            <pixiSprite 
+                texture={sprite.texture}
+                anchor={0.5}
+                scale={2}
+                y={enemy.map_position?.y || 0}
+                x={enemy.map_position?.x || 0}
+                zIndex={enemy.map_position?.y}
+            />
+            {showInteraction && (
+                <>
+                    <pixiGraphics
+                        x={(enemy.map_position?.x || 0)}
+                        y={(enemy.map_position?.y || 0) - 100}
+                        scale={pulseScale}
+                        zIndex={9999}
+                        draw={g => {
+                            g.clear();
+                            g.circle(0, 0, 25);
+                            g.fill({ color: 0x2d1b69, alpha: 0.7 });
+                            g.circle(0, 0, 25);
+                            g.stroke({ width: 2, color: 0x8b5cf6, alpha: 1 });
+                        }}
+                    />
+                    <pixiText
+                        text="F"
+                        anchor={0.5}
+                        x={(enemy.map_position?.x || 0)}
+                        y={(enemy.map_position?.y || 0) - 100}
+                        scale={pulseScale}
+                        zIndex={10000}
+                        style={{
+                            fontFamily: 'Arial',
+                            fontSize: 32,
+                            fontWeight: 'bold',
+                            fill: 0xFFFFFF,
+                            align: 'center'
+                        }}
+                    />
+                </>
+            )}
+        </>
     ));
 }
 
@@ -375,9 +562,10 @@ interface TestStageProps {
     stage: IStage;
     heroes: Hero[];
     enemies: Enemy[];
+    cards: Card[];
 }
 
-export default function TestStage({ stage, heroes, enemies }: TestStageProps) {
+export default function TestStage({ stage, heroes, enemies, cards }: TestStageProps) {
     const [isClient, setIsClient] = useState<boolean>(false);
     const [size, setSize] = useState<{ width: number; height: number }>({ width: window.innerWidth, height: window.innerHeight });
 
@@ -393,7 +581,7 @@ export default function TestStage({ stage, heroes, enemies }: TestStageProps) {
     return (isClient &&
         <Application width={size.width} height={size.height} background={0x1099bb}>
             <TeamProvider initialHeroes={heroes}>
-                <Experience stage={stage} initEnemies={enemies} />
+                <Experience stage={stage} initEnemies={enemies} cards={cards} />
             </TeamProvider>
         </Application>
     );
