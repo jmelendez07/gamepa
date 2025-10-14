@@ -3,7 +3,7 @@ name: Upload to Google Drive
 on:
   push:
     branches:
-      - main  # cambia si usas otra rama principal
+      - develop  # cambia si usas otra rama principal
 
 jobs:
   upload:
