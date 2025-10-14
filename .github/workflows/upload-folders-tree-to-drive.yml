@@ -30,14 +30,14 @@ jobs:
         run: |
           echo "mindmap" > folder_tree.mmd
           echo "  root((Repo Root))" >> folder_tree.mmd
+          
           find . -mindepth 1 -type d -not -path "./.git/*" -not -path "./.git" | sed 's/^\.\///' | sort | while read dir; do
             
             LEVEL=$(echo "$dir" | tr -cd '/' | wc -c)
             
-            SPACES=""
-            for i in $(seq 0 $LEVEL); do
-              SPACES="$SPACES  "
-            done
+            SPACES_COUNT=$(( (LEVEL + 2) * 2 ))
+            
+            SPACES=$(printf "%*s" $SPACES_COUNT)
             
             FOLDER_NAME=$(basename "$dir")
             
