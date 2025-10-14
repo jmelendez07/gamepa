@@ -45,7 +45,7 @@ jobs:
           done
 
       - name: Render Mermaid to PNG
-        run: mmdc -i folder_tree.mmd -o folder_tree.png -p puppeteer-config.json
+        run: mmdc -i folder_tree.mmd -o folder_tree.png -p puppeteer-config.json --scale 3
 
       - name: Upload PNG to Google Drive
         uses: logickoder/g-drive-upload@main
