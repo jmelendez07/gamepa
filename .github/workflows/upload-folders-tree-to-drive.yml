@@ -3,7 +3,7 @@ name: Upload to Google Drive
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   upload:
@@ -20,8 +20,8 @@ jobs:
       - name: Upload to Google Drive
         uses: adityak74/google-drive-upload-git-action@main
         with:
-          credentials: ${{ secrets.DRIVE_CREDENTIALS }}
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           filename: "prueba.txt"
-          folderId: ${{ secrets.FOLDER_ID }}
+          folderId: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
           name: "archivo-prueba.txt"
           overwrite: "true"
