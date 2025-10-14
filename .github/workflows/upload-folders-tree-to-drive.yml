@@ -20,6 +20,12 @@ jobs:
       - name: Install Mermaid CLI
         run: npm install -g @mermaid-js/mermaid-cli
 
+      - name: Create Puppeteer Config
+        run: |
+          echo '{' > puppeteer-config.json
+          echo '  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"]' >> puppeteer-config.json
+          echo '}' >> puppeteer-config.json
+
       - name: Generate Folder Structure for Mermaid
         run: |
           echo "graph TD" > folder_tree.mmd
