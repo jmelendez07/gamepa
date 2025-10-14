@@ -1,4 +1,4 @@
-name: Upload to Google Drive (OAuth)
+name: Generate Folder Tree and Upload to Google Drive
 
 on:
   push:
@@ -6,27 +6,47 @@ on:
       - develop
 
 jobs:
-  upload:
+  upload_diagram:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create ZIP archive
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y zip
-          zip -r archive.zip *
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli
 
-      - name: Upload to Google Drive with OAuth
+      - name: Generate Folder Structure for Mermaid
+        run: |
+          echo "graph TD" > folder_tree.mmd
+          
+          find . -mindepth 1 -type d | sed 's/^\.\///' | while read dir; do
+            DIR_ID=$(echo "$dir" | sed 's/\//-/g')
+            
+            if [[ "$dir" == *"/"* ]]; then
+              PARENT_DIR=$(dirname "$dir")
+              PARENT_ID=$(echo "$PARENT_DIR" | sed 's/\//-/g')
+              echo "  $PARENT_ID[\"$PARENT_DIR\"] --> $DIR_ID[\"$dir\"]" >> folder_tree.mmd
+            else
+              echo "  REPO[Repo Root] --> $DIR_ID[\"$dir\"]" >> folder_tree.mmd
+            fi
+          done
+
+      - name: Render Mermaid to SVG
+        run: mmdc -i folder_tree.mmd -o folder_tree.svg
+
+      - name: Upload SVG to Google Drive
         uses: logickoder/g-drive-upload@main
         with:
           authType: 'oauth'
           clientId: ${{ secrets.GOOGLE_CLIENT_ID }}
           clientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           refreshToken: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          filename: 'archive.zip'
+          filename: 'folder_tree.svg'
           folderId: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-          name: 'documentation.zip'
+          name: ${{ secrets.GOOGLE_TREE_FILE_NAME }}
           overwrite: 'true'
