@@ -3,7 +3,7 @@ name: Upload to Google Drive
 on:
   push:
     branches:
-      - develop  # cambia si usas otra rama principal
+      - main
 
 jobs:
   upload:
@@ -13,22 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Crear un archivo de prueba (puedes reemplazarlo con tu propio archivo)
       - name: Create test file
         run: |
-          echo "Archivo de prueba generado automáticamente el $(date)" > prueba.txt
+          echo "Este es un archivo de prueba subido automáticamente el $(date)" > prueba.txt
 
-      # Decodificar las credenciales base64 y guardarlas como credentials.json
-      - name: Decode Google credentials
-        run: |
-          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" | base64 --decode > credentials.json
-
-      # Subir archivo a Google Drive
       - name: Upload to Google Drive
         uses: adityak74/google-drive-upload-git-action@main
         with:
-          credentials: credentials.json
-          filename: "prueba.txt"               # archivo local
-          folderId: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}   # ID de la carpeta de Drive
-          name: "archivo-prueba.txt"           # nombre final en Drive
+          credentials: ${{ secrets.DRIVE_CREDENTIALS }}
+          filename: "prueba.txt"
+          folderId: ${{ secrets.FOLDER_ID }}
+          name: "archivo-prueba.txt"
           overwrite: "true"
