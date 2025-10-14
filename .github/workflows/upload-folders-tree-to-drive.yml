@@ -28,22 +28,23 @@ jobs:
 
       - name: Generate Folder Structure for Mermaid
         run: |
-          echo "graph TD" > folder_tree.mmd
+          echo "mindmap" > folder_tree.mmd
+          echo "  root((Repo Root))" >> folder_tree.mmd
           
-          find . -mindepth 1 -type d | sed 's/^\.\///' | while read dir; do
-            DIR_ID=$(echo "$dir" | sed 's/\//-/g')
+          find . -mindepth 1 -type d | sed 's/^\.\///' | sort | while read dir; do
+            LEVEL=$(echo "$dir" | awk -F"/" '{print NF}')
             
-            if [[ "$dir" == *"/"* ]]; then
-              PARENT_DIR=$(dirname "$dir")
-              PARENT_ID=$(echo "$PARENT_DIR" | sed 's/\//-/g')
-              echo "  $PARENT_ID[\"$PARENT_DIR\"] --> $DIR_ID[\"$dir\"]" >> folder_tree.mmd
-            else
-              echo "  REPO[Repo Root] --> $DIR_ID[\"$dir\"]" >> folder_tree.mmd
-            fi
+            SPACES=""
+            for i in $(seq 1 $LEVEL); do
+              SPACES="$SPACES  "
+            done
+            
+            FOLDER_NAME=$(basename "$dir")
+            echo "$SPACES$FOLDER_NAME" >> folder_tree.mmd
           done
 
       - name: Render Mermaid to PNG
-        run: mmdc -i folder_tree.mmd -o folder_tree.png -p puppeteer-config.json
+        run: mmdc -i folder_tree.mmd -o folder_tree.png -p puppeteer-config.json -Z 2
 
       - name: Upload PNG to Google Drive
         uses: logickoder/g-drive-upload@main
