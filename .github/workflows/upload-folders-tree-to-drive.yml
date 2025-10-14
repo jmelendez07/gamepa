@@ -26,20 +26,21 @@ jobs:
           echo '  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"]' >> puppeteer-config.json
           echo '}' >> puppeteer-config.json
 
-      - name: Generate Folder Structure for Mermaid
+      - name: Generate Folder Structure for Mermaid (Mindmap)
         run: |
           echo "mindmap" > folder_tree.mmd
           echo "  root((Repo Root))" >> folder_tree.mmd
-          
-          find . -mindepth 1 -type d | sed 's/^\.\///' | sort | while read dir; do
-            LEVEL=$(echo "$dir" | awk -F"/" '{print NF}')
+          find . -mindepth 1 -type d -not -path "./.git/*" -not -path "./.git" | sed 's/^\.\///' | sort | while read dir; do
+            
+            LEVEL=$(echo "$dir" | tr -cd '/' | wc -c)
             
             SPACES=""
-            for i in $(seq 1 $LEVEL); do
+            for i in $(seq 0 $LEVEL); do
               SPACES="$SPACES  "
             done
             
             FOLDER_NAME=$(basename "$dir")
+            
             echo "$SPACES$FOLDER_NAME" >> folder_tree.mmd
           done
 
