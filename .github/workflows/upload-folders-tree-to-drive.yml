@@ -37,7 +37,7 @@ jobs:
           done
 
       - name: Render Mermaid to SVG
-        run: mmdc -i folder_tree.mmd -o folder_tree.svg --no-sandbox
+        run: mmdc -i folder_tree.mmd -o folder_tree.svg --puppeteer-args "--no-sandbox"
 
       - name: Upload SVG to Google Drive
         uses: logickoder/g-drive-upload@main
