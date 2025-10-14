@@ -1,57 +1,27 @@
-name: Upload test.txt to Google Drive
+name: Upload to Google Drive
 
 on:
   push:
     branches:
-      - develop  # Puedes cambiarlo por otra rama o evento
+      - develop
 
 jobs:
   upload:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create test file
-        run: echo "Actualizado automáticamente el $(date)" > test.txt
+        run: |
+          echo "Este es un archivo de prueba subido automáticamente el $(date)" > prueba.txt
 
       - name: Upload to Google Drive
-        env:
-          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-        run: |
-          echo "$GOOGLE_SERVICE_ACCOUNT" > creds.json
-
-          # Instalar dependencias
-          sudo apt-get update -y
-          sudo apt-get install -y jq curl
-
-          # Construir JWT para obtener el access token
-          EMAIL=$(jq -r .client_email creds.json)
-          PRIVATE_KEY=$(jq -r .private_key creds.json | sed 's/\\n/\n/g')
-
-          HEADER=$(echo -n '{"alg":"RS256","typ":"JWT"}' | openssl base64 -e -A | tr '+/' '-_' | tr -d '=')
-          CLAIM=$(jq -n --arg email "$EMAIL" --arg now "$(date +%s)" '{
-            iss: $email,
-            scope: "https://www.googleapis.com/auth/drive.file",
-            aud: "https://oauth2.googleapis.com/token",
-            exp: ( ($now|tonumber) + 3600 ),
-            iat: ($now|tonumber)
-          }' | openssl base64 -e -A | tr '+/' '-_' | tr -d '=')
-          SIGNATURE=$(echo -n "$HEADER.$CLAIM" | openssl dgst -sha256 -sign <(echo "$PRIVATE_KEY") | openssl base64 -e -A | tr '+/' '-_' | tr -d '=')
-          JWT="$HEADER.$CLAIM.$SIGNATURE"
-
-          ACCESS_TOKEN=$(curl -s -X POST \
-            -d "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=$JWT" \
-            https://oauth2.googleapis.com/token | jq -r '.access_token')
-
-          # Subir el archivo test.txt a la carpeta especificada
-          curl -X POST \
-            -L "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart" \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -F "metadata={name : 'test.txt', parents: [\"$GOOGLE_DRIVE_FOLDER_ID\"]};type=application/json;charset=UTF-8" \
-            -F "file=@test.txt;type=text/plain"
-
-      - name: Confirm completion
-        run: echo "Archivo test.txt subido a Google Drive ✅"
+        uses: adityak74/google-drive-upload-git-action@main
+        with:
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          filename: "prueba.txt"
+          folderId: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+          name: "archivo-prueba.txt"
+          overwrite: "true"
