@@ -42,17 +42,17 @@ jobs:
             fi
           done
 
-      - name: Render Mermaid to SVG
-        run: mmdc -i folder_tree.mmd -o folder_tree.svg -p puppeteer-config.json
+      - name: Render Mermaid to PNG
+        run: mmdc -i folder_tree.mmd -o folder_tree.png -p puppeteer-config.json
 
-      - name: Upload SVG to Google Drive
+      - name: Upload PNG to Google Drive
         uses: logickoder/g-drive-upload@main
         with:
           authType: 'oauth'
           clientId: ${{ secrets.GOOGLE_CLIENT_ID }}
           clientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           refreshToken: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          filename: 'folder_tree.svg'
+          filename: 'folder_tree.png'
           folderId: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
           name: ${{ secrets.GOOGLE_TREE_FILE_NAME }}
           overwrite: 'true'
