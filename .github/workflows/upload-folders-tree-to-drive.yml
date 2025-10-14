@@ -1,4 +1,4 @@
-name: Upload to Google Drive
+name: Upload to Google Drive (OAuth)
 
 on:
   push:
@@ -13,15 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create test file
+      - name: Create ZIP archive
         run: |
-          echo "Este es un archivo de prueba subido automáticamente el $(date)" > prueba.txt
+          sudo apt-get update -y
+          sudo apt-get install -y zip
+          zip -r archive.zip *
 
-      - name: Upload to Google Drive
-        uses: adityak74/google-drive-upload-git-action@main
+      - name: Upload to Google Drive with OAuth
+        uses: logickoder/g-drive-upload@main
         with:
-          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-          filename: "prueba.txt"
+          authType: 'oauth'
+          clientId: ${{ secrets.GOOGLE_CLIENT_ID }}
+          clientSecret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          refreshToken: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          filename: 'archive.zip'
           folderId: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-          name: "archivo-prueba.txt"
-          overwrite: "true"
+          name: 'documentation.zip'
+          overwrite: 'true'
