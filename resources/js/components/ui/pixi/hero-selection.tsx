@@ -1,13 +1,18 @@
-import Hero from '@/types/hero';
+import { useTeam } from '@/Providers/TeamProvider';
 import { Assets, Container, Texture } from 'pixi.js';
 import { useEffect, useRef, useState } from 'react';
 
-interface HeroSelectionUIProps {
-    teamHeroes: Hero[];
-    currentHeroIndex?: number;
-}
+const itemHeight = 100;
+const gap = 10;
+const totalItemHeight = itemHeight + gap;
+const borderRadius = 50;
+const borderWidth = 3;
+const healthBarWidth = 80;
+const healthBarHeight = 8;
+const healthBarRadius = 4;
 
-export const HeroSelectionUI = ({ teamHeroes, currentHeroIndex }: HeroSelectionUIProps) => {
+export const HeroSelectionUI = () => {
+    const { teamHeroes, currentHero } = useTeam();
     const [heroAvatars, setHeroAvatars] = useState<Texture[]>([]);
     const [roleIcons, setRoleIcons] = useState<Texture[]>([]);
     const containerRef = useRef<Container>(null);
@@ -27,17 +32,6 @@ export const HeroSelectionUI = ({ teamHeroes, currentHeroIndex }: HeroSelectionU
         loadRolesIcons();
     }, [teamHeroes]);
 
-    const itemHeight = 100;
-    const gap = 10;
-    const totalItemHeight = itemHeight + gap;
-    const borderRadius = 50;
-    const borderWidth = 3;
-
-    // Dimensiones de la barra de vida
-    const healthBarWidth = 80;
-    const healthBarHeight = 8;
-    const healthBarRadius = 4;
-
     const getHealthColor = (percentage: number) => {
         if (percentage > 0.6) return 0x4caf50;
         if (percentage > 0.35) return 0xffc107;
@@ -51,30 +45,26 @@ export const HeroSelectionUI = ({ teamHeroes, currentHeroIndex }: HeroSelectionU
     };
 
     return (
-        <pixiContainer x={(window.innerWidth / 7) * 6} y={window.innerHeight / 6}>
+        <pixiContainer zIndex={1000} x={(window.innerWidth / 7) * 6} y={window.innerHeight / 8}>
             {heroAvatars.map((avatar, index) => {
                 const yPosition = index * totalItemHeight;
-                const isCurrentHero = currentHeroIndex === index;
                 const hero = teamHeroes[index];
-                const healthPercentage = hero.health / hero.health; // Ajusta con maxHealth si lo tienes
+                const healthPercentage = hero.health / hero.health;
 
                 return (
                     <pixiContainer ref={containerRef} key={index} y={yPosition}>
-                        {/* Fondo del gráfico con bordes redondeados */}
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();
                                 g.roundRect(0, 0, window.innerWidth / 7 + 50, itemHeight, borderRadius);
-                                g.fill({ color: 0x000000, alpha: isCurrentHero ? 0.6 : 0.3 });
+                                g.fill({ color: 0x000000, alpha: currentHero.id === hero.id ? 0.6 : 0.3 });
                             }}
                         />
 
-                        <pixiText text={index + 1} x={20} y={itemHeight / 2 - 12} style={{ fill: 0xffffff, fontSize: 24, fontFamily: 'Jersey 10' }} />
+                        <pixiText text={(index + 1) + '.'} x={20} y={itemHeight / 2 - 12} style={{ fill: 0xffffff, fontSize: 28, fontFamily: 'Jersey 10' }} resolution={2} />
+                        <pixiText text={hero.name} x={40} y={itemHeight / 2 - 12} style={{ fill: 0xffffff, fontSize: 28, fontFamily: 'Jersey 10' }} resolution={2} />
 
-                        <pixiText text={hero.name} x={50} y={itemHeight / 2 - 12} style={{ fill: 0xffffff, fontSize: 24, fontFamily: 'Jersey 10' }} />
-
-                        {/* Borde púrpura si es el héroe actual */}
-                        {isCurrentHero && (
+                        {currentHero.id === hero.id && (
                             <pixiGraphics
                                 draw={(g) => {
                                     g.clear();
@@ -84,13 +74,9 @@ export const HeroSelectionUI = ({ teamHeroes, currentHeroIndex }: HeroSelectionU
                             />
                         )}
 
-                        {/* Avatar del héroe */}
                         <pixiSprite texture={avatar} x={150} y={15} width={64} height={64} />
-
-                        {/* Icono del rol del héroe */}
                         <pixiSprite texture={roleIcons[index]} x={135} y={20} width={16} height={16} />
 
-                        {/* Barra de vida - Fondo (a los pies del avatar) */}
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();
@@ -99,7 +85,6 @@ export const HeroSelectionUI = ({ teamHeroes, currentHeroIndex }: HeroSelectionU
                             }}
                         />
 
-                        {/* Barra de vida - Progreso */}
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();
@@ -111,7 +96,6 @@ export const HeroSelectionUI = ({ teamHeroes, currentHeroIndex }: HeroSelectionU
                             }}
                         />
 
-                        {/* Brillo superior de la barra */}
                         <pixiGraphics
                             draw={(g) => {
                                 g.clear();

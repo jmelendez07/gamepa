@@ -18,9 +18,9 @@ import { extend } from '@pixi/react';
 import { Assets, Container, Sprite, Texture } from 'pixi.js';
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { StatsUI } from './stats-ui';
-import { HeroSelectionUI } from './MainContainer-UI/hero-selection-ui';
-import { ProfileUI } from './MainContainer-UI/profile-ui';
-import { MissionsUI } from './MainContainer-UI/misions-ui';
+import { HeroSelectionUI } from '../../ui/pixi/hero-selection';
+import { ProfileUI } from '../../ui/pixi/profile';
+import { MissionsUI } from '../../ui/pixi/misions';
 import { useTeam } from '@/Providers/TeamProvider';
 
 extend({ Container, Sprite });
@@ -306,10 +306,10 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, stage, childr
                 )}
             </Camera>
 
-            {heroOnTheField && <StatsUI currentHero={heroOnTheField} />}
+            {heroOnTheField && <StatsUI />}
 
             {teamHeroes.length > 0 && (
-                <HeroSelectionUI teamHeroes={teamHeroes} currentHeroIndex={teamHeroes.findIndex((hero) => hero.id === heroOnTheField?.id)} />
+                <HeroSelectionUI />
             )}
 
             {stage && !inCombat && (
@@ -338,7 +338,7 @@ export const MainContainer = ({ canvasSize, defaultEnemies, cards, stage, childr
                 />
             )}
 
-            {!inCombat && userProfile && <ProfileUI userProfile={userProfile || null} />}
+            {!inCombat && userProfile && <ProfileUI />}
 
             {!inCombat && <MissionsUI stage={stage} />}
 

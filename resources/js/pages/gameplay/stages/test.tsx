@@ -1,12 +1,20 @@
 import useEnemyAnimation from "@/components/enemy/useEnemyAnimation";
+import { StatsUI } from "@/components/experience/MainContainer/stats-ui";
 import { KeyMap } from "@/components/types/key";
+import ConfigUI from "@/components/ui/pixi/config";
+import { HeroSelectionUI } from "@/components/ui/pixi/hero-selection";
+import { MissionsUI } from "@/components/ui/pixi/misions";
+import { ProfileUI } from "@/components/ui/pixi/profile";
+import { StageUI } from "@/components/ui/pixi/stage";
 import { Actions } from "@/enums/hero-actions";
 import { Directions } from "@/enums/hero-directions";
 import { ALLOWED_KEYS, getPolygonCentroid, getRow, HERO_FRAME_SIZE, HERO_MOVING_SPEED, HERO_MOVING_SPEED_RUNNING, isPointInPolygon, MAP_SCALE } from "@/lib/utils";
 import { TeamProvider, useTeam } from "@/Providers/TeamProvider";
+import { SharedData } from "@/types";
 import Enemy from "@/types/enemy";
 import Hero from "@/types/hero";
 import { Stage as IStage } from "@/types/planet";
+import { usePage } from "@inertiajs/react";
 import { Application, extend, useTick } from "@pixi/react";
 import { Assets, Container, Sprite, Texture, Ticker, Graphics, Rectangle } from "pixi.js";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -392,7 +400,13 @@ export default function TestStage({ stage, heroes, enemies }: TestStageProps) {
 
     return (isClient &&
         <Application width={size.width} height={size.height} background={0x1099bb}>
+            <ProfileUI />
+            <ConfigUI windowSize={size} />
+            <MissionsUI stage={stage} />
+            <StageUI stage={stage} />
             <TeamProvider initialHeroes={heroes}>
+                <HeroSelectionUI />
+                <StatsUI />
                 <Experience stage={stage} initEnemies={enemies} />
             </TeamProvider>
         </Application>
