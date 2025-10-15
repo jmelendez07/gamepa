@@ -7,11 +7,7 @@ extend({ Container, Sprite, Graphics, Text });
 
 const configImage = "https://res.cloudinary.com/dvibz13t8/image/upload/v1758740375/config_yzleae.webp";
 
-interface ConfigUIProps {
-    windowSize: { width: number; height: number };
-}
-
-export default function ConfigUI({ windowSize }: ConfigUIProps) {
+export default function ConfigUI() {
     const [showModal, setShowModal] = useState(false);
     const [configTexture, setConfigTexture] = useState<Texture | null>(null);
     const [animationProgress, setAnimationProgress] = useState(0);
@@ -38,7 +34,7 @@ export default function ConfigUI({ windowSize }: ConfigUIProps) {
         if (modalRef.current) {
             const easeProgress = 1 - Math.pow(1 - animationProgress, 3);
             const startY = -200;
-            const endY = windowSize.height / 2;
+            const endY = window.innerHeight / 2;
             modalRef.current.y = startY + (endY - startY) * easeProgress;
             modalRef.current.alpha = animationProgress;
         }
@@ -134,7 +130,7 @@ export default function ConfigUI({ windowSize }: ConfigUIProps) {
         <pixiContainer zIndex={1000}>
             {configTexture && (
                 <pixiContainer
-                    x={windowSize.width - 80}
+                    x={window.innerWidth - 80}
                     y={20}
                     interactive
                     cursor="pointer"
@@ -160,7 +156,7 @@ export default function ConfigUI({ windowSize }: ConfigUIProps) {
                         draw={(g) => {
                             g.clear();
                             g.beginFill(0x000000, 1);
-                            g.drawRect(0, 0, windowSize.width, windowSize.height);
+                            g.drawRect(0, 0, window.innerWidth, window.innerHeight);
                             g.endFill();
                         }}
                         interactive={true}
@@ -169,7 +165,7 @@ export default function ConfigUI({ windowSize }: ConfigUIProps) {
 
                     <pixiContainer
                         ref={modalRef}
-                        x={windowSize.width / 2}
+                        x={window.innerWidth / 2}
                         interactive
                         onClick={handleModalContentClick}
                     >

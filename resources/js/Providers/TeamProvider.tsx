@@ -9,6 +9,7 @@ interface TeamContextType {
     updateHeroHealth: (heroId: string, newHealth: number) => void;
     resetTeamHealth: () => void;
     isTeamFull: boolean;
+    textures: Texture[];
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -98,6 +99,7 @@ export const TeamProvider = ({ children, initialHeroes }: { children: ReactNode;
                 updateHeroHealth,
                 resetTeamHealth,
                 isTeamFull,
+                textures,
             }}
         >
             {children}

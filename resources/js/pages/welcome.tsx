@@ -139,8 +139,6 @@ export default function Welcome() {
                     name="description"
                     content={`Únete a ${name} y vive aventuras épicas mientras resuelves problemas matemáticos en un mundo pixelart único`}
                 />
-                <link rel="preconnect" href="https://fonts.bunny.net" />
-                <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
             </Head>
 
             <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800">
@@ -265,12 +263,17 @@ export default function Welcome() {
                                             ? route('dashboard')
                                             : auth.user.roles.some((r) => r.name === Roles.Teacher)
                                               ? route('rooms.index')
-                                              : '#'
+                                              : auth.user.roles.some((r) => r.name === Roles.Student)
+                                                ? route('gameplay.index')
+                                                : '#'
                                     }
                                 >
                                     <Button className="transform cursor-pointer rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-purple-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-purple-500/25">
-                                        <Shield className="mr-2 h-4 w-4" />
-                                        Panel
+                                        { auth.user.roles.some(r => r.name === Roles.Student) 
+                                            ? (<Play className="mr-0.5 h-4 w-4" />) 
+                                            : (<Shield className="mr-0.5 h-4 w-4" />)
+                                        }
+                                        {auth.user.roles.some(r => r.name === Roles.Student) ? 'Seguir Jugando' : 'Panel'}
                                     </Button>
                                 </Link>
                             ) : (

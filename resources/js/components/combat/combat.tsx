@@ -5,7 +5,7 @@ import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { useCallback, useEffect, useState } from 'react';
 import { ANIMATION_SPEED } from '../constants/game-world';
-import { useHeroAnimation } from '../Hero/useHeroAnimation';
+import { useHeroAnimation } from '../../hooks/use-hero-animation';
 import CardsInHand from './combat/cards-in-hand';
 import DiscardedCardsModal from './combat/discarded-cards-modal';
 import DiscardedCardsStack from './combat/discarded-cards-stack';

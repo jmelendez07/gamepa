@@ -1,7 +1,7 @@
 import { extend, useTick } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { useEffect, useState } from 'react';
-import { useHeroAnimation } from '../Hero/useHeroAnimation';
+import { useHeroAnimation } from '../../hooks/use-hero-animation';
 import { ANIMATION_SPEED } from '../constants/game-world';
 import Hero from '@/types/hero';
 

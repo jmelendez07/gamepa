@@ -1,5 +1,4 @@
  import { useTeam } from '@/Providers/TeamProvider';
-import Hero from '@/types/hero';
 import { extend } from '@pixi/react';
 import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { useEffect, useState } from 'react';
