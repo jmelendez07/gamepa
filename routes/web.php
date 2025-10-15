@@ -23,20 +23,15 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::get('gameplay/test/{stageId}', [GameplayController::class, 'test'])->name('gameplay.test');
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:estudiante'])->group(function () {
         Route::get('heroes/opciones', [HeroController::class, 'options'])->name('heroes.options');
         Route::post('heroes/seleccionar', [HeroController::class, 'select'])->name('heroes.select');
 
         Route::middleware(['check_user_hero'])->group(function () {
-            // Rutas específicas primero
             Route::get('gameplay/galaxia/{galaxyId}', [GameplayController::class, 'galaxy'])->name('gameplay.galaxy');
             Route::get('gameplay/lugar/{stageId}', [GameplayController::class, 'stage'])->name('gameplay.stage');
             Route::post('gameplay/next-stage', [GameplayController::class, 'nextStage'])->name('gameplay.next-stage');
-            
-            // Resource route después (para evitar conflictos)
             Route::resource('gameplay', GameplayController::class)->names('gameplay')->except(['show']);
         });
     });

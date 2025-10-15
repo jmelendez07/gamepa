@@ -1,21 +1,21 @@
 import Hero from '@/types/hero';
+import { Assets, Texture } from 'pixi.js';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
 
 interface TeamContextType {
     teamHeroes: Hero[];
+    currentHero: Hero;
     setTeamHeroes: (heroes: Hero[]) => void;
     updateHeroHealth: (heroId: string, newHealth: number) => void;
     resetTeamHealth: () => void;
     isTeamFull: boolean;
+    textures: Texture[];
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
-
 const MAX_TEAM_SIZE = 4;
 const STORAGE_KEY = 'gamepa_team_state';
 
-// ✅ Función helper para asegurar que el héroe tenga current_health
 const ensureCurrentHealth = (hero: Hero): Hero => {
     return {
         ...hero,
@@ -25,35 +25,38 @@ const ensureCurrentHealth = (hero: Hero): Hero => {
 
 export const TeamProvider = ({ children, initialHeroes }: { children: ReactNode; initialHeroes: Hero[] }) => {
     const [teamHeroes, setTeamHeroesState] = useState<Hero[]>(() => {
-        // Intentar cargar del localStorage
         const savedTeam = localStorage.getItem(STORAGE_KEY);
         
         if (savedTeam) {
-            try {
-                const parsedTeam = JSON.parse(savedTeam);
-                if (parsedTeam.length > 0) {
-                    // ✅ Asegurar que los héroes guardados tengan current_health
-                    return parsedTeam.map(ensureCurrentHealth);
-                }
-            } catch (error) {
-                console.error('Error parsing saved team:', error);
+            const parsedTeam = JSON.parse(savedTeam);
+            if (parsedTeam.length > 0) {
+                return parsedTeam.map(ensureCurrentHealth);
             }
         }
         
-        // Si no hay savedTeam o está vacío, inicializar con current_health = health
-        console.log('Initializing heroes with current_health:', initialHeroes.map(h => h.health));
         return initialHeroes.map(ensureCurrentHealth);
     });
+    const [textures, setTextures] = useState<Texture[]>([]);
+    const [currentHero, setCurrentHero] = useState<Hero>(teamHeroes[0]);
 
-    // Persistir en localStorage cada vez que cambie el equipo
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(teamHeroes));
+        
+        const textureMap = teamHeroes.map(hero => Assets.load<Texture>(hero.spritesheet));
+        Promise.all(textureMap).then(textures => {
+            setTextures(textures);
+
+            if (currentHero) {
+                setCurrentHero({
+                    ...currentHero,
+                    texture: textures[teamHeroes.findIndex(h => h.id === currentHero.id)]
+                });
+            }
+        });
     }, [teamHeroes]);
 
-    // ✅ Sincronizar con initialHeroes cuando cambian (por ejemplo, al cargar nuevos héroes)
     useEffect(() => {
         setTeamHeroesState(prev => {
-            // Si el localStorage estaba vacío y ahora tenemos initialHeroes
             if (prev.length === 0 && initialHeroes.length > 0) {
                 return initialHeroes.map(ensureCurrentHealth);
             }
@@ -91,10 +94,12 @@ export const TeamProvider = ({ children, initialHeroes }: { children: ReactNode;
         <TeamContext.Provider
             value={{
                 teamHeroes,
+                currentHero,
                 setTeamHeroes,
                 updateHeroHealth,
                 resetTeamHealth,
                 isTeamFull,
+                textures,
             }}
         >
             {children}

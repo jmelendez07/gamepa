@@ -98,7 +98,7 @@ export default function Register() {
                         <div className="text-center mb-8">
                             <Link href={route('home')} className="flex items-center justify-center mb-4">
                                 <Shield className="w-12 h-12 text-indigo-300 mr-3 animate-pulse" />
-                                <h1 className="text-4xl font-jersey md:text-5xl text-white">{name}</h1>
+                                <h1 className="text-4xl font-jersey md:text-5xl lg:text-8xl text-white">{name}</h1>
                                 <Sword className="w-12 h-12 text-purple-300 ml-3 animate-pulse" />
                             </Link>
                             <h2 className="text-2xl font-jersey text-indigo-200 mb-2">Forja tu Leyenda</h2>

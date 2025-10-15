@@ -99,11 +99,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <div className="text-center mb-8">
                             <Link href={route('home')} className="flex items-center justify-center mb-4">
                                 <Swords className="w-12 h-12 text-purple-300 mr-3 animate-pulse" />
-                                <h1 className="text-4xl font-jersey md:text-5xl text-white">{name}</h1>
+                                <h1 className="text-4xl font-jersey md:text-5xl lg:text-8xl text-white">{name}</h1>
                                 <ShieldPlus className="w-12 h-12 text-purple-300 ml-3 animate-pulse" />
                             </Link>
                             <h2 className="text-2xl font-jersey md:text-3xl text-purple-200 mb-2">Bienvenido, Héroe</h2>
-                            <p className="text-purple-300">Ingresa a tu reino épico</p>
                         </div>
 
                         {/* Card principal con efecto glassmorphism */}
