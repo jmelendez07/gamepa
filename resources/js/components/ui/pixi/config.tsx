@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { extend, useTick } from '@pixi/react';
 import { Container, Sprite, Graphics, Text, TextStyle, Assets, Texture } from 'pixi.js';
 import { router } from '@inertiajs/react';
+import { useFullscreen } from '@/hooks/use-fullscreen';
 
 extend({ Container, Sprite, Graphics, Text });
 
@@ -13,12 +14,17 @@ export default function ConfigUI() {
     const [animationProgress, setAnimationProgress] = useState(0);
     const [hoverMenu, setHoverMenu] = useState(false);
     const [hoverLogout, setHoverLogout] = useState(false);
+    const [hoverFullscreen, setHoverFullscreen] = useState(false);
     const [arrowProgressMenu, setArrowProgressMenu] = useState(0);
     const [arrowProgressLogout, setArrowProgressLogout] = useState(0);
+    const [arrowProgressFullscreen, setArrowProgressFullscreen] = useState(0);
     const [bgProgressMenu, setBgProgressMenu] = useState(0);
     const [bgProgressLogout, setBgProgressLogout] = useState(0);
+    const [bgProgressFullscreen, setBgProgressFullscreen] = useState(0);
     const modalRef = useRef<any>(null);
     const backgroundRef = useRef<any>(null);
+
+    const { isFullscreen, toggleFullscreen, isSupported } = useFullscreen();
 
     useState(() => {
         Assets.load(configImage).then(setConfigTexture);
@@ -57,6 +63,13 @@ export default function ConfigUI() {
             setArrowProgressLogout(prev => Math.max(prev - ticker.deltaTime * 0.15, 0));
         }
 
+        // Animación de flecha para "Pantalla completa"
+        if (hoverFullscreen && arrowProgressFullscreen < 1) {
+            setArrowProgressFullscreen(prev => Math.min(prev + ticker.deltaTime * 0.15, 1));
+        } else if (!hoverFullscreen && arrowProgressFullscreen > 0) {
+            setArrowProgressFullscreen(prev => Math.max(prev - ticker.deltaTime * 0.15, 0));
+        }
+
         // Animación de fondo para "Volver al menu"
         if (hoverMenu && bgProgressMenu < 1) {
             setBgProgressMenu(prev => Math.min(prev + ticker.deltaTime * 0.12, 1));
@@ -69,6 +82,13 @@ export default function ConfigUI() {
             setBgProgressLogout(prev => Math.min(prev + ticker.deltaTime * 0.12, 1));
         } else if (!hoverLogout && bgProgressLogout > 0) {
             setBgProgressLogout(prev => Math.max(prev - ticker.deltaTime * 0.12, 0));
+        }
+
+        // Animación de fondo para "Pantalla completa"
+        if (hoverFullscreen && bgProgressFullscreen < 1) {
+            setBgProgressFullscreen(prev => Math.min(prev + ticker.deltaTime * 0.12, 1));
+        } else if (!hoverFullscreen && bgProgressFullscreen > 0) {
+            setBgProgressFullscreen(prev => Math.max(prev - ticker.deltaTime * 0.12, 0));
         }
     });
 
@@ -95,6 +115,10 @@ export default function ConfigUI() {
     const handleLogout = useCallback(() => {
         router.visit(route('logout'), { method: 'post' });
     }, []);
+
+    const handleFullscreenToggle = useCallback(async () => {
+        await toggleFullscreen();
+    }, [toggleFullscreen]);
 
     const titleStyle = new TextStyle({
         fontFamily: 'Jersey 10, Arial, sans-serif',
@@ -174,7 +198,7 @@ export default function ConfigUI() {
                                 g.clear();
                                 g.beginFill(0x2d1b69, 1);
                                 g.lineStyle(3, 0x8b5cf6, 1);
-                                g.drawRoundedRect(-350, -175, 700, 350, 10);
+                                g.drawRoundedRect(-350, -225, 700, 450, 10);
                                 g.endFill();
                             }}
                         />
@@ -184,13 +208,53 @@ export default function ConfigUI() {
                             style={titleStyle}
                             anchor={0.5}
                             x={-135}
-                            y={-130}
+                            y={-180}
                             resolution={3}
                         />
 
-                        <pixiContainer y={-70}>
+                        <pixiContainer y={-120}>
+                            {/* Botón Pantalla Completa */}
+                            {isSupported && (
+                                <pixiContainer
+                                    y={50}
+                                    interactive
+                                    cursor="pointer"
+                                    onPointerDown={handleFullscreenToggle}
+                                    onPointerOver={() => setHoverFullscreen(true)}
+                                    onPointerOut={() => setHoverFullscreen(false)}
+                                >
+                                    <pixiGraphics
+                                        draw={(g) => {
+                                            g.clear();
+                                            const alpha = 0.3 + (bgProgressFullscreen * 0.3);
+                                            g.beginFill(0x8b5cf6, alpha);
+                                            g.drawRoundedRect(-330, -25, 660, 70, 5);
+                                            g.endFill();
+                                        }}
+                                    />
+                                    <pixiText
+                                        text={isFullscreen ? "Salir pantalla completa" : "Pantalla completa"}
+                                        style={menuItemStyle}
+                                        anchor={0.5}
+                                        x={0}
+                                        y={5}
+                                        resolution={2}
+                                    />
+                                    <pixiText
+                                        text="→"
+                                        style={arrowStyle}
+                                        anchor={0.5}
+                                        x={-280 + (arrowProgressFullscreen * 20)}
+                                        y={5}
+                                        alpha={arrowProgressFullscreen}
+                                        resolution={2}
+                                    />
+                                </pixiContainer>
+                            )}
+
+                            {/* Botón Volver al Menu */}
                             <pixiContainer
-                                y={50}
+                                y={isSupported ? 140 : 50}
                                 interactive
                                 cursor="pointer"
                                 onPointerDown={handleReturnToMenu}
@@ -224,8 +288,10 @@ export default function ConfigUI() {
                                     resolution={2}
                                 />
                             </pixiContainer>
+
+                            {/* Botón Cerrar Sesión */}
                             <pixiContainer
-                                y={140}
+                                y={isSupported ? 230 : 140}
                                 interactive
                                 cursor="pointer"
                                 onPointerDown={handleLogout}
@@ -263,7 +329,7 @@ export default function ConfigUI() {
 
                         <pixiContainer
                             x={315}
-                            y={-140}
+                            y={-190}
                             interactive={true}
                             cursor="pointer"
                             onPointerDown={handleCloseModal}

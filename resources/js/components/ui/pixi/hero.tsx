@@ -1,5 +1,6 @@
 import { Actions } from "@/enums/hero-actions";
 import { Directions } from "@/enums/hero-directions";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { getRow, HERO_FRAME_SIZE, HERO_MOVING_SPEED, HERO_MOVING_SPEED_RUNNING } from "@/lib/utils";
 import { useTeam } from "@/Providers/TeamProvider";
 import { useTick } from "@pixi/react";

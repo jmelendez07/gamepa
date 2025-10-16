@@ -20,11 +20,12 @@ interface ExperienceProps {
     stage: Stage;
     initEnemies: Enemy[];
     cards: Card[];
+    canvasSize: { width: number; height: number };
 }
 
 extend({ Sprite, Container, Text });
 
-export const Experience = ({ stage, initEnemies, cards }: ExperienceProps) => {
+export const Experience = ({ stage, initEnemies, cards, canvasSize }: ExperienceProps) => {
     const { currentHero, teamHeroes, updateHeroHealth, changeCurrentHero, textures } = useTeam();
     const { auth } = usePage<SharedData>().props;
     const [stageTexture, setStageTexture] = useState<Texture | null>(null);
@@ -56,28 +57,31 @@ export const Experience = ({ stage, initEnemies, cards }: ExperienceProps) => {
         [],
     );
 
-    const generateRandomCombatPosition = useCallback((index: number) => {
-        const baseX = window.innerWidth * 0.5;
-        const minY = window.innerHeight * (1 / 3);
-        const maxY = window.innerHeight * (2 / 3);
-        const baseY = minY + (maxY - minY) * 0.3;
+    const generateRandomCombatPosition = useCallback(
+        (index: number) => {
+            const baseX = canvasSize.width * 0.5;
+            const minY = canvasSize.height * (1 / 3);
+            const maxY = canvasSize.height * (2 / 3);
+            const baseY = minY + (maxY - minY) * 0.3;
 
-        const spacing = 120;
-        const enemiesPerRow = 3;
+            const spacing = 120;
+            const enemiesPerRow = 3;
 
-        const row = Math.floor(index / enemiesPerRow);
-        const col = index % enemiesPerRow;
+            const row = Math.floor(index / enemiesPerRow);
+            const col = index % enemiesPerRow;
 
-        const randomOffsetX = (Math.random() - 0.5) * 30;
-        const randomOffsetY = (Math.random() - 0.5) * 40;
+            const randomOffsetX = (Math.random() - 0.5) * 30;
+            const randomOffsetY = (Math.random() - 0.5) * 40;
 
-        const calculatedY = baseY + row * spacing + randomOffsetY;
+            const calculatedY = baseY + row * spacing + randomOffsetY;
 
-        return {
-            x: Math.max(150, Math.min(baseX + col * spacing + randomOffsetX, window.innerWidth - 150)),
-            y: Math.max(minY, Math.min(calculatedY, maxY - 50)),
-        };
-    }, []);
+            return {
+                x: Math.max(150, Math.min(baseX + col * spacing + randomOffsetX, canvasSize.width - 150)),
+                y: Math.max(minY, Math.min(calculatedY, maxY - 50)),
+            };
+        },
+        [canvasSize],
+    );
 
     const keysLoop = useCallback(
         (delta: number) => {
@@ -197,10 +201,11 @@ export const Experience = ({ stage, initEnemies, cards }: ExperienceProps) => {
                 sprite.y = newY;
             }
 
-            camera.x = window.innerWidth / 2 - sprite.x;
-            camera.y = window.innerHeight / 2 - sprite.y;
+            // Actualizar posición de la cámara con el tamaño dinámico del canvas
+            camera.x = canvasSize.width / 2 - sprite.x;
+            camera.y = canvasSize.height / 2 - sprite.y;
         },
-        [keys, polygonPoints, isRunning, runTimeLeft, cooldownLeft, enemies],
+        [keys, polygonPoints, isRunning, runTimeLeft, cooldownLeft, enemies, canvasSize],
     );
 
     const updateUserProfileLevel = async (newTotalXp: number) => {
@@ -349,13 +354,13 @@ export const Experience = ({ stage, initEnemies, cards }: ExperienceProps) => {
             <UI stage={stage} />
             <pixiContainer ref={cameraRef} sortableChildren={true}>
                 <HeroUI
-                   
                     spriteRef={spriteRef}
                     isMoving={Object.values(keys).some((v) => v)}
                     isRunning={isRunning}
                     direction={direction}
                     x={centroid.x}
                     y={centroid.y}
+                    canvasSize={canvasSize}
                 />
                 {enemies.map((enemy) => (
                     <EnemyUI key={enemy.id} enemy={enemy} showInteraction={nearbyEnemy?.id === enemy.id} />
